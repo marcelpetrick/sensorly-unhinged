@@ -1,0 +1,54 @@
+name: hardware
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  generate:
+    name: generator rules + reproducibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The offline checks need nothing but Python: courtyard overlaps, parts
+      # off the outline, copper in the antenna keep-out, heat sources too near
+      # the sensor, and anything at all on Variant B's thermal neck.
+      - name: Generator rule checks
+        run: make check
+
+      # AGENTS.md: generated files are committed AND reproducible.
+      - name: Regenerate and fail on drift
+        run: |
+          make gen thermal bom
+          git diff --exit-code -- hardware docs/img docs/45-thermal-model.md \
+            || { echo "::error::generated files differ from the committed ones - run 'make gen thermal bom' and commit"; exit 1; }
+
+  kicad:
+    name: KiCad DRC + manufacturing outputs
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/kicad/kicad:10.0
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: KiCad version
+        run: kicad-cli version
+
+      # Zero DRC errors, only the reviewed warnings, and a ratsnest budget that
+      # may go down but never up. Policy lives in tools/drc_gate.py.
+      - name: DRC gate
+        run: make drc
+
+      - name: Manufacturing outputs
+        run: make outputs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fab-package
+          path: hardware/outputs/
+          if-no-files-found: error
