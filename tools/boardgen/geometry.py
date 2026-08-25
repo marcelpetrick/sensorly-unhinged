@@ -28,6 +28,7 @@ class Footprint:
     text: str
     courtyard: tuple[float, float, float, float]   # xmin, xmax, ymin, ymax (local)
     pads: dict[str, list[tuple[float, float]]] = field(default_factory=dict)
+    pad_size: dict[str, tuple[float, float]] = field(default_factory=dict)
     bottom: bool = False
 
 
@@ -87,10 +88,18 @@ def load(name: str) -> Footprint:
     if cy is None:                       # e.g. mounting hole: fall back to pads
         cy = (-1.5, 1.5, -1.5, 1.5)
     pads: dict[str, list[tuple[float, float]]] = {}
-    for m in re.finditer(rf'\(pad "([^"]+)"[^\n]*\n?\s*\(at {_num} {_num}', text):
-        pads.setdefault(m.group(1), []).append((float(m.group(2)), float(m.group(3))))
+    size: dict[str, tuple[float, float]] = {}
+    for body in _blocks(text, "pad "):
+        name = re.search(r'\(pad "([^"]*)"', body).group(1)
+        at = re.search(rf"\(at {_num} {_num}", body)
+        sz = re.search(rf"\(size {_num} {_num}\)", body)
+        if not at:
+            continue
+        pads.setdefault(name, []).append((float(at.group(1)), float(at.group(2))))
+        if sz:
+            size[name] = (float(sz.group(1)), float(sz.group(2)))
     bottom = '(layer "B.Cu")' in text.split("(pad", 1)[0]
-    return Footprint(short, text, cy, pads, bottom)
+    return Footprint(short, text, cy, pads, size, bottom)
 
 
 _CACHE: dict[str, Footprint] = {}

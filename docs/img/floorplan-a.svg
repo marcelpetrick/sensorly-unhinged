@@ -1,0 +1,357 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32.33 39.33" width="388" height="472" role="img" aria-label="Variant A floorplan">
+<style>
+.outline{fill:#0d3b26;stroke:#c9d1d9;stroke-width:.18}
+.crtyd{fill:none;stroke:#8b98a5;stroke-width:.08;stroke-dasharray:.5 .4;opacity:.75}
+.pad{fill:#e3b341}
+.pad-b{fill:#6ea8fe;opacity:.85}
+.ref{font:600 1.05px ui-sans-serif,system-ui,sans-serif;fill:#e6edf3;
+     text-anchor:middle;dominant-baseline:central}
+.dim{font:500 1.25px ui-monospace,ui-sans-serif,monospace;fill:#8b949e}
+.tag{font:600 1.05px ui-monospace,monospace;fill:#f85149}
+.tagb{font:600 1.05px ui-monospace,monospace;fill:#58a6ff}
+.rf{fill:#f85149;fill-opacity:.16;stroke:#f85149;stroke-width:.12;
+    stroke-dasharray:.7 .5}
+.quiet{fill:#58a6ff;fill-opacity:.16;stroke:#58a6ff;stroke-width:.12;
+       stroke-dasharray:.7 .5}
+.trk{fill:none;stroke:#f0b429;stroke-width:.15;stroke-linecap:round;
+     stroke-linejoin:round}
+.via{fill:none;stroke:#f0b429;stroke-width:.1}
+.hot{fill:#f85149;opacity:.85}
+</style>
+<g transform="translate(1.17,1.17)">
+<polygon class="outline" points="0.00,0.00 30.00,0.00 30.00,34.00 0.00,34.00"/>
+<rect class="rf" x="5.40" y="0.00" width="17.20" height="7.75" />
+<text class="tag" x="5.90" y="6.85" style="fill:#f85149">RF KEEP-OUT</text>
+<rect class="quiet" x="10.00" y="28.30" width="12.00" height="5.70" />
+<text class="tagb" x="10.50" y="29.70">SENSOR QUIET ZONE</text>
+<path class="trk" d="M 15.30 31.90 L 15.30 32.00 L 8.50 32.00 L 8.50 31.30"/>
+<path class="trk" d="M 15.30 32.70 L 15.90 32.70 L 15.90 31.30 L 10.50 31.30"/>
+<path class="trk" d="M 16.70 32.70 L 18.80 32.70 L 18.80 30.70 L 19.70 30.70"/>
+<path class="trk" d="M 16.70 31.90 L 16.70 30.20 L 22.50 30.20 L 22.50 31.00"/>
+<circle class="via" cx="19.70" cy="30.70" r="0.30"/>
+<circle class="via" cx="22.50" cy="31.00" r="0.30"/>
+<rect class="crtyd" x="7.15" y="0.35" width="13.70" height="17.00" />
+<rect class="pad" x="7.70" y="7.30" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="8.10" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="8.90" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="9.70" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="10.50" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="11.30" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="12.10" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="12.90" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="13.70" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="14.50" width="0.80" height="0.40" />
+<rect class="pad" x="7.70" y="15.30" width="0.80" height="0.40" />
+<rect class="pad" x="8.80" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="9.60" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="10.40" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="11.20" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="12.00" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="12.80" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="13.60" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="14.40" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="15.20" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="16.00" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="16.80" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="17.60" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="18.40" y="16.20" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="15.30" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="14.50" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="13.70" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="12.90" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="12.10" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="11.30" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="10.50" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="9.70" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="8.90" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="8.10" width="0.80" height="0.40" />
+<rect class="pad" x="19.50" y="7.30" width="0.80" height="0.40" />
+<rect class="pad" x="18.40" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="17.60" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="16.80" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="16.00" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="15.20" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="14.40" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="13.60" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="12.80" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="12.00" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="11.20" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="10.40" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="9.60" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="8.80" y="6.40" width="0.80" height="0.40" />
+<rect class="pad" x="11.30" y="8.80" width="1.45" height="1.45" />
+<rect class="pad" x="11.30" y="10.78" width="1.45" height="1.45" />
+<rect class="pad" x="11.30" y="12.75" width="1.45" height="1.45" />
+<rect class="pad" x="13.28" y="8.80" width="1.45" height="1.45" />
+<rect class="pad" x="13.28" y="10.78" width="1.45" height="1.45" />
+<rect class="pad" x="13.28" y="12.75" width="1.45" height="1.45" />
+<rect class="pad" x="15.25" y="8.80" width="1.45" height="1.45" />
+<rect class="pad" x="15.25" y="10.78" width="1.45" height="1.45" />
+<rect class="pad" x="15.25" y="12.75" width="1.45" height="1.45" />
+<rect class="pad" x="19.60" y="6.20" width="0.70" height="0.70" />
+<rect class="pad" x="19.60" y="16.10" width="0.70" height="0.70" />
+<rect class="pad" x="7.70" y="16.10" width="0.70" height="0.70" />
+<rect class="pad" x="7.70" y="6.20" width="0.70" height="0.70" />
+<text class="ref" x="14.00" y="11.50">U1</text>
+<rect class="crtyd" x="0.23" y="19.18" width="9.42" height="10.64" />
+<rect class="pad" x="2.57" y="27.07" width="0.65" height="0.65" />
+<rect class="pad" x="2.57" y="21.29" width="0.65" height="0.65" />
+<rect class="pad" x="0.73" y="27.45" width="1.45" height="0.60" />
+<rect class="pad" x="0.73" y="26.65" width="1.45" height="0.60" />
+<rect class="pad" x="0.73" y="25.60" width="1.45" height="0.30" />
+<rect class="pad" x="0.73" y="24.60" width="1.45" height="0.30" />
+<rect class="pad" x="0.73" y="24.10" width="1.45" height="0.30" />
+<rect class="pad" x="0.73" y="23.10" width="1.45" height="0.30" />
+<rect class="pad" x="0.73" y="21.75" width="1.45" height="0.60" />
+<rect class="pad" x="0.73" y="20.95" width="1.45" height="0.60" />
+<rect class="pad" x="0.73" y="20.95" width="1.45" height="0.60" />
+<rect class="pad" x="0.73" y="21.75" width="1.45" height="0.60" />
+<rect class="pad" x="0.73" y="22.60" width="1.45" height="0.30" />
+<rect class="pad" x="0.73" y="23.60" width="1.45" height="0.30" />
+<rect class="pad" x="0.73" y="25.10" width="1.45" height="0.30" />
+<rect class="pad" x="0.73" y="26.10" width="1.45" height="0.30" />
+<rect class="pad" x="0.73" y="26.65" width="1.45" height="0.60" />
+<rect class="pad" x="0.73" y="27.45" width="1.45" height="0.60" />
+<rect class="pad" x="1.57" y="28.32" width="1.60" height="1.00" />
+<rect class="pad" x="5.75" y="28.32" width="1.60" height="1.00" />
+<rect class="pad" x="1.57" y="19.68" width="1.60" height="1.00" />
+<rect class="pad" x="5.75" y="19.68" width="1.60" height="1.00" />
+<text class="ref" x="5.50" y="24.50">J1</text>
+<rect class="crtyd" x="17.75" y="19.90" width="10.20" height="9.20" />
+<rect class="pad" x="18.25" y="25.00" width="3.50" height="1.00" />
+<rect class="pad" x="18.25" y="23.00" width="3.50" height="1.00" />
+<rect class="pad" x="24.05" y="27.10" width="3.40" height="1.50" />
+<rect class="pad" x="24.05" y="20.40" width="3.40" height="1.50" />
+<text class="ref" x="22.85" y="24.50">J2</text>
+<rect class="crtyd" x="22.27" y="8.37" width="4.26" height="4.26" />
+<rect class="pad" x="23.68" y="9.78" width="0.64" height="0.64" />
+<rect class="pad" x="23.68" y="10.58" width="0.64" height="0.64" />
+<rect class="pad" x="24.48" y="9.78" width="0.64" height="0.64" />
+<rect class="pad" x="24.48" y="10.58" width="0.64" height="0.64" />
+<rect class="pad" x="22.52" y="9.62" width="0.88" height="0.25" />
+<rect class="pad" x="22.52" y="10.12" width="0.88" height="0.25" />
+<rect class="pad" x="22.52" y="10.62" width="0.88" height="0.25" />
+<rect class="pad" x="22.52" y="11.12" width="0.88" height="0.25" />
+<rect class="pad" x="23.52" y="11.50" width="0.25" height="0.88" />
+<rect class="pad" x="24.02" y="11.50" width="0.25" height="0.88" />
+<rect class="pad" x="24.52" y="11.50" width="0.25" height="0.88" />
+<rect class="pad" x="25.02" y="11.50" width="0.25" height="0.88" />
+<rect class="pad" x="25.40" y="11.12" width="0.88" height="0.25" />
+<rect class="pad" x="25.40" y="10.62" width="0.88" height="0.25" />
+<rect class="pad" x="25.40" y="10.12" width="0.88" height="0.25" />
+<rect class="pad" x="25.40" y="9.62" width="0.88" height="0.25" />
+<rect class="pad" x="25.02" y="8.62" width="0.25" height="0.88" />
+<rect class="pad" x="24.52" y="8.62" width="0.25" height="0.88" />
+<rect class="pad" x="24.02" y="8.62" width="0.25" height="0.88" />
+<rect class="pad" x="23.52" y="8.62" width="0.25" height="0.88" />
+<rect class="pad" x="23.60" y="9.70" width="1.60" height="1.60" />
+<circle class="hot" cx="24.40" cy="10.50" r="0.8"/>
+<text class="ref" x="24.40" y="10.50">U4</text>
+<rect class="crtyd" x="2.20" y="8.70" width="2.40" height="2.60" />
+<rect class="pad" x="2.45" y="9.12" width="0.60" height="0.25" />
+<rect class="pad" x="2.45" y="9.62" width="0.60" height="0.25" />
+<rect class="pad" x="2.45" y="10.12" width="0.60" height="0.25" />
+<rect class="pad" x="2.45" y="10.62" width="0.60" height="0.25" />
+<rect class="pad" x="3.75" y="10.62" width="0.60" height="0.25" />
+<rect class="pad" x="3.75" y="10.12" width="0.60" height="0.25" />
+<rect class="pad" x="3.75" y="9.62" width="0.60" height="0.25" />
+<rect class="pad" x="3.75" y="9.12" width="0.60" height="0.25" />
+<circle class="hot" cx="3.40" cy="10.00" r="0.8"/>
+<text class="ref" x="3.40" y="10.00">U3</text>
+<rect class="crtyd" x="2.15" y="12.15" width="2.50" height="2.10" />
+<rect class="pad" x="2.40" y="12.40" width="0.55" height="1.60" />
+<rect class="pad" x="3.85" y="12.40" width="0.55" height="1.60" />
+<circle class="hot" cx="3.40" cy="13.20" r="0.8"/>
+<text class="ref" x="3.40" y="13.20">L1</text>
+<rect class="crtyd" x="13.45" y="20.30" width="4.10" height="3.40" />
+<rect class="pad" x="13.70" y="20.75" width="1.32" height="0.60" />
+<rect class="pad" x="13.70" y="21.70" width="1.32" height="0.60" />
+<rect class="pad" x="13.70" y="22.65" width="1.32" height="0.60" />
+<rect class="pad" x="15.97" y="22.65" width="1.33" height="0.60" />
+<rect class="pad" x="15.97" y="21.70" width="1.33" height="0.60" />
+<rect class="pad" x="15.97" y="20.75" width="1.33" height="0.60" />
+<text class="ref" x="15.50" y="22.00">U5</text>
+<rect class="crtyd" x="9.80" y="24.75" width="7.80" height="5.50" />
+<rect class="pad" x="10.30" y="26.65" width="1.55" height="1.00" />
+<rect class="pad" x="15.55" y="26.65" width="1.55" height="1.00" />
+<rect class="pad" x="10.30" y="28.35" width="1.55" height="1.00" />
+<rect class="pad" x="15.55" y="28.35" width="1.55" height="1.00" />
+<text class="ref" x="13.70" y="28.00">SW1</text>
+<rect class="crtyd" x="9.82" y="21.27" width="2.96" height="1.46" />
+<rect class="pad" x="10.08" y="21.52" width="0.88" height="0.95" />
+<rect class="pad" x="11.65" y="21.52" width="0.88" height="0.95" />
+<text class="ref" x="11.30" y="22.00">D1</text>
+<rect class="crtyd" x="7.07" y="30.83" width="1.86" height="0.94" />
+<rect class="pad" x="7.22" y="30.98" width="0.54" height="0.64" />
+<rect class="pad" x="8.24" y="30.98" width="0.54" height="0.64" />
+<text class="ref" x="8.00" y="31.30">R3</text>
+<rect class="crtyd" x="9.07" y="30.83" width="1.86" height="0.94" />
+<rect class="pad" x="9.22" y="30.98" width="0.54" height="0.64" />
+<rect class="pad" x="10.24" y="30.98" width="0.54" height="0.64" />
+<text class="ref" x="10.00" y="31.30">R4</text>
+<rect class="crtyd" x="14.80" y="31.30" width="2.40" height="2.00" />
+<rect class="pad" x="15.05" y="31.75" width="0.50" height="0.30" />
+<rect class="pad" x="15.05" y="32.55" width="0.50" height="0.30" />
+<rect class="pad" x="16.45" y="32.55" width="0.50" height="0.30" />
+<rect class="pad" x="16.45" y="31.75" width="0.50" height="0.30" />
+<text class="ref" x="16.00" y="32.30">U2</text>
+<rect class="crtyd" x="19.04" y="31.39" width="0.92" height="1.82" />
+<rect class="pad" x="19.19" y="32.50" width="0.62" height="0.56" />
+<rect class="pad" x="19.19" y="31.54" width="0.62" height="0.56" />
+<text class="ref" x="19.50" y="32.30">C6</text>
+<rect class="crtyd" x="6.20" y="25.40" width="2.00" height="2.00" />
+<rect class="pad-b" x="6.45" y="25.65" width="1.50" height="1.50" />
+<rect class="crtyd" x="8.74" y="25.40" width="2.00" height="2.00" />
+<rect class="pad-b" x="8.99" y="25.65" width="1.50" height="1.50" />
+<rect class="crtyd" x="11.28" y="25.40" width="2.00" height="2.00" />
+<rect class="pad-b" x="11.53" y="25.65" width="1.50" height="1.50" />
+<rect class="crtyd" x="13.82" y="25.40" width="2.00" height="2.00" />
+<rect class="pad-b" x="14.07" y="25.65" width="1.50" height="1.50" />
+<rect class="crtyd" x="16.36" y="25.40" width="2.00" height="2.00" />
+<rect class="pad-b" x="16.61" y="25.65" width="1.50" height="1.50" />
+<rect class="crtyd" x="18.90" y="25.40" width="2.00" height="2.00" />
+<rect class="pad-b" x="19.15" y="25.65" width="1.50" height="1.50" />
+<rect class="crtyd" x="6.20" y="27.94" width="2.00" height="2.00" />
+<rect class="pad-b" x="6.45" y="28.19" width="1.50" height="1.50" />
+<rect class="crtyd" x="8.74" y="27.94" width="2.00" height="2.00" />
+<rect class="pad-b" x="8.99" y="28.19" width="1.50" height="1.50" />
+<rect class="crtyd" x="11.28" y="27.94" width="2.00" height="2.00" />
+<rect class="pad-b" x="11.53" y="28.19" width="1.50" height="1.50" />
+<rect class="crtyd" x="13.82" y="27.94" width="2.00" height="2.00" />
+<rect class="pad-b" x="14.07" y="28.19" width="1.50" height="1.50" />
+<rect class="crtyd" x="16.36" y="27.94" width="2.00" height="2.00" />
+<rect class="pad-b" x="16.61" y="28.19" width="1.50" height="1.50" />
+<rect class="crtyd" x="18.90" y="27.94" width="2.00" height="2.00" />
+<rect class="pad-b" x="19.15" y="28.19" width="1.50" height="1.50" />
+<rect class="crtyd" x="6.20" y="30.48" width="2.00" height="2.00" />
+<rect class="pad-b" x="6.45" y="30.73" width="1.50" height="1.50" />
+<rect class="crtyd" x="8.74" y="30.48" width="2.00" height="2.00" />
+<rect class="pad-b" x="8.99" y="30.73" width="1.50" height="1.50" />
+<rect class="crtyd" x="11.28" y="30.48" width="2.00" height="2.00" />
+<rect class="pad-b" x="11.53" y="30.73" width="1.50" height="1.50" />
+<rect class="crtyd" x="13.82" y="30.48" width="2.00" height="2.00" />
+<rect class="pad-b" x="14.07" y="30.73" width="1.50" height="1.50" />
+<rect class="crtyd" x="16.36" y="30.48" width="2.00" height="2.00" />
+<rect class="pad-b" x="16.61" y="30.73" width="1.50" height="1.50" />
+<rect class="crtyd" x="18.30" y="17.52" width="3.40" height="1.96" />
+<rect class="pad" x="18.55" y="17.77" width="1.00" height="1.45" />
+<rect class="pad" x="20.45" y="17.77" width="1.00" height="1.45" />
+<text class="ref" x="20.00" y="18.50">C1</text>
+<rect class="crtyd" x="6.59" y="17.54" width="1.82" height="0.92" />
+<rect class="pad" x="6.74" y="17.69" width="0.56" height="0.62" />
+<rect class="pad" x="7.70" y="17.69" width="0.56" height="0.62" />
+<text class="ref" x="7.50" y="18.00">C2</text>
+<rect class="crtyd" x="5.79" y="15.59" width="0.92" height="1.82" />
+<rect class="pad" x="5.94" y="16.70" width="0.62" height="0.56" />
+<rect class="pad" x="5.94" y="15.74" width="0.62" height="0.56" />
+<text class="ref" x="6.25" y="16.50">C3</text>
+<rect class="crtyd" x="21.53" y="15.07" width="0.94" height="1.86" />
+<rect class="pad" x="21.68" y="16.24" width="0.64" height="0.54" />
+<rect class="pad" x="21.68" y="15.22" width="0.64" height="0.54" />
+<text class="ref" x="22.00" y="16.00">R1</text>
+<rect class="crtyd" x="9.79" y="19.09" width="0.92" height="1.82" />
+<rect class="pad" x="9.94" y="20.20" width="0.62" height="0.56" />
+<rect class="pad" x="9.94" y="19.24" width="0.62" height="0.56" />
+<text class="ref" x="10.25" y="20.00">C4</text>
+<rect class="crtyd" x="9.79" y="23.54" width="1.82" height="0.92" />
+<rect class="pad" x="9.94" y="23.69" width="0.56" height="0.62" />
+<rect class="pad" x="10.90" y="23.69" width="0.56" height="0.62" />
+<text class="ref" x="10.70" y="24.00">C5</text>
+<rect class="crtyd" x="11.12" y="19.53" width="1.86" height="0.94" />
+<rect class="pad" x="11.27" y="19.68" width="0.54" height="0.64" />
+<rect class="pad" x="12.29" y="19.68" width="0.54" height="0.64" />
+<text class="ref" x="12.05" y="20.00">R2</text>
+<rect class="crtyd" x="0.67" y="7.02" width="2.96" height="1.46" />
+<rect class="pad" x="0.93" y="7.28" width="0.90" height="0.95" />
+<rect class="pad" x="2.47" y="7.28" width="0.90" height="0.95" />
+<text class="ref" x="2.15" y="7.75">C7</text>
+<rect class="crtyd" x="4.92" y="10.77" width="1.46" height="2.96" />
+<rect class="pad" x="5.18" y="12.58" width="0.95" height="0.90" />
+<rect class="pad" x="5.18" y="11.03" width="0.95" height="0.90" />
+<text class="ref" x="5.65" y="12.25">C8</text>
+<rect class="crtyd" x="0.93" y="11.07" width="0.94" height="1.86" />
+<rect class="pad" x="1.08" y="12.24" width="0.64" height="0.54" />
+<rect class="pad" x="1.08" y="11.22" width="0.64" height="0.54" />
+<text class="ref" x="1.40" y="12.00">R5</text>
+<rect class="crtyd" x="4.93" y="7.82" width="0.94" height="1.86" />
+<rect class="pad" x="5.08" y="8.99" width="0.64" height="0.54" />
+<rect class="pad" x="5.08" y="7.97" width="0.64" height="0.54" />
+<text class="ref" x="5.40" y="8.75">R6</text>
+<rect class="crtyd" x="21.18" y="12.32" width="0.94" height="1.86" />
+<rect class="pad" x="21.33" y="13.49" width="0.64" height="0.54" />
+<rect class="pad" x="21.33" y="12.47" width="0.64" height="0.54" />
+<text class="ref" x="21.65" y="13.25">R7</text>
+<rect class="crtyd" x="22.22" y="12.78" width="1.86" height="0.94" />
+<rect class="pad" x="22.37" y="12.93" width="0.54" height="0.64" />
+<rect class="pad" x="23.39" y="12.93" width="0.54" height="0.64" />
+<text class="ref" x="23.15" y="13.25">R8</text>
+<rect class="crtyd" x="22.72" y="7.28" width="1.86" height="0.94" />
+<rect class="pad" x="22.87" y="7.43" width="0.54" height="0.64" />
+<rect class="pad" x="23.89" y="7.43" width="0.54" height="0.64" />
+<text class="ref" x="23.65" y="7.75">R9</text>
+<rect class="crtyd" x="24.22" y="12.78" width="1.86" height="0.94" />
+<rect class="pad" x="24.37" y="12.93" width="0.54" height="0.64" />
+<rect class="pad" x="25.39" y="12.93" width="0.54" height="0.64" />
+<text class="ref" x="25.15" y="13.25">R10</text>
+<rect class="crtyd" x="24.72" y="7.28" width="1.86" height="0.94" />
+<rect class="pad" x="24.87" y="7.43" width="0.54" height="0.64" />
+<rect class="pad" x="25.89" y="7.43" width="0.54" height="0.64" />
+<text class="ref" x="25.65" y="7.75">R11</text>
+<rect class="crtyd" x="26.68" y="6.82" width="0.94" height="1.86" />
+<rect class="pad" x="26.83" y="7.99" width="0.64" height="0.54" />
+<rect class="pad" x="26.83" y="6.97" width="0.64" height="0.54" />
+<text class="ref" x="27.15" y="7.75">R12</text>
+<rect class="crtyd" x="26.68" y="12.32" width="0.94" height="1.86" />
+<rect class="pad" x="26.83" y="13.49" width="0.64" height="0.54" />
+<rect class="pad" x="26.83" y="12.47" width="0.64" height="0.54" />
+<text class="ref" x="27.15" y="13.25">R13</text>
+<rect class="crtyd" x="26.67" y="8.80" width="1.96" height="3.40" />
+<rect class="pad" x="26.92" y="10.95" width="1.45" height="1.00" />
+<rect class="pad" x="26.92" y="9.05" width="1.45" height="1.00" />
+<text class="ref" x="27.65" y="10.50">C9</text>
+<rect class="crtyd" x="22.70" y="5.02" width="3.40" height="1.96" />
+<rect class="pad" x="22.95" y="5.28" width="1.00" height="1.45" />
+<rect class="pad" x="24.85" y="5.28" width="1.00" height="1.45" />
+<text class="ref" x="24.40" y="6.00">C10</text>
+<rect class="crtyd" x="22.70" y="14.02" width="3.40" height="1.96" />
+<rect class="pad" x="22.95" y="14.28" width="1.00" height="1.45" />
+<rect class="pad" x="24.85" y="14.28" width="1.00" height="1.45" />
+<text class="ref" x="24.40" y="15.00">C11</text>
+<rect class="crtyd" x="21.19" y="7.84" width="0.92" height="1.82" />
+<rect class="pad" x="21.34" y="8.95" width="0.62" height="0.56" />
+<rect class="pad" x="21.34" y="7.99" width="0.62" height="0.56" />
+<text class="ref" x="21.65" y="8.75">C12</text>
+<rect class="crtyd" x="0.57" y="18.03" width="1.86" height="0.94" />
+<rect class="pad" x="0.72" y="18.18" width="0.54" height="0.64" />
+<rect class="pad" x="1.74" y="18.18" width="0.54" height="0.64" />
+<text class="ref" x="1.50" y="18.50">R16</text>
+<rect class="crtyd" x="0.57" y="30.03" width="1.86" height="0.94" />
+<rect class="pad" x="0.72" y="30.18" width="0.54" height="0.64" />
+<rect class="pad" x="1.74" y="30.18" width="0.54" height="0.64" />
+<text class="ref" x="1.50" y="30.50">R17</text>
+<rect class="crtyd" x="2.59" y="18.04" width="1.82" height="0.92" />
+<rect class="pad" x="2.74" y="18.19" width="0.56" height="0.62" />
+<rect class="pad" x="3.70" y="18.19" width="0.56" height="0.62" />
+<text class="ref" x="3.50" y="18.50">C14</text>
+<rect class="crtyd" x="24.17" y="18.78" width="1.86" height="0.94" />
+<rect class="pad" x="24.32" y="18.93" width="0.54" height="0.64" />
+<rect class="pad" x="25.34" y="18.93" width="0.54" height="0.64" />
+<text class="ref" x="25.10" y="19.25">R14</text>
+<rect class="crtyd" x="24.17" y="29.28" width="1.86" height="0.94" />
+<rect class="pad" x="24.32" y="29.43" width="0.54" height="0.64" />
+<rect class="pad" x="25.34" y="29.43" width="0.54" height="0.64" />
+<text class="ref" x="25.10" y="29.75">R15</text>
+<rect class="crtyd" x="26.19" y="18.79" width="1.82" height="0.92" />
+<rect class="pad" x="26.34" y="18.94" width="0.56" height="0.62" />
+<rect class="pad" x="27.30" y="18.94" width="0.56" height="0.62" />
+<text class="ref" x="27.10" y="19.25">C13</text>
+<text class="dim" x="0" y="-0.6">30 x 34 mm   HW A1   Compact</text>
+<rect x="0.00" y="35.30" width="1.1" height="1.1" fill="#e3b341"/>
+<text class="dim" x="1.60" y="36.20">top pad</text>
+<rect x="6.04" y="35.30" width="1.1" height="1.1" fill="#6ea8fe"/>
+<text class="dim" x="7.64" y="36.20">pogo pad</text>
+<rect x="12.70" y="35.30" width="1.1" height="1.1" fill="#f0b429"/>
+<text class="dim" x="14.30" y="36.20">island 0.15</text>
+<rect x="21.22" y="35.30" width="1.1" height="1.1" fill="#f85149"/>
+<text class="dim" x="22.82" y="36.20">heat source</text>
+</g></svg>

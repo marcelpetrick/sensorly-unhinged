@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "sensorly")(type "KiCad")(uri "${KIPRJMOD}/../lib/sensorly.pretty")(options "")(descr "ENV sensor project footprints - vendored, see hardware/lib/README.md"))
+)

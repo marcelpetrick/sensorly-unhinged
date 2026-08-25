@@ -37,6 +37,11 @@ ANCHORED = {
     "U5":  (15.5, 22.0, 0),      # USB ESD array
     "SW1": (13.7, 28.0, 0),      # provisioning button
     "D1":  (11.3, 22.0, 0),      # status LED
+    # I2C pull-ups: anchored, not auto-placed. EDS S3.1 puts them on the MAIN
+    # board so their dissipation stays there, and both variants hand the sensor
+    # off at the bottom-centre edge, so this is where they belong in both.
+    "R3":  (8.0, 31.3, 0),
+    "R4":  (10.0, 31.3, 0),
 }
 
 # Passives are auto-placed near an anchor; this table says near what, with what
@@ -50,7 +55,6 @@ NEAR = {
     "C9": ("U4", 90), "C10": ("U4", 90), "C11": ("U4", 90), "C12": ("U4", 90),
     "R16": ("J1", 0), "R17": ("J1", 0), "C14": ("J1", 0),
     "R14": ("J2", 90), "R15": ("J2", 90), "C13": ("J2", 90),
-    "R3": ("U1", 0), "R4": ("U1", 0),
 }
 
 # Pogo field: 2.54 mm grid on the bottom side, one contiguous rectangle.
@@ -174,4 +178,4 @@ def sensor_keepout(v: Variant) -> tuple[float, float, float, float]:
     sx, sy = v.sensor_xy
     if v.key == "b":
         return B_ISLAND_RECT[0], B_ISLAND_RECT[2], B_ISLAND_RECT[1], B_ISLAND_RECT[3]
-    return (0.0, sx + 5.0, sy - 5.0, v.height)
+    return (sx - 6.0, sx + 6.0, sy - 4.0, v.height)
