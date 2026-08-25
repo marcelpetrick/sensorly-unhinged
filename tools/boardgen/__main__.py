@@ -10,6 +10,7 @@ from .pcb import emit, write
 from .place import place
 from .project import write_all
 from .render import render, write as write_svg
+from .sch import write as write_sch
 from .route import route_island, stitch_ground
 from .variants import VARIANTS
 
@@ -19,6 +20,10 @@ ROOT = Path(__file__).resolve().parents[2]
 def main(argv: list[str]) -> int:
     check_only = "--check-only" in argv
     failed = False
+    if not check_only:
+        write_sch(ROOT)
+        print("--- shared schematic")
+        print("    wrote hardware/schematic/env-sensor.kicad_sch")
     for key, v in VARIANTS.items():
         placed = place(v)
         findings = check(v, placed)

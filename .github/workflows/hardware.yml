@@ -24,7 +24,10 @@ jobs:
       - name: Regenerate and fail on drift
         run: |
           make gen thermal bom
-          git diff --exit-code -- hardware docs/img docs/45-thermal-model.md \
+          git diff --exit-code -- hardware/schematic hardware/variant-a \
+              hardware/variant-b hardware/outputs/bom.csv \
+              hardware/outputs/netlist.txt docs/img/floorplan-a.svg \
+              docs/img/floorplan-b.svg docs/45-thermal-model.md \
             || { echo "::error::generated files differ from the committed ones - run 'make gen thermal bom' and commit"; exit 1; }
 
   kicad:
@@ -41,8 +44,8 @@ jobs:
 
       # Zero DRC errors, only the reviewed warnings, and a ratsnest budget that
       # may go down but never up. Policy lives in tools/drc_gate.py.
-      - name: DRC gate
-        run: make drc
+      - name: ERC + DRC + schematic parity gate
+        run: make erc drc
 
       - name: Manufacturing outputs
         run: make outputs

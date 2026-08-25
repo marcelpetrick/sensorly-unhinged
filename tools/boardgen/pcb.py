@@ -14,6 +14,7 @@ from . import geometry as G
 from .design import (BOARD_THICKNESS, NETS, PART_BY_REF, STACKUP)
 from .place import Placement
 from .route import Track, Via
+from .sch import unconnected_nets
 from .variants import (B_ISLAND_RECT, B_NECK_RECT, Variant, antenna_keepout,
                        sensor_keepout)
 
@@ -46,17 +47,19 @@ def _xy(x, y):
 # --------------------------------------------------------------------------
 def _net_index():
     idx = {"": 0}
-    for i, name in enumerate(sorted(NETS), start=1):
+    names = sorted(set(NETS) | set(unconnected_nets().values()))
+    for i, name in enumerate(names, start=1):
         idx[name] = i
     return idx
 
 
 def _pad_net_map():
-    """(ref, pad) -> net name"""
+    """(ref, pad) -> net name, including the generated unconnected-() names."""
     out = {}
     for net, conns in NETS.items():
         for ref, pad in conns:
             out[(ref, pad)] = net
+    out.update(unconnected_nets())
     return out
 
 

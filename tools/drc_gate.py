@@ -6,6 +6,7 @@ rule-complete but only the four sensor-island nets are routed, so 80 unconnected
 items is the expected state, not a regression.
 
 Policy:
+  * any schematic/PCB parity difference -> fail (both come from one model)
   * any DRC violation at severity `error`  -> fail
   * unconnected items above the recorded budget -> fail
   * unconnected items below the budget -> fail too, with "update the budget",
@@ -46,15 +47,24 @@ def main(argv: list[str]) -> int:
     budgets = json.loads(BUDGET.read_text()) if BUDGET.exists() else {}
     expected = budgets.get(variant, {}).get("unconnected")
 
+    parity = d.get("schematic_parity") or []
     errors = [v for v in d["violations"] if v["severity"] == "error"]
     warnings = [v for v in d["violations"] if v["severity"] == "warning"]
     unexpected = [w for w in warnings if w["type"] not in ACCEPTED_WARNINGS]
     unconnected = len(d["unconnected_items"])
 
     print(f"  variant {variant}: {len(errors)} errors, {len(warnings)} warnings "
-          f"({len(unexpected)} unreviewed), {unconnected} unconnected")
+          f"({len(unexpected)} unreviewed), {len(parity)} parity, "
+          f"{unconnected} unconnected")
 
     bad = False
+    # Schematic parity has to be exact. The board is generated from the same
+    # model as the schematic, so any difference is a generator bug, not a
+    # design choice.
+    for v in parity:
+        items = " / ".join(i.get("description", "") for i in v.get("items", []))
+        print(f"    PARITY {v['type']}: {v.get('description')} | {items}")
+        bad = True
     for v in errors:
         items = " / ".join(i.get("description", "") for i in v.get("items", []))
         print(f"    ERROR {v['type']}: {items}")

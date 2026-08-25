@@ -7,20 +7,21 @@ VARIANTS  := a b
 ROOT      := $(CURDIR)
 BUILD     := $(ROOT)/_build
 
-.PHONY: all gen check drc outputs render bom thermal clean help
+.PHONY: all gen check erc drc outputs render bom thermal clean help
 .DEFAULT_GOAL := help
 
 help:
-	@echo "make gen      - regenerate both boards, project files, DRC rules and SVGs"
+	@echo "make gen      - regenerate the schematic, both boards, project files, DRC rules and SVGs"
 	@echo "make check    - generator-side rule checks only (no KiCad needed)"
-	@echo "make drc      - KiCad DRC on both variants (errors fail the build)"
+	@echo "make erc      - KiCad ERC on the shared schematic"
+	@echo "make drc      - KiCad DRC + schematic parity on both variants"
 	@echo "make bom      - BOM + placement CSVs from the shared design model"
 	@echo "make outputs  - gerbers, drill, BOM, CPL, STEP, PDF into hardware/outputs"
-	@echo "make render   - KiCad 3D renders into docs/img"
+	@echo "make render   - KiCad 3D renders + schematic SVG into docs/img"
 	@echo "make thermal  - regenerate docs/45-thermal-model.md from the geometry"
 	@echo "make all      - gen + check + drc + bom + outputs"
 
-all: gen check drc bom thermal outputs
+all: gen check erc drc bom thermal outputs
 
 gen:
 	$(PY) -m tools.boardgen
@@ -44,15 +45,23 @@ $(BUILD)/$(1)/env-sensor-$(1).kicad_pcb: hardware/variant-$(1)/env-sensor-$(1).k
 	@mkdir -p $(BUILD)/$(1)
 	@cp hardware/variant-$(1)/env-sensor-$(1).kicad_pro $(BUILD)/$(1)/env-sensor-$(1).kicad_pro
 	@cp hardware/variant-$(1)/env-sensor-$(1).kicad_dru $(BUILD)/$(1)/env-sensor-$(1).kicad_dru
+	@cp hardware/schematic/env-sensor.kicad_sch $(BUILD)/$(1)/env-sensor-$(1).kicad_sch
+	@cp hardware/lib/sensorly.kicad_sym $(BUILD)/$(1)/ 2>/dev/null || true
+	@printf '(sym_lib_table\n  (version 7)\n  (lib (name "sensorly")(type "KiCad")(uri "%s/hardware/lib/sensorly.kicad_sym")(options "")(descr ""))\n)\n' "$(ROOT)" > $(BUILD)/$(1)/sym-lib-table
 	@printf '(fp_lib_table\n  (version 7)\n  (lib (name "sensorly")(type "KiCad")(uri "%s/hardware/lib/sensorly.pretty")(options "")(descr ""))\n)\n' "$(ROOT)" > $(BUILD)/$(1)/fp-lib-table
 	@cp $$< $$@
 	@$(KICAD_CLI) pcb drc --refill-zones --save-board -o /dev/null $$@ >/dev/null
 endef
 $(foreach v,$(VARIANTS),$(eval $(call FILLED_RULE,$(v))))
 
+erc:
+	@$(KICAD_CLI) sch erc --severity-error --severity-warning --exit-code-violations \
+	  --format json -o $(BUILD)/erc.json hardware/schematic/env-sensor.kicad_sch \
+	  || { echo "ERC violations - see $(BUILD)/erc.json"; exit 1; }
+
 drc: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	@for v in $(VARIANTS); do \
-	  $(KICAD_CLI) pcb drc --severity-error --severity-warning \
+	  $(KICAD_CLI) pcb drc --severity-error --severity-warning --schematic-parity \
 	    --format json -o $(BUILD)/$$v/drc.json $(BUILD)/$$v/env-sensor-$$v.kicad_pcb \
 	    >/dev/null; \
 	  $(PY) -m tools.drc_gate $(BUILD)/$$v/drc.json $$v || exit 1; \
@@ -77,6 +86,14 @@ outputs: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb) bom
 	    -o $$o/step/env-sensor-$$v.step $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \
 	  echo "wrote $$o"; \
 	done
+	@mkdir -p hardware/outputs/schematic
+	@$(KICAD_CLI) sch export pdf --black-and-white \
+	  -o hardware/outputs/schematic/env-sensor.pdf \
+	  hardware/schematic/env-sensor.kicad_sch >/dev/null
+	@$(KICAD_CLI) sch export netlist --format kicadsexpr \
+	  -o hardware/outputs/schematic/env-sensor.net \
+	  hardware/schematic/env-sensor.kicad_sch >/dev/null
+	@echo "wrote hardware/outputs/schematic"
 
 render: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	@mkdir -p docs/img
@@ -86,6 +103,10 @@ render: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	    -o docs/img/render-$$v.png $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \
 	  echo "wrote docs/img/render-$$v.png"; \
 	done
+	@$(KICAD_CLI) sch export svg --black-and-white --no-background-color \
+	  -o docs/img/ hardware/schematic/env-sensor.kicad_sch >/dev/null
+	@mv docs/img/env-sensor.svg docs/img/schematic.svg
+	@echo "wrote docs/img/schematic.svg"
 
 clean:
 	rm -rf $(BUILD)

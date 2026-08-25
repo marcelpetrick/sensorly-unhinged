@@ -1,0 +1,10 @@
+{
+  "meta": { "filename": "env-sensor.kicad_pro", "version": 3 },
+  "schematic": {
+    "annotate_start_num": 0,
+    "legacy_lib_dir": "",
+    "legacy_lib_list": []
+  },
+  "sheets": [],
+  "text_variables": {}
+}

@@ -8,3 +8,11 @@ __pycache__/
 .venv/
 _build/
 *.zip
+
+# Fab outputs are build products, not sources: gerbers, PDFs and STEP all embed
+# a generation timestamp, so they cannot be byte-reproducible and committing
+# them would make the CI drift check permanently red. CI builds and uploads them
+# as an artifact instead. The deterministic outputs (bom.csv, netlist.txt) are
+# committed.
+hardware/outputs/rev-*/
+hardware/outputs/schematic/
