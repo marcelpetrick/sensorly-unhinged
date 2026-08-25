@@ -15,12 +15,12 @@ from dataclasses import dataclass
 from . import geometry as G
 from .design import PART_BY_REF
 from .place import Placement
-from .variants import Variant, antenna_keepout
+from .variants import Variant, antenna_keepout, sensor_keepout
 
 GRID = 0.1
 ISLAND_WIDTH = 0.15          # EDS S3.1 - the dominant thermal term
 ISLAND_CLEAR = 0.15
-EDGE_CLEAR = 0.30
+EDGE_CLEAR = 0.40      # 0.3 mm copper-to-edge + half the trace width
 TURN_PENALTY = 12
 
 
@@ -145,6 +145,11 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         g = block_pads(exclude)
         for (x0, y0, x1, y1) in extra_blocked:
             g.block_rect(x0, y0, x1, y1)
+        if v.key == "a":
+            sx0, sx1, sy0, sy1 = sensor_keepout(v)
+            quiet = (sx0, sx1, sy0, sy1)
+        else:
+            quiet = None
 
         sx, sy = pads[src]
         if dst:
@@ -152,7 +157,12 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         else:
             # +3V0 and GND leave F.Cu on a via and join their plane. The via
             # goes in open board next to the connectors, never on the neck.
-            tx, ty = _free_spot(g, PLANE_VIA[net], 0.55)
+            gv = Grid.__new__(Grid)
+            gv.__dict__.update(g.__dict__)
+            gv.blocked = bytearray(g.blocked)
+            if quiet:
+                gv.block_rect(quiet[0], quiet[2], quiet[1], quiet[3])
+            tx, ty = _free_spot(gv, PLANE_VIA[net], 0.55)
         path = _dijkstra(g, (sx, sy), (tx, ty))
         if path is None:
             raise RuntimeError(f"island route failed for {net}")
@@ -165,12 +175,15 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
             bx, by = pts[i + 1]
             extra_blocked.append((min(ax, bx) - 0.3, min(ay, by) - 0.3,
                                   max(ax, bx) + 0.3, max(ay, by) + 0.3))
+        if dst is None:
+            vx, vy = pts[-1]
+            extra_blocked.append((vx - 0.55, vy - 0.55, vx + 0.55, vy + 0.55))
     return tracks, vias
 
 
 # Where the two plane nets drop off F.Cu. Open board beside the battery
 # connector, well clear of the neck and of the sensor's quiet zone.
-PLANE_VIA = {"+3V0": (20.0, 31.0), "GND": (22.5, 31.0)}
+PLANE_VIA = {"+3V0": (23.5, 30.2), "GND": (25.6, 30.2)}
 
 DIRS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
@@ -246,3 +259,60 @@ def _simplify(path):
             out.append(path[i])
     out.append(path[-1])
     return [(round(x, 3), round(y, 3)) for x, y in out]
+
+
+# --------------------------------------------------------------------------
+def stitch_ground(v: Variant, placed: list[Placement], tracks: list[Track],
+                  vias: list[Via], pitch: float = 2.5) -> list[Via]:
+    """A perimeter ring of GND vias tying the four copper layers together.
+
+    Standard practice on a 4-layer board with a module radio: it stops the
+    outer pours breaking into isolated islands and keeps the return path under
+    the antenna feed short. Placed nowhere near the antenna keep-out, the
+    sensor island or the thermal neck - a via there would be a copper column
+    straight through the board, which is the one thing Variant B exists to
+    avoid.
+    """
+    from .variants import B_ISLAND_RECT, B_NECK_RECT, sensor_keepout
+
+    g = Grid(v)
+    for p in placed:
+        fp = G.get(p.footprint)
+        for name, pts in fp.pads.items():
+            w, h = fp.pad_size.get(name, (0.6, 0.6))
+            if p.rot % 180:
+                w, h = h, w
+            for (lx, ly) in pts:
+                x, y = G.xform(lx, ly, p.x, p.y, p.rot)
+                g.block_rect(x - w / 2 - 0.55, y - h / 2 - 0.55,
+                             x + w / 2 + 0.55, y + h / 2 + 0.55)
+    for t in tracks:
+        for i in range(len(t.pts) - 1):
+            ax, ay = t.pts[i]
+            bx, by = t.pts[i + 1]
+            g.block_rect(min(ax, bx) - 0.55, min(ay, by) - 0.55,
+                         max(ax, bx) + 0.55, max(ay, by) + 0.55)
+    for vv in vias:
+        g.block_rect(vv.x - 0.9, vv.y - 0.9, vv.x + 0.9, vv.y + 0.9)
+    if v.key == "b":
+        nx0, ny0, nx1, ny1 = B_NECK_RECT
+        ix0, iy0, ix1, iy1 = B_ISLAND_RECT
+        g.block_rect(nx0 - 1.0, ny0 - 1.0, nx1 + 1.0, iy1 + 1.0)
+        g.block_rect(ix0 - 1.0, iy0 - 1.0, ix1 + 1.0, iy1 + 1.0)
+    else:
+        sx0, sx1, sy0, sy1 = sensor_keepout(v)
+        g.block_rect(sx0, sy0, sx1, sy1)
+
+    out: list[Via] = []
+    steps = int(pitch / GRID)
+    for iy in range(0, g.h, steps):
+        for ix in range(0, g.w, steps):
+            x, y = ix * GRID, iy * GRID
+            r = int(0.55 / GRID)
+            if not all(g.free(ix + dx, iy + dy)
+                       for dx in range(-r, r + 1) for dy in range(-r, r + 1)):
+                continue
+            out.append(Via("GND", round(x, 3), round(y, 3)))
+            g.block_rect(x - pitch * 0.6, y - pitch * 0.6,
+                         x + pitch * 0.6, y + pitch * 0.6)
+    return out

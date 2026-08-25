@@ -42,7 +42,7 @@ def _fits(box, v: Variant, taken, forbidden) -> bool:
     return True
 
 
-def _spiral(step=0.25, rings=60):
+def _spiral(step=0.25, rings=140):
     yield (0.0, 0.0)
     for r in range(1, rings + 1):
         d = r * step

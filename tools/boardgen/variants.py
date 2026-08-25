@@ -58,7 +58,7 @@ NEAR = {
 }
 
 # Pogo field: 2.54 mm grid on the bottom side, one contiguous rectangle.
-TESTPAD_ORIGIN = (7.2, 26.4)
+TESTPAD_ORIGIN = (9.0, 19.5)
 TESTPAD_COLS = 6
 TESTPAD_PITCH = 2.54
 
@@ -161,16 +161,19 @@ def antenna_keepout(v: Variant) -> tuple[float, float, float, float]:
     """Mandatory no-copper / no-part rectangle around the module PCB antenna.
 
     Espressif ask for ~15 mm clear in every direction. Neither board is 30 mm
-    wider than the module, so the in-plane keep-out is the antenna footprint
-    plus 2 mm and the full remaining clearance has to come from the ENCLOSURE
-    (requirement M-04). This is recorded as EDS open item EDS-7.
+    wider than the module, so in-plane we give the antenna the **full width of
+    the board** for its whole length and buy the rest of the clearance from the
+    ENCLOSURE (requirement M-04). That costs ~170 mm2 of a ~1000 mm2 board and
+    it is the right trade: RF range is a requirement, board area is not.
+
+    The rectangle deliberately stops at the antenna boundary rather than
+    extending into the module body - the module's own ground pads start 0.8 mm
+    below it, and a keep-out that swallowed them would be self-contradictory.
+    Recorded as EDS open item EDS-7.
     """
-    cx = ANCHORED["U1"][0] + v.body_dx
     cy = ANCHORED["U1"][1]
-    # module local: body y -11.15..5.85, antenna occupies the top 5.4 mm
-    ax0, ax1 = cx - 6.6 - 2.0, cx + 6.6 + 2.0
-    ay0, ay1 = 0.0, cy - 11.15 + 5.4 + 2.0
-    return (max(0.0, ax0), min(v.width, ax1), ay0, ay1)
+    # module local: body y -11.15..5.85, antenna is the top 5.4 mm of the body
+    return (0.0, v.width, 0.0, cy - 5.6)
 
 
 def sensor_keepout(v: Variant) -> tuple[float, float, float, float]:
@@ -178,4 +181,4 @@ def sensor_keepout(v: Variant) -> tuple[float, float, float, float]:
     sx, sy = v.sensor_xy
     if v.key == "b":
         return B_ISLAND_RECT[0], B_ISLAND_RECT[2], B_ISLAND_RECT[1], B_ISLAND_RECT[3]
-    return (sx - 6.0, sx + 6.0, sy - 4.0, v.height)
+    return (sx - 5.0, sx + 5.0, sy - 3.0, v.height)

@@ -10,7 +10,7 @@ from .pcb import emit, write
 from .place import place
 from .project import write_all
 from .render import render, write as write_svg
-from .route import route_island
+from .route import route_island, stitch_ground
 from .variants import VARIANTS
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -27,11 +27,12 @@ def main(argv: list[str]) -> int:
         for f in findings:
             print(f"    {f}")
         tracks, vias = route_island(v, placed, NETS)
+        vias = vias + stitch_ground(v, placed, tracks, vias)
         total = sum(
             abs(t.pts[i + 1][0] - t.pts[i][0]) + abs(t.pts[i + 1][1] - t.pts[i][1])
             for t in tracks for i in range(len(t.pts) - 1))
         print(f"    island nets routed: {len(tracks)}, {total:.1f} mm total, "
-              f"{len(vias)} plane vias")
+              f"{len(vias)} vias (2 plane + stitching)")
         if errors:
             failed = True
             continue

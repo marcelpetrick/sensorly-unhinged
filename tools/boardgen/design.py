@@ -45,7 +45,8 @@ PARTS = [
     Part("SW1", "SW_PROV", f"{FP}:Panasonic_EVQPUJ_EVQPUA", "EVQ-PUJ02K", "Panasonic",
          "provisioning / boot button", alt="TS-1187A-B-A-B (generic 3.5x2.9)"),
     Part("C5", "100nF/16V X7R", C0402, desc="SW1 debounce"),
-    Part("D1", "LED_GREEN", f"{FP}:LED_0603_1608Metric", desc="status LED, active low"),
+    Part("D1", "LED_GREEN", f"{FP}:LED_0603_1608Metric", "KP-1608SGC", "Kingbright",
+         "status LED, active low", alt="any 0603 green LED, Vf < 2.4 V at 0.5 mA"),
     Part("R2", "3k3 1%", R0402, desc="LED series, ~0.5 mA"),
 
     # --- 02 Sensor ----------------------------------------------------------
@@ -98,7 +99,8 @@ PARTS = [
     # --- 06 Battery ---------------------------------------------------------
     Part("J2", "JST-PH 2P", f"{FP}:JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal",
          "S2B-PH-SM4-TB(LF)(SN)", "JST",
-         "1S LiPo, pin 1 = VBAT(+), pin 2 = GND(-) - PROTECTED cell only"),
+         "1S LiPo, pin 1 = VBAT(+), pin 2 = GND(-) - PROTECTED cell only",
+         alt="B2B-PH-SM4-TB (top entry, same land pattern family)"),
     Part("R14", "2M2 1%", R0402, desc="VBAT divider top"),
     Part("R15", "2M2 1%", R0402, desc="VBAT divider bottom - 0.95 uA continuous, see EDS S6"),
     Part("C13", "100nF/16V X7R", C0402, desc="ADC filter"),

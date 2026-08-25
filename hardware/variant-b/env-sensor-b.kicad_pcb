@@ -137,34 +137,11 @@
 		(layer "F.Cu")
 		(uuid "4a7432ba-ecfa-5894-bc7f-cff09108962d")
 		(at 114.0 71.5)
-		(property "MPN" "ESP32-C6-MINI-1-N4"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "b43d95cb-861a-54d1-9b3d-de5d782a4a39")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "Espressif"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "e166cf27-fb21-53d3-a179-d65cd32a726e")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "2.4 GHz Wi-Fi, Bluetooth, Zigbee and Thread combo chip, external antenna, https://www.espressif.com/sites/default/files/documentation/esp32-c6-mini-1_mini-1u_datasheet_en.pdf")
 		(tags "2.4 GHz Wi-Fi Bluetooth Zigbee Thread external antenna espressif  16.6*13.2mm")
 		(property "Reference" "U1"
 			(at 0 6.9 0)
+			(hide yes)
 			(unlocked yes)
 			(layer "F.SilkS")
 			(uuid "7d14e0a9-8bc5-59b9-bffd-390a941ddfb0")
@@ -925,34 +902,11 @@
 		(layer "F.Cu")
 		(uuid "c8c72c58-7072-574b-a243-45060278ff97")
 		(at 105.5 84.5 90)
-		(property "MPN" "TYPE-C-31-M-12"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "2c44028b-f79d-57d1-9138-e220841a9738")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "HRO"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "5366ac72-e439-51db-bcad-040f0ca41c73")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "USB Type-C receptacle for USB 2.0 and PD, http://www.krhro.com/uploads/soft/180320/1-1P320120243.pdf")
 		(tags "usb usb-c 2.0 pd")
 		(property "Reference" "J1"
 			(at 0 -5.645 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(uuid "75f15728-9918-5329-a833-b8ec09fc676c")
 			(effects
@@ -1339,34 +1293,11 @@
 		(layer "F.Cu")
 		(uuid "65303856-b3d2-5133-a28d-20656ad00f86")
 		(at 122.85 84.5 90)
-		(property "MPN" "S2B-PH-SM4-TB(LF)(SN)"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "0e2f3b07-77e4-5bb2-ba98-81cddff55a9e")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "JST"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "39b3242f-b161-5070-85b0-0269ae0b9a58")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "JST PH series connector, S2B-PH-SM4-TB (http://www.jst-mfg.com/product/pdf/eng/ePH.pdf)")
 		(tags "connector JST PH horizontal")
 		(property "Reference" "J2"
 			(at 0 -5.8 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -1777,34 +1708,11 @@
 		(layer "F.Cu")
 		(uuid "4df80ef1-a3f1-57ef-916e-3d15757c9b75")
 		(at 124.4 70.5)
-		(property "MPN" "BQ24074RGTR"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "76f0253b-6edd-5d4a-a572-493d9baed3f5")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "Texas Instruments"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "973c7ef2-e4f9-54c7-adea-c6e25e4a57c9")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "VQFN, 16 Pin (http://www.ti.com/lit/ds/symlink/cdclvp1102.pdf#page=28)")
 		(tags "VQFN NoLead")
 		(property "Reference" "U4"
 			(at 0 -2.83 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -2287,33 +2195,10 @@
 		(layer "F.Cu")
 		(uuid "8a52a0e4-789a-5429-8079-5e3c441f602f")
 		(at 103.4 70.0)
-		(property "MPN" "TPS62840DLCR"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "6cf6fe58-0d9d-5f43-bdfa-e5cfd6d32df6")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "Texas Instruments"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "b650ef0f-a2f4-5318-9ecc-91a8a21e0672")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "TI DLC0008B, VSON-HR-8, 1.5x2.0mm body, 0.5mm pitch, no exposed pad. Land pattern per TI SLVSEC6D drawing 4224310/A: 8 pads 0.6x0.25mm, row centres 1.3mm apart, 0.5mm pitch. Verified against datasheet 2026-08-25.")
 		(tags "VSON-HR SON TI DLC TPS62840")
-		(property "Reference" "U3" (at 0 -1.9 0) (layer "F.SilkS")
+		(property "Reference" "U3" (at 0 -1.9 0)
+			(hide yes) (layer "F.SilkS")
 			(uuid "d6e9374b-c8e5-5439-9b6f-4cab8c5bd39e")
 			(effects (font (size 0.7 0.7) (thickness 0.12))))
 		(property "Value" "TPS62840DLC" (at 0 1.9 0) (layer "F.Fab")
@@ -2358,34 +2243,11 @@
 		(layer "F.Cu")
 		(uuid "8593f0a4-ec96-50c8-91fc-a5d5adf2d998")
 		(at 103.4 73.2)
-		(property "MPN" "DFE201612E-2R2M"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "2d25758a-c49a-5020-ac9a-8c092929f534")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "Murata"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "0198079a-efd6-5d8d-b322-05ffb9947b85")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "Inductor, Murata, DFE201610P, 2.0x1.6x1.0mm, (https://www.murata.com/~/media/webrenewal/products/inductor/chip/tokoproducts/wirewoundmetalalloychiptype/m_dfe201610p.ashx)")
 		(tags "power chip flatwire")
 		(property "Reference" "L1"
 			(at 0 -1.75 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -2496,34 +2358,11 @@
 		(layer "F.Cu")
 		(uuid "f975ddd7-5dcb-5981-b64a-91f7e7c0169e")
 		(at 115.5 82.0)
-		(property "MPN" "USBLC6-2SC6"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "1d2b5e25-58d7-5ece-8bb8-6221de793081")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "STMicroelectronics"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "89dc6cb4-8e74-5fca-94ad-ad3de642d3b5")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "SOT, 6 Pin (JEDEC MO-178 Var AB https://www.jedec.org/document_search?search_api_views_fulltext=MO-178)")
 		(tags "SOT TO_SOT_SMD")
 		(property "Reference" "U5"
 			(at 0 -2.4 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -2814,34 +2653,11 @@
 		(layer "F.Cu")
 		(uuid "b54662dc-251d-55cd-b5f5-a36039eaf265")
 		(at 113.7 88.0)
-		(property "MPN" "EVQ-PUJ02K"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "5473340a-2d21-56fd-96d7-c76f08245f16")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "Panasonic"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "253373b4-2a7d-5852-8756-954e1763405d")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "http://industrial.panasonic.com/cdbs/www-data/pdf/ATV0000/ATV0000CE5.pdf")
 		(tags "SMD SMT SPST EVQPUJ EVQPUA")
 		(property "Reference" "SW1"
 			(at 0 -4.5 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(uuid "070627de-d2d4-5763-844c-20480fe53913")
 			(effects
@@ -3110,6 +2926,7 @@
 		(tags "LED")
 		(property "Reference" "D1"
 			(at 0 -1.43 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -3268,6 +3085,7 @@
 		(tags "resistor")
 		(property "Reference" "R3"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -3382,6 +3200,7 @@
 		(tags "resistor")
 		(property "Reference" "R4"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -3492,34 +3311,11 @@
 		(layer "F.Cu")
 		(uuid "393736f2-cf42-5793-8144-b50f90a52a4b")
 		(at 114.0 106.0)
-		(property "MPN" "SHT45-AD1F-R2"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "013ed0c9-8549-5367-a296-7e1a02e1d2e8")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Manufacturer" "Sensirion"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(hide yes)
-			(uuid "c2a545f2-b9e8-5ebb-9693-7bb2fa0cab0d")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
 		(descr "Sensirion, SHT40, SHT41, SHT45, DFN, 4 Pin (https://sensirion.com/media/documents/33FD6951/624C4357/Datasheet_SHT4x.pdf)")
 		(tags "DFN NoLead")
 		(property "Reference" "U2"
 			(at 0 -1.7 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(uuid "16924bb1-db13-53b6-bff8-8f66828df720")
 			(effects
@@ -3782,6 +3578,7 @@
 		(tags "capacitor")
 		(property "Reference" "C6"
 			(at 0 -1.16 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -3891,10 +3688,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "fa863288-a627-5f91-a3a5-b079af6c3854")
-		(at 107.2 86.4)
+		(at 109.0 79.5)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP1" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP1" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "6fe83105-4037-5035-95b6-be8c0287a71f")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "GND" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -3912,10 +3710,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "40513ad2-1ab6-532f-9164-2c365ff6c441")
-		(at 109.74 86.4)
+		(at 111.54 79.5)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP2" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP2" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "531d95ee-a1ac-5847-9d03-cf8e582da6f1")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "VBUS" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -3933,10 +3732,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "cc1eefb9-0c16-5589-8397-99083ea64abe")
-		(at 112.28 86.4)
+		(at 114.08 79.5)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP3" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP3" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "c916c7fd-bb11-5aba-9e31-e3c1f05c60a6")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "VSYS" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -3954,10 +3754,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "2192b12d-455b-56ca-801c-c3005d4c6058")
-		(at 114.82 86.4)
+		(at 116.62 79.5)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP4" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP4" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "684a8ca1-51f5-5b66-a56e-9f6d001b6d3c")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "+3V0" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -3975,10 +3776,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "079142c9-a431-5429-a3a7-ce1d437aa2e5")
-		(at 117.36 86.4)
+		(at 119.16 79.5)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP5" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP5" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "94eb6d40-7777-5498-9af9-f4e45beeb9cb")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "VBAT" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -3996,10 +3798,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "6a0a876b-b0b0-56a9-850a-d538ced8c833")
-		(at 119.9 86.4)
+		(at 121.7 79.5)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP6" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP6" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "c3bf0e6d-0292-51b4-b76f-6628e20fcb4e")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "EN" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4017,10 +3820,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "468f42fa-4f43-5b6f-b575-69abb703841a")
-		(at 107.2 88.94)
+		(at 109.0 82.04)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP7" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP7" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "0165497d-c9e0-5bf8-9ee8-b8a361810fd9")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "BTN_PROV" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4038,10 +3842,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "d40289fd-7216-56e0-b76b-be0f4eea1b1b")
-		(at 109.74 88.94)
+		(at 111.54 82.04)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP8" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP8" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "19f90f33-92f7-54a6-91c6-a158b8d929f6")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "UART_TX" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4059,10 +3864,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "0d5d4af7-db02-5a1a-b467-e71494c4ab1d")
-		(at 112.28 88.94)
+		(at 114.08 82.04)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP9" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP9" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "961dd0c5-f25d-5935-bdfd-fd8f38cfc247")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "UART_RX" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4080,10 +3886,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "808ccccd-bfe8-58d7-90ae-2de98718bdac")
-		(at 114.82 88.94)
+		(at 116.62 82.04)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP10" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP10" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "0f5abc1e-6758-5450-99eb-69e534e3314d")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "USB_DP" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4101,10 +3908,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "edc3cc1f-47d7-524a-931f-1ffcd05fb02b")
-		(at 117.36 88.94)
+		(at 119.16 82.04)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP11" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP11" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "22ada6ce-4437-563b-95e7-21a7180161f7")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "USB_DM" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4122,10 +3930,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "2d6a31ad-0f63-558b-82e8-31d8389b7b67")
-		(at 119.9 88.94)
+		(at 121.7 82.04)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP12" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP12" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "a601ceec-ec88-559d-9bd3-5dd463a812b8")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "SDA" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4143,10 +3952,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "e5a69ee1-5d4e-5829-af05-1701d5043947")
-		(at 107.2 91.48)
+		(at 109.0 84.58)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP13" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP13" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "bcabf565-9f12-5029-8a74-719b259affaa")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "SCL" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4164,10 +3974,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "805f64d7-2954-5932-a315-43347e0bdb27")
-		(at 109.74 91.48)
+		(at 111.54 84.58)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP14" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP14" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "68fd3af9-930d-58e5-95bd-2b2fcb08fab7")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "CHG_N" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4185,10 +3996,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "b920cf65-22d1-5a86-b484-52de67c50b36")
-		(at 112.28 91.48)
+		(at 114.08 84.58)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP15" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP15" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "74020c4f-3165-5213-9506-6b5b65000512")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "PG_N" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4206,10 +4018,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "53472a13-7380-5bbf-adbd-360ecc05634f")
-		(at 114.82 91.48)
+		(at 116.62 84.58)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP16" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP16" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "fc85d267-aa96-5a4d-9b26-64e1cb8031ac")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "TEST_MODE" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4227,10 +4040,11 @@
 	(footprint "sensorly:TestPad_D1.5mm_Bottom"
 		(layer "B.Cu")
 		(uuid "be70c3ec-4ee0-5d2e-8a92-ed329a26cd5d")
-		(at 117.36 91.48)
+		(at 119.16 84.58)
 		(descr "1.5 mm round pogo test pad on the BOTTOM side. Assembly is single-sided top, so the whole pogo field is on the bare side of the board and the fixture is a flat plate.")
 		(tags "test point pogo")
-		(property "Reference" "TP17" (at 0 -1.4 0) (layer "B.SilkS")
+		(property "Reference" "TP17" (at 0 -1.4 0)
+			(hide yes) (layer "B.SilkS")
 			(uuid "ed2fcd74-b1c9-5fc2-8dd1-8d6f4c77b7be")
 			(effects (font (size 0.6 0.6) (thickness 0.1)) (justify mirror)))
 		(property "Value" "GND" (at 0 1.4 0) (layer "B.Fab") (hide yes)
@@ -4248,11 +4062,12 @@
 	(footprint "sensorly:C_0805_2012Metric"
 		(layer "F.Cu")
 		(uuid "012039da-b681-5411-bc49-9f88b536f271")
-		(at 120.0 78.5)
+		(at 106.0 76.0 90)
 		(descr "Capacitor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf, https://docs.google.com/spreadsheets/d/1BsfQQcO9C6DZCsRaXUlFlo91Tg2WpOkGARC1WS5S8t0/edit?usp=sharing)")
 		(tags "capacitor")
 		(property "Reference" "C1"
 			(at 0 -1.68 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -4333,14 +4148,14 @@
 			)
 		)
 		(pad "1" smd roundrect
-			(at -0.95 0)
+			(at -0.95 0 90.0)
 			(size 1 1.45)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 1 "+3V0")
 		)
 		(pad "2" smd roundrect
-			(at 0.95 0)
+			(at 0.95 0 90.0)
 			(size 1 1.45)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
@@ -4362,11 +4177,12 @@
 	(footprint "sensorly:C_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "a1020a4f-0904-5000-a4e2-0dbe9fa1f734")
-		(at 107.5 78.0)
+		(at 106.75 78.5)
 		(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C2"
 			(at 0 -1.16 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -4476,11 +4292,12 @@
 	(footprint "sensorly:C_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "925021dc-793c-5cd2-9420-f4884d371644")
-		(at 106.25 76.5 90)
+		(at 121.5 76.75 90)
 		(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C3"
 			(at 0 -1.16 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -4590,11 +4407,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "a22512fe-b5b0-5859-802f-972fba936b1f")
-		(at 122.0 76.0 90)
+		(at 106.0 66.5)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R1"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -4675,14 +4493,14 @@
 			)
 		)
 		(pad "1" smd roundrect
-			(at -0.51 0 90.0)
+			(at -0.51 0)
 			(size 0.54 0.64)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 1 "+3V0")
 		)
 		(pad "2" smd roundrect
-			(at 0.51 0 90.0)
+			(at 0.51 0)
 			(size 0.54 0.64)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
@@ -4704,11 +4522,12 @@
 	(footprint "sensorly:C_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "ee0c9064-c6f8-5ff5-a89f-a3485bed3244")
-		(at 110.25 80.0 90)
+		(at 122.0 66.5)
 		(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C4"
 			(at 0 -1.16 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -4789,14 +4608,14 @@
 			)
 		)
 		(pad "1" smd roundrect
-			(at -0.48 0 90.0)
+			(at -0.48 0)
 			(size 0.56 0.62)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 6 "EN")
 		)
 		(pad "2" smd roundrect
-			(at 0.48 0 90.0)
+			(at 0.48 0)
 			(size 0.56 0.62)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
@@ -4818,11 +4637,12 @@
 	(footprint "sensorly:C_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "25c76b78-1775-5d16-a462-703ac0cd6f12")
-		(at 110.7 84.0)
+		(at 116.95 91.25)
 		(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C5"
 			(at 0 -1.16 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -4932,11 +4752,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "664625f4-cf30-5563-8050-877eccb6fcc8")
-		(at 112.05 80.0)
+		(at 104.8 78.5)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R2"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5051,6 +4872,7 @@
 		(tags "capacitor")
 		(property "Reference" "C7"
 			(at 0 -1.43 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5165,6 +4987,7 @@
 		(tags "capacitor")
 		(property "Reference" "C8"
 			(at 0 -1.43 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5279,6 +5102,7 @@
 		(tags "resistor")
 		(property "Reference" "R5"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5388,11 +5212,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "df913f47-2666-5e3a-bee1-4841ae5ea13f")
-		(at 105.4 68.75 90)
+		(at 104.9 68.0)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R6"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5473,14 +5298,14 @@
 			)
 		)
 		(pad "1" smd roundrect
-			(at -0.51 0 90.0)
+			(at -0.51 0)
 			(size 0.54 0.64)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 27 "VSET")
 		)
 		(pad "2" smd roundrect
-			(at 0.51 0 90.0)
+			(at 0.51 0)
 			(size 0.54 0.64)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
@@ -5507,6 +5332,7 @@
 		(tags "resistor")
 		(property "Reference" "R7"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5616,11 +5442,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "0fe79530-adf6-5a6b-9307-91ee8e66722a")
-		(at 123.15 73.25)
+		(at 121.9 67.75)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R8"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5730,11 +5557,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "70b0a7dd-5ae4-542a-87d2-cbbf7d1c4acb")
-		(at 123.65 67.75)
+		(at 123.15 73.25)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R9"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5844,11 +5672,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "437240df-6fd9-5d01-b545-0ef442fdff06")
-		(at 125.15 73.25)
+		(at 123.9 67.75)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R10"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -5958,11 +5787,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "902432fb-8c8e-5895-8348-b94afab8973c")
-		(at 125.65 67.75)
+		(at 125.15 73.25)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R11"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6072,11 +5902,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "da9ea68d-700c-5b98-a54d-a8b809cb9b4e")
-		(at 121.65 68.75 90)
+		(at 125.9 67.75)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R12"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6157,14 +5988,14 @@
 			)
 		)
 		(pad "1" smd roundrect
-			(at -0.51 0 90.0)
+			(at -0.51 0)
 			(size 0.54 0.64)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
 			(net 11 "ITERM")
 		)
 		(pad "2" smd roundrect
-			(at 0.51 0 90.0)
+			(at 0.51 0)
 			(size 0.54 0.64)
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(roundrect_rratio 0.25)
@@ -6186,11 +6017,12 @@
 	(footprint "sensorly:R_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "0bcec90f-402b-5052-9bc4-34a4855d9f4a")
-		(at 121.65 70.75 90)
+		(at 121.65 69.25 90)
 		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "resistor")
 		(property "Reference" "R13"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6300,11 +6132,12 @@
 	(footprint "sensorly:C_0805_2012Metric"
 		(layer "F.Cu")
 		(uuid "b944e6bc-e81e-59b8-905d-526d18311e58")
-		(at 124.4 66.0)
+		(at 124.15 75.0)
 		(descr "Capacitor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf, https://docs.google.com/spreadsheets/d/1BsfQQcO9C6DZCsRaXUlFlo91Tg2WpOkGARC1WS5S8t0/edit?usp=sharing)")
 		(tags "capacitor")
 		(property "Reference" "C9"
 			(at 0 -1.68 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6414,11 +6247,12 @@
 	(footprint "sensorly:C_0805_2012Metric"
 		(layer "F.Cu")
 		(uuid "966b3cbd-76bd-55d1-9154-56a0f6d93d84")
-		(at 124.4 75.0)
+		(at 123.9 77.25)
 		(descr "Capacitor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf, https://docs.google.com/spreadsheets/d/1BsfQQcO9C6DZCsRaXUlFlo91Tg2WpOkGARC1WS5S8t0/edit?usp=sharing)")
 		(tags "capacitor")
 		(property "Reference" "C10"
 			(at 0 -1.68 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6528,11 +6362,12 @@
 	(footprint "sensorly:C_0805_2012Metric"
 		(layer "F.Cu")
 		(uuid "037c350a-a117-5ab7-b4b5-541fdbe4c413")
-		(at 124.4 63.75)
+		(at 119.9 90.25)
 		(descr "Capacitor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf, https://docs.google.com/spreadsheets/d/1BsfQQcO9C6DZCsRaXUlFlo91Tg2WpOkGARC1WS5S8t0/edit?usp=sharing)")
 		(tags "capacitor")
 		(property "Reference" "C11"
 			(at 0 -1.68 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6642,11 +6477,12 @@
 	(footprint "sensorly:C_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "3d73dc1a-db75-5110-b063-3e00d74d91b6")
-		(at 126.9 73.75 90)
+		(at 121.65 71.25 90)
 		(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C12"
 			(at 0 -1.16 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6761,6 +6597,7 @@
 		(tags "resistor")
 		(property "Reference" "R16"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6875,6 +6712,7 @@
 		(tags "resistor")
 		(property "Reference" "R17"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -6984,11 +6822,12 @@
 	(footprint "sensorly:C_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "b4c8015f-2925-5d02-bdad-f6e0e7825fda")
-		(at 103.5 78.5)
+		(at 103.5 90.5)
 		(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C14"
 			(at 0 -1.16 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -7103,6 +6942,7 @@
 		(tags "resistor")
 		(property "Reference" "R14"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -7217,6 +7057,7 @@
 		(tags "resistor")
 		(property "Reference" "R15"
 			(at 0 -1.17 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -7326,11 +7167,12 @@
 	(footprint "sensorly:C_0402_1005Metric"
 		(layer "F.Cu")
 		(uuid "d8aa1aeb-5725-59ac-b8b4-a9a12f5409bd")
-		(at 117.1 78.75 90)
+		(at 122.35 90.25 90)
 		(descr "Capacitor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
 		(tags "capacitor")
 		(property "Reference" "C13"
 			(at 0 -1.16 0)
+			(hide yes)
 			(layer "F.SilkS")
 			(effects
 				(font
@@ -7557,34 +7399,10 @@
 		(layer "Edge.Cuts")
 		(uuid "0a4e6064-567f-5713-91c4-9d0e19c4ee11")
 	)
-	(gr_text "ENV SENSOR"
-		(at 100.8 79.0)
+	(gr_text "ENV"
+		(at 100.6 61.7)
 		(layer "F.SilkS")
-		(uuid "d51d957d-906d-52e6-af71-22c7e2a914b4")
-		(effects
-			(font
-				(size 0.9 0.9)
-				(thickness 0.15)
-			)
-			(justify left bottom)
-		)
-	)
-	(gr_text "HW B1"
-		(at 100.8 80.2)
-		(layer "F.SilkS")
-		(uuid "6a73c82b-615f-5e6e-a4d5-fd3c66709762")
-		(effects
-			(font
-				(size 0.9 0.9)
-				(thickness 0.15)
-			)
-			(justify left bottom)
-		)
-	)
-	(gr_text "2026"
-		(at 100.8 81.4)
-		(layer "F.SilkS")
-		(uuid "a90c4ebe-6fbb-54c7-8442-23563c607e60")
+		(uuid "875c1340-8a59-5da4-9926-91a473a1c755")
 		(effects
 			(font
 				(size 0.7 0.7)
@@ -7593,34 +7411,34 @@
 			(justify left bottom)
 		)
 	)
-	(gr_text "+"
-		(at 124.6 80.6)
+	(gr_text "SENSOR"
+		(at 100.6 62.9)
 		(layer "F.SilkS")
-		(uuid "b5a63bf9-31c1-5cf8-be9c-696f04e2b1b9")
+		(uuid "a502cb32-0263-5ea7-9ebd-266398edf7ed")
 		(effects
 			(font
-				(size 1.0 1.0)
-				(thickness 0.167)
+				(size 0.7 0.7)
+				(thickness 0.117)
 			)
 			(justify left bottom)
 		)
 	)
-	(gr_text "-"
-		(at 124.6 82.6)
+	(gr_text "HW B1"
+		(at 100.6 64.1)
 		(layer "F.SilkS")
-		(uuid "f41718eb-dc4d-53c9-bec3-4bd60ad6575d")
+		(uuid "6a73c82b-615f-5e6e-a4d5-fd3c66709762")
 		(effects
 			(font
-				(size 1.0 1.0)
-				(thickness 0.167)
+				(size 0.7 0.7)
+				(thickness 0.117)
 			)
 			(justify left bottom)
 		)
 	)
-	(gr_text "BAT"
-		(at 118.2 79.4)
+	(gr_text "2026"
+		(at 100.6 65.3)
 		(layer "F.SilkS")
-		(uuid "af2df90e-57a2-5b2a-91fa-500688bf9352")
+		(uuid "a90c4ebe-6fbb-54c7-8442-23563c607e60")
 		(effects
 			(font
 				(size 0.6 0.6)
@@ -7629,8 +7447,32 @@
 			(justify left bottom)
 		)
 	)
+	(gr_text "+"
+		(at 122.4 86.1)
+		(layer "F.SilkS")
+		(uuid "b5a63bf9-31c1-5cf8-be9c-696f04e2b1b9")
+		(effects
+			(font
+				(size 0.9 0.9)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "-"
+		(at 122.4 84.1)
+		(layer "F.SilkS")
+		(uuid "f41718eb-dc4d-53c9-bec3-4bd60ad6575d")
+		(effects
+			(font
+				(size 0.9 0.9)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
 	(gr_text "USB-C 5V"
-		(at 101.0 78.0)
+		(at 101.2 91.8)
 		(layer "F.SilkS")
 		(uuid "8bb4c61e-4f02-591a-b4b1-188f298a2b12")
 		(effects
@@ -7641,8 +7483,8 @@
 			(justify left bottom)
 		)
 	)
-	(gr_text "VAR THERMALLY ISOLATED"
-		(at 100.8 93.6)
+	(gr_text "VARIANT B"
+		(at 101.2 92.6)
 		(layer "B.SilkS")
 		(uuid "7c839d53-c20e-5fb9-8009-cc42f1e2b6f8")
 		(effects
@@ -7650,11 +7492,11 @@
 				(size 0.6 0.6)
 				(thickness 0.1)
 			)
-			(justify left bottom (justify mirror))
+			(justify right bottom mirror)
 		)
 	)
 	(gr_text "POGO"
-		(at 105.6 85.6)
+		(at 109.0 78.2)
 		(layer "B.SilkS")
 		(uuid "50c9c7e0-b054-5acf-9064-2dc28973a76b")
 		(effects
@@ -7662,7 +7504,7 @@
 				(size 0.6 0.6)
 				(thickness 0.1)
 			)
-			(justify left bottom (justify mirror))
+			(justify right bottom mirror)
 		)
 	)
 	(segment
@@ -7715,67 +7557,187 @@
 	)
 	(segment
 		(start 114.7 106.4)
-		(end 115.5 106.4)
+		(end 115.3 106.4)
 		(width 0.15)
 		(layer "F.Cu")
 		(net 1)
 		(uuid "335b164f-9e19-532e-b688-5e0f9cbfde1f")
 	)
 	(segment
-		(start 115.5 106.4)
-		(end 115.5 91.0)
+		(start 115.3 106.4)
+		(end 115.3 91.9)
 		(width 0.15)
 		(layer "F.Cu")
 		(net 1)
-		(uuid "25692c25-3c02-5900-b2cb-af919016168d")
+		(uuid "bf5a3032-78ed-5094-a472-56c10b1ac2d3")
 	)
 	(segment
-		(start 115.5 91.0)
-		(end 120.0 91.0)
+		(start 115.3 91.9)
+		(end 123.5 91.9)
 		(width 0.15)
 		(layer "F.Cu")
 		(net 1)
-		(uuid "636790af-c591-5830-a28a-6d8d3cab7a4d")
+		(uuid "46aab4ea-7406-5e26-9561-1bf73e004659")
+	)
+	(segment
+		(start 123.5 91.9)
+		(end 123.5 90.9)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 1)
+		(uuid "0307eced-e7c1-5e53-844e-f52ffb30fc28")
 	)
 	(segment
 		(start 114.7 105.6)
-		(end 114.7 90.6)
+		(end 114.7 89.7)
 		(width 0.15)
 		(layer "F.Cu")
 		(net 8)
 		(uuid "a98c3d39-e368-5a9a-b897-5ca4ff5a1338")
 	)
 	(segment
-		(start 114.7 90.6)
-		(end 122.5 90.6)
+		(start 114.7 89.7)
+		(end 118.1 89.7)
 		(width 0.15)
 		(layer "F.Cu")
 		(net 8)
-		(uuid "4fc31901-c265-5e7b-bb23-e0870bddba15")
+		(uuid "39875ee7-994e-57d0-ba20-afb40eca28e5")
 	)
 	(segment
-		(start 122.5 90.6)
-		(end 122.5 91.0)
+		(start 118.1 89.7)
+		(end 118.1 89.1)
 		(width 0.15)
 		(layer "F.Cu")
 		(net 8)
-		(uuid "e063ddf1-d6ab-5635-8ef0-600b31b0d0d1")
+		(uuid "016e645f-85c6-5e61-96a5-4235ffa47ccf")
+	)
+	(segment
+		(start 118.1 89.1)
+		(end 126.3 89.1)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 8)
+		(uuid "981c61de-2f57-5e36-8040-04a2b49c9b9c")
+	)
+	(segment
+		(start 126.3 89.1)
+		(end 126.3 90.9)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 8)
+		(uuid "cf2921eb-eaf2-5f76-9b40-6c4e8011a1e1")
+	)
+	(segment
+		(start 126.3 90.9)
+		(end 124.9 90.9)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 8)
+		(uuid "da471893-b5f3-55a7-b9a9-c6d302087fed")
 	)
 	(via
-		(at 120.0 91.0)
+		(at 123.5 90.9)
 		(size 0.6)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")
 		(net 1)
-		(uuid "2583352d-30f4-5167-a0d9-ee943f9873a7")
+		(uuid "1844a2a1-f0ef-58cf-a319-bf85c95a5e2c")
 	)
 	(via
-		(at 122.5 91.0)
+		(at 124.9 90.9)
 		(size 0.6)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")
 		(net 8)
-		(uuid "43562bec-51e2-54e2-aee7-aa82e81dd478")
+		(uuid "39717f5e-70b1-59bc-a360-31c532ba9323")
+	)
+	(via
+		(at 110.0 70.0)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "c87b0032-f85c-526a-86b6-0cc0324934de")
+	)
+	(via
+		(at 110.0 72.5)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "0e54f9aa-0411-5cc8-8b19-dce05710b47f")
+	)
+	(via
+		(at 110.0 75.0)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "43aa930f-a3f3-52f1-a49c-4dc898fbfdaa")
+	)
+	(via
+		(at 105.0 82.5)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "ebd997e2-0256-55bd-bb95-7f901394c5be")
+	)
+	(via
+		(at 105.0 85.0)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "283eaf35-be80-582b-8743-9d5baaec0f57")
+	)
+	(via
+		(at 125.0 85.0)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "85cc45ec-c964-5739-ab6a-48486203c5a8")
+	)
+	(via
+		(at 120.0 87.5)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "c3a02b38-8814-5294-8853-21c92bc27a18")
+	)
+	(via
+		(at 122.5 87.5)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "252a9876-8312-5c09-9b77-34ea52ea7176")
+	)
+	(via
+		(at 102.5 92.5)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "950bbc6d-49d5-5e06-8009-4cc87936d8f3")
+	)
+	(via
+		(at 105.0 92.5)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "5fbceffe-d4b6-5d88-ac2a-cc3de1a7e547")
+	)
+	(via
+		(at 125.0 92.5)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 8)
+		(uuid "b9bb4886-201d-515f-bf67-2e1692eeb2b9")
 	)
 	(zone
 		(net 8)
@@ -7784,8 +7746,8 @@
 		(uuid "758dbf52-3e0b-5eb9-8ab9-f8be2c326ad5")
 		(name "GND pour")
 		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0.2)
+		(connect_pads yes
+			(clearance 0)
 		)
 		(min_thickness 0.2)
 		(filled_areas_thickness no)
@@ -7842,7 +7804,7 @@
 			(vias not_allowed)
 			(pads not_allowed)
 			(copperpour not_allowed)
-			(footprints not_allowed)
+			(footprints allowed)
 		)
 		(placement
 			(enabled no)
@@ -7854,7 +7816,7 @@
 		)
 		(polygon
 			(pts
-				(xy 105.4 60.0) (xy 122.6 60.0) (xy 122.6 67.75) (xy 105.4 67.75)
+				(xy 100.0 60.0) (xy 128.0 60.0) (xy 128.0 65.9) (xy 100.0 65.9)
 			)
 		)
 	)

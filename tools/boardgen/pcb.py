@@ -91,25 +91,24 @@ def _emit_footprint(p: Placement, netidx, padnet) -> str:
             seen[old] = _u(f"{p.ref}/{old}")
         return f'(uuid "{seen[old]}")'
 
-    head, _, tail = text.partition("(descr")
+    head, sep, tail = text.partition("(descr")
     tail = re.sub(r'\(uuid "([0-9a-fA-F-]+)"\)', _reuuid, tail)
-    text = head + ("(descr" + tail if _ else "")
+    text = head + sep + tail
 
-    extra = []
-    if part.mpn:
-        extra.append(f'\t(property "MPN" "{part.mpn}"\n\t\t(at 0 0 0)\n'
-                     f'\t\t(layer "F.Fab")\n\t\t(hide yes)\n'
-                     f'\t\t(uuid "{_u(p.ref + "/mpn")}")\n'
-                     "\t\t(effects\n\t\t\t(font\n\t\t\t\t(size 1 1)\n"
-                     "\t\t\t\t(thickness 0.15)\n\t\t\t)\n\t\t)\n\t)")
-    if part.manufacturer:
-        extra.append(f'\t(property "Manufacturer" "{part.manufacturer}"\n\t\t(at 0 0 0)\n'
-                     f'\t\t(layer "F.Fab")\n\t\t(hide yes)\n'
-                     f'\t\t(uuid "{_u(p.ref + "/mfr")}")\n'
-                     "\t\t(effects\n\t\t\t(font\n\t\t\t\t(size 1 1)\n"
-                     "\t\t\t\t(thickness 0.15)\n\t\t\t)\n\t\t)\n\t)")
-    if extra:
-        text = text.replace("\n\t(descr", "\n" + "\n".join(extra) + "\n\t(descr", 1)
+    # Reference designators come off the silkscreen. On a 30 x 34 mm board
+    # carrying forty 0402s there is no legible way to silk-print all of them -
+    # they collide with each other and with pads, which is exactly what KiCad's
+    # silk DRC says. Nothing is lost: every KiCad library footprint already
+    # carries an fp_text "${REFERENCE}" on F.Fab, so the assembly drawing keeps
+    # every reference. The silkscreen then carries only what a human needs while
+    # holding the board: name, revision, battery polarity, USB and pogo labels.
+    for block in G._blocks(text, 'property "Reference"'):
+        if "(hide yes)" in block:
+            break
+        i = block.index(")", block.index("(at "))
+        text = text.replace(block, block[:i + 1] + "\n\t\t(hide yes)"
+                            + block[i + 1:], 1)
+        break
 
     # pads: absolute rotation, and the net they belong to
     pieces, cursor = [], 0
@@ -137,9 +136,12 @@ def _emit_footprint(p: Placement, netidx, padnet) -> str:
     if part.dnp:
         attrs.append("dnp")
     if attrs and "(attr " in text:
-        text = re.sub(r"\(attr ([^)]*)\)",
-                      lambda m: f"(attr {m.group(1)} {' '.join(a for a in attrs if a not in m.group(1))})",
-                      text, count=1)
+        text = re.sub(
+            r"\(attr ([^)]*)\)",
+            lambda m: f"(attr {m.group(1)} "
+                      f"{' '.join(a for a in attrs if a not in m.group(1))})",
+            text, count=1)
+
     return "\t" + text.replace("\n", "\n\t").rstrip() + "\n"
 
 
@@ -159,7 +161,7 @@ def _outline(v: Variant) -> str:
 
 
 def _zone(name, netname, netidx, layers, poly, seed, keepout=None,
-          priority=0) -> str:
+          priority=0, solid_pads=False) -> str:
     pts = " ".join(f"({'xy'} {a} {b})" for a, b in (_xy(x, y) for x, y in poly))
     lay = " ".join(f'"{l}"' for l in layers)
     head = (f"\t(zone\n\t\t(net {netidx.get(netname, 0)})\n"
@@ -170,7 +172,11 @@ def _zone(name, netname, netidx, layers, poly, seed, keepout=None,
             f"\t\t(hatch edge 0.5)\n")
     if priority:
         head += f"\t\t(priority {priority})\n"
-    head += ("\t\t(connect_pads\n\t\t\t(clearance 0.2)\n\t\t)\n"
+    # A ground plane that reaches the module's 20 ground pads through two
+    # thermal spokes each is not a ground plane. Solid connection for GND.
+    conn = "(connect_pads yes\n\t\t\t(clearance 0)\n\t\t)" if solid_pads \
+        else "(connect_pads\n\t\t\t(clearance 0.2)\n\t\t)"
+    head += (f"\t\t{conn}\n"
              "\t\t(min_thickness 0.2)\n\t\t(filled_areas_thickness no)\n")
     if keepout:
         head += ("\t\t(keepout\n"
@@ -198,13 +204,17 @@ KO_HARD = dict(tracks="not_allowed", vias="not_allowed", pads="not_allowed",
                copperpour="not_allowed", footprints="not_allowed")
 KO_NO_POUR = dict(tracks="allowed", vias="not_allowed", pads="allowed",
                   copperpour="not_allowed", footprints="allowed")
+# The module itself must be allowed to sit in its own antenna keep-out.
+KO_RF = dict(tracks="not_allowed", vias="not_allowed", pads="not_allowed",
+             copperpour="not_allowed", footprints="allowed")
 
 
 def _zones(v: Variant, netidx) -> str:
     out = []
     # GND on the outer layers and the L2 reference plane
     out.append(_zone("GND pour", "GND", netidx,
-                     ["F.Cu", "In1.Cu", "B.Cu"], v.outline, f"zone/gnd/{v.key}"))
+                     ["F.Cu", "In1.Cu", "B.Cu"], v.outline, f"zone/gnd/{v.key}",
+                     solid_pads=True))
     # L3 carries the system rail
     out.append(_zone("+3V0 plane", "+3V0", netidx,
                      ["In2.Cu"], v.outline, f"zone/3v0/{v.key}"))
@@ -213,7 +223,7 @@ def _zones(v: Variant, netidx) -> str:
     out.append(_zone("RF keep-out (module antenna)", "", netidx,
                      ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"],
                      _rect(ax0, ay0, ax1, ay1), f"zone/rf/{v.key}",
-                     keepout=KO_HARD))
+                     keepout=KO_RF))
 
     if v.key == "b":
         nx0, ny0, nx1, ny1 = B_NECK_RECT
@@ -244,24 +254,28 @@ def _silk(v: Variant) -> str:
     lines = []
 
     def txt(s, x, y, size=0.8, layer="F.SilkS", mirror=False, seed=""):
-        just = ' (justify mirror)' if mirror else ''
+        just = ' mirror' if mirror else ''
+        anchor = 'right' if mirror else 'left'
         lines.append(
             f'\t(gr_text "{s}"\n\t\t(at {_xy(x, y)[0]} {_xy(x, y)[1]})\n'
             f'\t\t(layer "{layer}")\n\t\t(uuid "{_u("silk/" + v.key + "/" + (seed or s))}")\n'
             f"\t\t(effects\n\t\t\t(font\n\t\t\t\t(size {size} {size})\n"
             f"\t\t\t\t(thickness {round(size / 6, 3)})\n\t\t\t)\n"
-            f"\t\t\t(justify left bottom{just})\n\t\t)\n\t)\n")
+            f"\t\t\t(justify {anchor} bottom{just})\n\t\t)\n\t)\n")
 
-    txt("ENV SENSOR", 0.8, 19.0, 0.9, seed="name")
-    txt(v.revision, 0.8, 20.2, 0.9, seed="rev")
-    txt("2026", 0.8, 21.4, 0.7, seed="year")
-    txt("+", 24.6, 20.6, 1.0, seed="batplus")     # J2 pin 1 polarity
-    txt("-", 24.6, 22.6, 1.0, seed="batminus")
-    txt("BAT", 18.2, 19.4, 0.6, seed="bat")
-    txt("USB-C 5V", 1.0, 18.0, 0.6, seed="usb")
-    txt(f"VAR {v.name.upper()}", 0.8, 33.6, 0.6, layer="B.SilkS",
+    # The antenna keep-out strip has no components in it by construction, so
+    # it is the one place on this board with room for a title block. Silk is not
+    # copper, so putting text there does not violate the keep-out.
+    txt("ENV", 0.6, 1.7, 0.7, seed="name1")
+    txt("SENSOR", 0.6, 2.9, 0.7, seed="name2")
+    txt(v.revision, 0.6, 4.1, 0.7, seed="rev")
+    txt("2026", 0.6, 5.3, 0.6, seed="year")
+    txt("+", 22.4, 26.1, 0.9, seed="batplus")      # J2 pin 1 = VBAT
+    txt("-", 22.4, 24.1, 0.9, seed="batminus")     # J2 pin 2 = GND
+    txt("USB-C 5V", 1.2, 31.8, 0.6, seed="usb")
+    txt(f"VARIANT {v.key.upper()}", 1.2, 32.6, 0.6, layer="B.SilkS",
         mirror=True, seed="variant")
-    txt("POGO", 5.6, 25.6, 0.6, layer="B.SilkS", mirror=True, seed="pogo")
+    txt("POGO", 9.0, 18.2, 0.6, layer="B.SilkS", mirror=True, seed="pogo")
     return "".join(lines)
 
 

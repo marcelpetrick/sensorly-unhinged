@@ -1,0 +1,5 @@
+{
+  "_comment": "Expected DRC state. Errors are always zero. `unconnected` is the number of ratsnest connections still to be routed; it must go down, never up, and every change is a deliberate commit. See tools/drc_gate.py.",
+  "a": { "unconnected": 80, "note": "placement + island nets only; main-board routing outstanding" },
+  "b": { "unconnected": 80, "note": "placement + island nets only; main-board routing outstanding" }
+}
