@@ -1,0 +1,10 @@
+hardware/**/*-backups/
+*.kicad_prl
+*-bak
+*.bak
+fp-info-cache
+__pycache__/
+*.pyc
+.venv/
+_build/
+*.zip
