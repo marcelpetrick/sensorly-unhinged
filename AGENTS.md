@@ -109,6 +109,12 @@ A change is done when:
 - [ ] any newly locked decision moved from the Open table to the Locked table,
 - [ ] a reviewer can see *why* from the commit message alone.
 
+## 6b. Licence
+
+The project is **GPL-3.0-or-later** (`LICENSE`). New files authored here inherit
+it. Anything vendored keeps its own terms and gets a line in
+`hardware/lib/README.md` or the README licence table — never quietly relicensed.
+
 ## 7. For AI agents specifically
 
 - **Do not invent datasheet numbers.** Cite the source (datasheet + section, or

@@ -126,5 +126,16 @@ firmware/        ESP-IDF application (not started)
 
 ## Licence
 
-Hardware design files and documentation: see `hardware/lib/README.md` for the
-provenance and licence of vendored footprints.
+**GPL-3.0-or-later** — see [`LICENSE`](LICENSE). That covers everything authored
+here: the generator, the schematic and both boards, the enclosure model, the
+documents.
+
+Two things in the tree are not ours and keep their own terms:
+
+| | |
+|---|---|
+| `hardware/lib/sensorly.pretty/*` and `hardware/lib/sensorly.kicad_sym` (except the two authored parts) | from the [official KiCad libraries](https://gitlab.com/kicad/libraries), CC-BY-SA 4.0 **with the KiCad library exception** — which explicitly permits unlimited use in your own designs without imposing licence terms on the design itself. See `hardware/lib/README.md`. |
+| Datasheet figures quoted in `docs/` | the manufacturers'. Cited, not reproduced. |
+
+The KiCad library exception is what makes this combination clean: the footprints
+can sit inside a GPL project without the CC-BY-SA terms propagating to the board.
