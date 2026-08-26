@@ -35,7 +35,7 @@ jobs:
               hardware/outputs/netlist.txt docs/img/floorplan-a.svg \
               docs/img/floorplan-b.svg docs/45-thermal-model.md \
               docs/60-manufacturing-cost.md docs/61-cost-reduction.md \
-              docs/80-enclosure.md mechanical \
+              docs/80-enclosure.md mechanical/*.scad \
             || { echo "::error::generated files differ from the committed ones - run 'make gen thermal bom' and commit"; exit 1; }
 
   kicad:
@@ -58,8 +58,15 @@ jobs:
       - name: Manufacturing outputs
         run: make outputs
 
+      - name: Enclosure meshes
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq openscad
+          make mech
+
       - uses: actions/upload-artifact@v4
         with:
           name: fab-package
-          path: hardware/outputs/
+          path: |
+            hardware/outputs/
+            mechanical/*.stl
           if-no-files-found: error

@@ -16,3 +16,8 @@ _build/
 # committed.
 hardware/outputs/rev-*/
 hardware/outputs/schematic/
+
+# Meshes are build products too, for a different reason than the gerbers:
+# OpenSCAD's CGAL triangulation is not stable between runs, so the same .scad
+# yields byte-different STLs. `make mech` rebuilds them; CI uploads them.
+mechanical/*.stl
