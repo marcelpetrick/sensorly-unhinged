@@ -31,7 +31,7 @@ jobs:
               hardware/variant-b hardware/lib hardware/outputs/bom.csv \
               hardware/outputs/netlist.txt docs/img/floorplan-a.svg \
               docs/img/floorplan-b.svg docs/45-thermal-model.md \
-              docs/60-manufacturing-cost.md \
+              docs/60-manufacturing-cost.md docs/61-cost-reduction.md \
             || { echo "::error::generated files differ from the committed ones - run 'make gen thermal bom' and commit"; exit 1; }
 
   kicad:

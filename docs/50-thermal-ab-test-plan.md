@@ -103,6 +103,11 @@ carefully" cannot become the reason B wins.
 
 Worth stating, because each of these has quietly ruined someone's A/B test:
 
+- **boards from different fabs, or different copper weights.** Inner-plane
+  copper weight is the dominant term in Variant A's conduction; 0.5 oz inner
+  layers instead of 1 oz would halve it and shrink the effect being measured.
+  One fab, one stackup, one order — and record the stackup with the data. See
+  `62-fabrication-3-boards.md` §3;
 - units built from different part lots, or hand-soldered instead of assembled;
 - different enclosure prints (different material, layer height, or infill);
 - the reference sitting closer to one group than the other;

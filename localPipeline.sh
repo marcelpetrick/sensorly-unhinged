@@ -149,6 +149,7 @@ reproducibility() {
   local paths=(hardware/schematic hardware/variant-a hardware/variant-b
                hardware/lib hardware/outputs/bom.csv hardware/outputs/netlist.txt
                docs/45-thermal-model.md docs/60-manufacturing-cost.md
+               docs/61-cost-reduction.md
                docs/img/floorplan-a.svg docs/img/floorplan-b.svg)
   if ! git diff --quiet -- "${paths[@]}"; then
     printf 'generated files differ from the committed ones:\n'

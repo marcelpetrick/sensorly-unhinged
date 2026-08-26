@@ -93,6 +93,8 @@ lives in a designer's memory gets widened the first time a route is awkward.
 | [`docs/45-thermal-model.md`](docs/45-thermal-model.md) | generated screening model |
 | [`docs/50-thermal-ab-test-plan.md`](docs/50-thermal-ab-test-plan.md) | the experiment and its decision gate |
 | [`docs/60-manufacturing-cost.md`](docs/60-manufacturing-cost.md) | generated cost estimate, from the real joint count |
+| [`docs/61-cost-reduction.md`](docs/61-cost-reduction.md) | what would make it cheaper, and what each saving costs |
+| [`docs/62-fabrication-3-boards.md`](docs/62-fabrication-3-boards.md) | who makes three boards, and what the antenna needs from them |
 | [`docs/70-what-the-board-can-do.md`](docs/70-what-the-board-can-do.md) | what firmware alone unlocks — three radios, one board |
 | [`docs/vision.md`](docs/vision.md) | the original transcript this was distilled from |
 

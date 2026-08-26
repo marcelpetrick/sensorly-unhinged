@@ -61,6 +61,23 @@ BOM_PRICES = {
 }
 PASSIVE_USD = (0.008, 0.030)     # per 0402/0603/0805 1% part, LCSC basic
 
+# Cost-down candidates: ref -> (new price range, what it is, what it costs you)
+SWAPS = {
+    "sensor": ("U2", (1.20, 2.50), "SHT40-AD1B",
+               "+-0.2 C / +-1.8 %RH instead of +-0.1 / +-1.0, and no PTFE "
+               "membrane. Same footprint, same address, same driver."),
+    "sensor_mid": ("U2", (2.40, 4.20), "SHT40-AD1F",
+                   "keeps the filter membrane, drops only the accuracy bin. "
+                   "Same footprint, same address, same driver."),
+    "mcu": ("U1", (1.40, 2.20), "ESP32-C3-MINI-1-N4",
+            "loses 802.15.4 (Thread/Zigbee/Matter) and Wi-Fi 6 TWT. Same "
+            "module outline and land pattern, but a different pin map - a "
+            "netlist change in design.py, not a board respin."),
+    "charger": ("U4", (0.20, 0.45), "MCP73831",
+                "loses the power path, so the load hangs off the cell while "
+                "charging, and loses the NTC input. Different footprint."),
+}
+
 # Everything else in the finished unit. These are bought in Europe, so they are
 # already in EUR and carry no import VAT line of their own.
 EXTRAS_EUR = {
@@ -107,9 +124,11 @@ def measure() -> Design:
                   a.width * a.height / 100.0, b.width * b.height / 100.0)
 
 
-def bom_cost(d: Design) -> tuple[float, float]:
+def bom_cost(d: Design, swaps: tuple[str, ...] = ()) -> tuple[float, float]:
+    replaced = {SWAPS[k][0]: SWAPS[k][1] for k in swaps}
     lo = hi = 0.0
     for ref, ((l, h), _src) in BOM_PRICES.items():
+        l, h = replaced.get(ref, (l, h))
         lo += l
         hi += h
     lo += d.passives * PASSIVE_USD[0]
@@ -117,13 +136,19 @@ def bom_cost(d: Design) -> tuple[float, float]:
     return lo, hi
 
 
-def assembly_cost(d: Design, qty: int) -> tuple[float, float]:
-    """Per-order assembly cost for `qty` boards of one variant."""
+PANEL_FEE_USD = 8.21             # JLCPCB, panelized design > 1
+
+
+def assembly_cost(d: Design, qty: int, *, extended: int | None = None,
+                  hand_solder: bool = True) -> tuple[float, float]:
+    """Per-order assembly cost for `qty` boards sharing one setup."""
     r = {k: v[0] for k, v in RATES.items()}
-    fixed = r["smt_setup_usd"] + r["stencil_usd"] \
-        + d.extended * r["extended_part_usd"] + r["hand_solder_order_usd"]
-    per_board = d.smt_joints * r["smt_joint_usd"] \
-        + d.tht_joints * r["manual_joint_usd"]
+    ext = d.extended if extended is None else extended
+    fixed = r["smt_setup_usd"] + r["stencil_usd"] + ext * r["extended_part_usd"]
+    per_board = d.smt_joints * r["smt_joint_usd"]
+    if hand_solder:
+        fixed += r["hand_solder_order_usd"]
+        per_board += d.tht_joints * r["manual_joint_usd"]
     lo = fixed + qty * per_board
     # the high case assumes the setup/feeder side lands ~40 % worse
     hi = fixed * 1.4 + qty * per_board * 1.4
@@ -131,18 +156,30 @@ def assembly_cost(d: Design, qty: int) -> tuple[float, float]:
 
 
 def scenario(d: Design, name: str, groups: list[tuple[str, int]],
-             fab_key: str, enclosure: str) -> dict:
-    parts_lo, parts_hi = bom_cost(d)
+             fab_key: str, enclosure: str, *, panelized: bool = False,
+             swaps: tuple[str, ...] = (), extended: int | None = None,
+             hand_solder: bool = True) -> dict:
+    parts_lo, parts_hi = bom_cost(d, swaps)
     total_units = sum(q for _v, q in groups)
 
     fab_lo, fab_hi = RATES[fab_key][0]
     fab = (fab_lo * len(groups), fab_hi * len(groups))
 
-    asm_lo = asm_hi = 0.0
-    for _variant, q in groups:
-        a, b = assembly_cost(d, q)
-        asm_lo += a
-        asm_hi += b
+    if panelized:
+        # A and B carry the identical BOM, so one panel means one setup, one
+        # stencil and one feeder load for both variants.
+        asm_lo, asm_hi = assembly_cost(d, total_units, extended=extended,
+                                       hand_solder=hand_solder)
+        asm_lo += PANEL_FEE_USD
+        asm_hi += PANEL_FEE_USD
+        fab = (fab_lo, fab_hi)          # one panel, one fabrication order
+    else:
+        asm_lo = asm_hi = 0.0
+        for _variant, q in groups:
+            a, b = assembly_cost(d, q, extended=extended,
+                                 hand_solder=hand_solder)
+            asm_lo += a
+            asm_hi += b
 
     comp_lo = parts_lo * total_units
     comp_hi = parts_hi * total_units
@@ -284,10 +321,143 @@ module and stays a personal project.
     return "\n".join(o) + "\n"
 
 
+# --------------------------------------------------------------------------
+# Cost reduction
+# --------------------------------------------------------------------------
+def reduction_report() -> str:
+    d = measure()
+    base = scenario(d, "baseline", [("a", 5), ("b", 5)], "fab_5pcs_usd",
+                    "enclosure_self")
+    steps = [
+        ("Baseline — two separate orders", base,
+         "5 × A and 5 × B ordered as two jobs, as costed in `60-manufacturing-cost.md`."),
+        ("Panelise A and B on one panel",
+         scenario(d, "panel", [("a", 5), ("b", 5)], "fab_5pcs_usd",
+                  "enclosure_self", panelized=True),
+         "A and B carry the **identical BOM**, so one panel means one setup, one "
+         "stencil and one feeder load instead of two. Costs one panel fee "
+         f"(${PANEL_FEE_USD:.2f}) and buys back everything else."),
+        ("+ all-SMD USB-C, fewer extended parts",
+         scenario(d, "smd", [("a", 5), ("b", 5)], "fab_5pcs_usd",
+                  "enclosure_self", panelized=True, hand_solder=False,
+                  extended=4),
+         "A fully-SMD USB-C receptacle removes the 4 through-hole shield lugs, "
+         "and with them the hand-soldering line entirely. Sourcing the "
+         "connector, inductor, button and battery header from the basic library "
+         "halves the per-part feeder fees."),
+        ("+ SHT40-AD1F instead of SHT45-AD1F",
+         scenario(d, "sensor", [("a", 5), ("b", 5)], "fab_5pcs_usd",
+                  "enclosure_self", panelized=True, hand_solder=False,
+                  extended=4, swaps=("sensor_mid",)),
+         "Keeps the PTFE membrane — the part that protects the multi-year "
+         "measurement — and drops only the accuracy bin, ±0.2 °C / ±1.8 %RH "
+         "instead of ±0.1 / ±1.0. Same footprint, same I²C address, same driver."),
+    ]
+
+    o = [f"""# 61 — Cost Reduction (generated)
+
+<!-- Generated by `make cost` from tools/cost.py. Do not edit. -->
+
+`60-manufacturing-cost.md` costs the design as drawn and stays as it is. This
+file asks the separate question: **what would actually make it cheaper, and what
+does each saving cost us?**
+
+Same rate table, same researched sources, same caveat — planning estimates, not
+quotes.
+
+## The ladder
+
+Each row includes the ones above it.
+
+| Change | Assembly (USD) | Per finished unit | Saved |
+|---|---:|---:|---:|"""]
+    base_unit = base["per_unit"]
+    for name, s_, _why in steps:
+        saved = ((base_unit[0] - s_["per_unit"][0]) / base_unit[0] * 100,
+                 (base_unit[1] - s_["per_unit"][1]) / base_unit[1] * 100)
+        sv = "—" if s_ is base else f"{saved[0]:.0f}–{saved[1]:.0f} %"
+        o.append(f"| {name} | ${s_['asm'][0]:,.0f}–{s_['asm'][1]:,.0f} | "
+                 f"{eur(*s_['per_unit'], dp=2)} | {sv} |")
+
+    o.append("\n## Why each one works\n")
+    for name, _s, why in steps[1:]:
+        o.append(f"**{name}.** {why}\n")
+
+    o.append(f"""
+## The single biggest lever is free
+
+Panelising A and B together saves roughly
+${base['asm'][0] - steps[1][1]['asm'][0]:,.0f} on the assembly line and costs
+nothing in the design. It works only because of the decision made at the very
+start — *one electrical platform, two physical implementations*. Two genuinely
+different boards could not share a feeder setup.
+
+There is one condition, and it belongs on the order: **the panel rails and
+break-off tabs must not sit in the antenna keep-out or across Variant B's
+3.5 mm neck.** A tab in the neck puts a stress riser at the weakest point of
+the board. See `62-fabrication-3-boards.md`.
+
+## What we are deliberately not doing
+
+| Change | Saves | Why not |
+|---|---:|---|
+| ESP32-C3-MINI-1 instead of C6 | ~$1.60–1.70/board | Loses 802.15.4 and TWT — that is Thread, Zigbee and Matter gone, which is most of what `70-what-the-board-can-do.md` promises. One euro is the cheapest option this project buys. |
+| MCP73831 instead of BQ24074 | ~$0.30/board | Loses the power path, so the load hangs off the cell while charging, and loses the NTC input. Different footprint too. Bad trade at any price. |
+| SHT40-AD1B (no membrane) | ~$1.20/board more than the -AD1F | Contamination is the dominant multi-year failure mode. Removing the filter to save a euro is exactly the saving that costs you the product in year three. |
+| Drop the LED and button | ~$0.30/board | Provisioning and status would move to USB-only. Not worth it. |
+| 3 + 3 prototypes instead of 5 + 5 | ~4 × board BOM | Statistically, this is the expensive one. See below. |
+
+## About building fewer prototypes
+
+Cutting 5 + 5 to 3 + 3 saves roughly
+${4 * bom_cost(d)[0]:,.0f}–{4 * bom_cost(d)[1]:,.0f} of components — real money,
+but the smallest lever on this page, and it is the only one that costs
+*information* rather than features.
+
+`50-thermal-ab-test-plan.md` already says five samples support a difference with
+a range, not a p-value. With three, the within-group range is estimated from
+three numbers, and a single outlier — one bad solder joint on one sensor, one
+unit sitting nearer a radiator — moves the group mean enough to flip the
+decision gate. The gate's 0.15 °C and 0.3 °C thresholds were chosen assuming
+n = 5.
+
+If budget forces it: **build 3 + 3, but treat the result as a screen rather than
+a decision.** If A and B separate by more than a degree it will be obvious with
+three. If they separate by two tenths, three units cannot tell you that, and the
+honest response is to build more before choosing — which costs more than doing
+it once with five.
+""")
+    return "\n".join(o) + "\n"
+
+
+# --------------------------------------------------------------------------
+# Bare-PCB-only fabrication at 3 boards
+# --------------------------------------------------------------------------
+OSHPARK_USD_PER_IN2 = 10.0       # 4-layer prototype service, includes 3 copies
+
+
+def fab3_table() -> str:
+    a, b = VARIANTS["a"], VARIANTS["b"]
+    o = ["| Board | Size | Area | OSH Park 4-layer (3 copies) | Per board |",
+         "|---|---|---:|---:|---:|"]
+    total = 0.0
+    for v in (a, b):
+        in2 = (v.width / 25.4) * (v.height / 25.4)
+        price = in2 * OSHPARK_USD_PER_IN2
+        total += price
+        o.append(f"| {v.key.upper()} — {v.name} | {v.width:.0f} × {v.height:.0f} mm "
+                 f"| {in2:.2f} in² | ${price:.2f} | ${price / 3:.2f} |")
+    o.append(f"| **Both, 3 + 3 = 6 boards** | | | **${total:.2f}** | "
+             f"**${total / 6:.2f}** |")
+    return "\n".join(o)
+
+
 if __name__ == "__main__":
-    text = report()
     if "--write" in sys.argv:
-        (ROOT / "docs" / "60-manufacturing-cost.md").write_text(text)
+        (ROOT / "docs" / "60-manufacturing-cost.md").write_text(report())
         print("wrote docs/60-manufacturing-cost.md")
+        (ROOT / "docs" / "61-cost-reduction.md").write_text(reduction_report())
+        print("wrote docs/61-cost-reduction.md")
     else:
-        print(text)
+        print(report())
+        print(reduction_report())
