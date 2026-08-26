@@ -10,6 +10,7 @@ Dijkstra on a 0.1 mm grid with a turn penalty, so the routes come out straight.
 from __future__ import annotations
 
 import heapq
+import math
 from dataclasses import dataclass
 
 from . import geometry as G
@@ -20,7 +21,7 @@ from .variants import Variant, antenna_keepout, sensor_keepout
 GRID = 0.1
 ISLAND_WIDTH = 0.15          # EDS S3.1 - the dominant thermal term
 ISLAND_CLEAR = 0.15
-EDGE_CLEAR = 0.40      # 0.3 mm copper-to-edge + half the trace width
+EDGE_CLEAR = 0.50      # 0.3 mm copper-to-edge + half the widest track
 TURN_PENALTY = 12
 
 
@@ -75,8 +76,12 @@ class Grid:
                     break
 
     def block_rect(self, x0, y0, x1, y1):
-        for iy in range(max(0, int(y0 / GRID)), min(self.h, int(y1 / GRID) + 2)):
-            for ix in range(max(0, int(x0 / GRID)), min(self.w, int(x1 / GRID) + 2)):
+        # Round outward by less than a cell. `int(x) + 2` over-blocks by 0.2 mm,
+        # which is enough to seal a 0.5 mm-pitch pad's own escape corridor.
+        for iy in range(max(0, math.floor(y0 / GRID)),
+                        min(self.h, math.ceil(y1 / GRID) + 1)):
+            for ix in range(max(0, math.floor(x0 / GRID)),
+                            min(self.w, math.ceil(x1 / GRID) + 1)):
                 self.blocked[iy * self.w + ix] = 1
 
     def free(self, ix, iy):
@@ -128,22 +133,31 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         return grid2
 
     # Sensor connections, in the order that keeps the lanes tidy in the neck.
+    # The long hauls first, then C6 - the only passive allowed on the island
+    # (EDS S3.1.5) - taps whichever of them it belongs to. C6 is connected
+    # across the island rather than fed by its own via, because a via on the
+    # island is a copper column straight through the thermal isolation.
     plan = [
-        ("SDA", ("U2", "1"), ("R3", "2")),
-        ("SCL", ("U2", "2"), ("R4", "2")),
-        ("+3V0", ("U2", "3"), None),
-        ("GND", ("U2", "4"), None),
+        ("SDA", ("U2", "1"), ("R3", "2"), None),
+        ("SCL", ("U2", "2"), ("R4", "2"), None),
+        ("+3V0", ("U2", "3"), None, None),
+        ("GND", ("U2", "4"), None, None),
+        ("+3V0", ("C6", "1"), None, "+3V0"),
+        ("GND", ("C6", "2"), None, "GND"),
     ]
     tracks: list[Track] = []
     vias: list[Via] = []
     extra_blocked: list[tuple] = []
 
-    for net, src, dst in plan:
+    routed_cells: dict[str, set[tuple[int, int]]] = {}
+    for net, src, dst, tap in plan:
         exclude = {src}
         if dst:
             exclude.add(dst)
         g = block_pads(exclude)
-        for (x0, y0, x1, y1) in extra_blocked:
+        for owner, (x0, y0, x1, y1) in extra_blocked:
+            if tap and owner == tap:
+                continue      # tapping our own net: its clearance is not ours
             g.block_rect(x0, y0, x1, y1)
         if v.key == "a":
             sx0, sx1, sy0, sy1 = sensor_keepout(v)
@@ -152,7 +166,11 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
             quiet = None
 
         sx, sy = pads[src]
-        if dst:
+        goals: set[tuple[int, int]] | None = None
+        if tap:
+            goals = routed_cells[tap]
+            tx = ty = None
+        elif dst:
             tx, ty = pads[dst]
         else:
             # +3V0 and GND leave F.Cu on a via and join their plane. The via
@@ -163,21 +181,35 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
             if quiet:
                 gv.block_rect(quiet[0], quiet[2], quiet[1], quiet[3])
             tx, ty = _free_spot(gv, PLANE_VIA[net], 0.55)
-        path = _dijkstra(g, (sx, sy), (tx, ty))
+        path = _dijkstra(g, (sx, sy), (tx, ty) if goals is None else None,
+                         goals=goals)
         if path is None:
-            raise RuntimeError(f"island route failed for {net}")
+            raise RuntimeError(f"island route failed for {net} from {src}")
         pts = _simplify(path)
         tracks.append(Track(net, ISLAND_WIDTH, "F.Cu", pts))
-        if dst is None:
+        cells = set()
+        for i in range(len(path)):
+            cells.add((int(round(path[i][0] / GRID)),
+                       int(round(path[i][1] / GRID))))
+        for i in range(len(path) - 1):
+            ax, ay = path[i]
+            bx, by = path[i + 1]
+            steps = int(round(max(abs(bx - ax), abs(by - ay)) / GRID))
+            for k in range(steps + 1):
+                cells.add((int(round((ax + (bx - ax) * k / max(steps, 1)) / GRID)),
+                           int(round((ay + (by - ay) * k / max(steps, 1)) / GRID))))
+        routed_cells.setdefault(net, set()).update(cells)
+        if dst is None and tap is None:
             vias.append(Via(net, pts[-1][0], pts[-1][1]))
         for i in range(len(pts) - 1):
             ax, ay = pts[i]
             bx, by = pts[i + 1]
-            extra_blocked.append((min(ax, bx) - 0.3, min(ay, by) - 0.3,
-                                  max(ax, bx) + 0.3, max(ay, by) + 0.3))
-        if dst is None:
+            extra_blocked.append((net, (min(ax, bx) - 0.3, min(ay, by) - 0.3,
+                                        max(ax, bx) + 0.3, max(ay, by) + 0.3)))
+        if dst is None and tap is None:
             vx, vy = pts[-1]
-            extra_blocked.append((vx - 0.55, vy - 0.55, vx + 0.55, vy + 0.55))
+            extra_blocked.append((net, (vx - 0.55, vy - 0.55,
+                                        vx + 0.55, vy + 0.55)))
     return tracks, vias
 
 
@@ -204,11 +236,17 @@ def _free_spot(g: Grid, pref, clear: float):
     raise RuntimeError(f"no free spot near {pref}")
 
 
-def _dijkstra(g: Grid, start, goal):
+def _dijkstra(g: Grid, start, goal, goals: set[tuple[int, int]] | None = None):
+    """Route to `goal`, or to any cell in `goals` (used to tap an existing net)."""
     sx, sy = int(round(start[0] / GRID)), int(round(start[1] / GRID))
-    gx, gy = int(round(goal[0] / GRID)), int(round(goal[1] / GRID))
-    # the two endpoints are always reachable: they are our own pads
-    for (px, py) in ((sx, sy), (gx, gy)):
+    if goals is None:
+        gx, gy = int(round(goal[0] / GRID)), int(round(goal[1] / GRID))
+        targets = {(gx, gy)}
+    else:
+        targets = set(goals)
+        gx = gy = None
+    # our own pads are always reachable
+    for (px, py) in [(sx, sy)] + ([(gx, gy)] if goals is None else []):
         if 0 <= px < g.w and 0 <= py < g.h:
             g.blocked[py * g.w + px] = 0
     best: dict[tuple[int, int, int], float] = {}
@@ -220,14 +258,14 @@ def _dijkstra(g: Grid, start, goal):
         key = (x, y, d)
         if key in best and best[key] < cost:
             continue
-        if (x, y) == (gx, gy):
+        if (x, y) in targets:
             found = key
             break
         for nd, (dx, dy) in enumerate(DIRS):
             nx, ny = x + dx, y + dy
             if not (0 <= nx < g.w and 0 <= ny < g.h):
                 continue
-            if not g.free(nx, ny):
+            if not g.free(nx, ny) and (nx, ny) not in targets:
                 continue
             nc = cost + 1 + (TURN_PENALTY if d != -1 and nd != d else 0)
             nk = (nx, ny, nd)

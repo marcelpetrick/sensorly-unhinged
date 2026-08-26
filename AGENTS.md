@@ -47,6 +47,7 @@ from the repository, it was not made properly.
 |---|---|---|
 | Schematic / PCB | **KiCad 9+** (`kicad-cli`) | canonical source of truth is the `.kicad_sch` / `.kicad_pcb` text |
 | Board geometry | `tools/boardgen/` (Python) | parametric generator: **A and B are emitted from one model** |
+| Routing | `tools/boardgen/autoroute.py` | in-generator, so a rule change re-routes both boards; hand-routing the remainder in KiCad is expected and fine |
 | ERC / DRC / outputs | `kicad-cli` via `make` | never click-and-export by hand |
 | Enclosure | **OpenSCAD** / **FreeCAD** | parametric `.scad`, board STEP imported |
 | Firmware | **ESP-IDF** | not Arduino, for the production firmware |

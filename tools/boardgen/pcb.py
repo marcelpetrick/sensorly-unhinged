@@ -203,6 +203,33 @@ def _rect(x0, y0, x1, y1):
     return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
 
 
+def _free_label(v: Variant, placed, w: float, h: float, prefer):
+    """A spot for a silkscreen label that no courtyard already occupies.
+
+    Silk over a pad is only cosmetic, but chasing it by hand after every
+    placement change is not. Ask the placement where there is room instead."""
+    # Search outward from where the label belongs, not across the whole board -
+    # a "USB-C" label that wanders onto the sensor island is worse than one that
+    # overlaps a courtyard.
+    boxes = [p.box for p in placed]
+    cands = [prefer]
+    for r in range(1, 24):
+        for dy in range(-r, r + 1):
+            for dx in range(-r, r + 1):
+                if max(abs(dx), abs(dy)) != r:
+                    continue
+                cands.append((prefer[0] + dx * 0.5, prefer[1] + dy * 0.5))
+    for (x, y) in cands:
+        box = (x, x + w, y - h, y)
+        # Variant B's outline is not a rectangle, so a bounding-box test is not
+        # enough - the label has to be inside the actual board.
+        if not G.box_inside_polys(box, v.polys, margin=0.5):
+            continue
+        if not any(G.boxes_overlap(box, b, 0.2) for b in boxes):
+            return x, y
+    return prefer
+
+
 KO_HARD = dict(tracks="not_allowed", vias="not_allowed", pads="not_allowed",
                copperpour="not_allowed", footprints="not_allowed")
 KO_NO_POUR = dict(tracks="allowed", vias="not_allowed", pads="allowed",
@@ -253,10 +280,11 @@ def _zones(v: Variant, netidx) -> str:
     return "".join(out)
 
 
-def _silk(v: Variant) -> str:
+def _silk(v: Variant, placed=()) -> str:
     lines = []
 
     def txt(s, x, y, size=0.8, layer="F.SilkS", mirror=False, seed=""):
+        size = size
         just = ' mirror' if mirror else ''
         anchor = 'right' if mirror else 'left'
         lines.append(
@@ -275,7 +303,8 @@ def _silk(v: Variant) -> str:
     txt("2026", 0.6, 5.3, 0.6, seed="year")
     txt("+", 22.4, 26.1, 0.9, seed="batplus")      # J2 pin 1 = VBAT
     txt("-", 22.4, 24.1, 0.9, seed="batminus")     # J2 pin 2 = GND
-    txt("USB-C 5V", 1.2, 31.8, 0.6, seed="usb")
+    txt("USB-C 5V", *_free_label(v, placed, 5.0, 0.6, prefer=(1.2, 31.8)),
+        size=0.6, seed="usb")
     txt(f"VARIANT {v.key.upper()}", 1.2, 32.6, 0.6, layer="B.SilkS",
         mirror=True, seed="variant")
     txt("POGO", 9.0, 18.2, 0.6, layer="B.SilkS", mirror=True, seed="pogo")
@@ -352,7 +381,7 @@ def emit(v: Variant, placed: list[Placement], tracks, vias) -> str:
     for p in placed:
         parts.append(_emit_footprint(p, netidx, padnet))
     parts.append(_outline(v))
-    parts.append(_silk(v))
+    parts.append(_silk(v, placed))
     parts.append(_tracks(tracks, vias, netidx))
     parts.append(_zones(v, netidx))
     parts.append(")\n")

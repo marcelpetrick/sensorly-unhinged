@@ -85,20 +85,30 @@ cannot win. Its value is as the **control** in the experiment.
 
 ## Routing status — stated plainly
 
-Both boards are **placement-complete and rule-complete, not routed**. What is in
-the files: outline, all 41 placements, 4-layer stackup, all 29 nets, GND pour on
-F/In1/B, +3V0 plane on In2, RF and thermal keep-outs, GND stitching, silkscreen,
-and the four sensor-island nets routed at 0.15 mm with their plane vias.
-80 ratsnest connections per board remain.
+Both boards are **partially routed**: 80 ratsnest connections per board have
+become **58**. What the generator routes, and why:
 
-Those four nets are routed here rather than left to the layout session because
-they carry a *rule* — 0.15 mm, no vias, nothing else near them — and the same
-rule is written into each variant's `.kicad_dru`, so KiCad's DRC enforces it
-against whoever routes the rest. `hardware/drc-budget.json` records the 80 and
-may only ever decrease.
+| | |
+|---|---|
+| **Sensor island** — 4 nets | They carry a *rule* (0.15 mm, no vias, nothing else near them) that is also written into each `.kicad_dru`, so DRC enforces it against whoever routes the rest. |
+| **Power fan-out** — every `+3V0` pad | A routed stub to a via into the In2 plane. Tedious, mechanical, and exactly what a generator should do. |
+| **GND** | The F.Cu/B.Cu pours plus a stitching ring; only one connection remains. |
+| **Whatever else it could reach** | Variant A: 38 tracks, 364 mm, 27 vias. Variant B: 35 tracks, 487 mm, 18 vias. |
 
-KiCad DRC on both variants: **0 errors**, 5 and 4 warnings, all three warning
-types reviewed and justified in `tools/drc_gate.py`.
+The rest — 58 connections, mostly escapes from the 0.5 mm-pitch charger and the
+USB-C receptacle's interleaved D+/D− pairs — is a KiCad session.
+`hardware/drc-budget.json` records the 58 and may only ever decrease.
+
+**Why the router stops there.** It has no rip-up and no shoving: once a net is
+placed it stays, so a net routed early can permanently block one routed later.
+That is a deliberate trade. A better autorouter exists — freerouting, via
+Specctra DSN — but its output is a one-off artifact, and this repository's
+central claim is that a rule change regenerates *both* boards identically. Route
+by hand or by freerouting once, and the next time the neck width moves, someone
+has to do it again and hope they make the same decisions twice.
+
+KiCad DRC on both variants: **0 errors, 0 unreviewed warnings, 0 schematic
+parity differences.**
 
 ## Prior expectation, to be falsified
 

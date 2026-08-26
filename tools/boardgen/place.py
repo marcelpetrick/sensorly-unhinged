@@ -16,7 +16,11 @@ from .variants import (ANCHORED, B_NECK_RECT, NEAR, TESTPAD_COLS,
                        TESTPAD_ORIGIN, TESTPAD_PITCH, Variant, antenna_keepout,
                        sensor_keepout)
 
-COURTYARD_GAP = 0.10          # mm between courtyards
+COURTYARD_GAP = 0.10          # mm between courtyards - the hard rule
+# Auto-placed passives keep more than the hard minimum. Packing 0402s against
+# an IC's courtyard satisfies DRC and then seals every escape corridor on a
+# 0.5 mm-pitch part, which the router discovers much later and much louder.
+PLACE_GAP = 0.45
 EDGE_MARGIN = 0.50            # mm from the board outline
 
 
@@ -34,7 +38,7 @@ def _fits(box, v: Variant, taken, forbidden) -> bool:
     if not G.box_inside_polys(box, v.polys, margin=EDGE_MARGIN):
         return False   # passives keep the full margin; anchored parts may not
     for other in taken:
-        if G.boxes_overlap(box, other, COURTYARD_GAP):
+        if G.boxes_overlap(box, other, PLACE_GAP):
             return False
     for zone in forbidden:
         if G.boxes_overlap(box, zone):

@@ -29,13 +29,16 @@ boards exist, including the thresholds under which A wins.
 
 ## Status
 
-Placement- and rule-complete, DRC-clean, **not yet routed** (80 ratsnest
-connections per board). Phase 6 of 14 — see [`docs/00-plan.md`](docs/00-plan.md).
+Placement- and rule-complete, DRC-clean, **partially routed** — 80 ratsnest
+connections per board down to 58; the sensor island, the power fan-out to the
+planes and the ground stitching are done, the fine-pitch escapes are not.
+Phase 6 of 14 — see [`docs/00-plan.md`](docs/00-plan.md).
 
 ```
 KiCad ERC      0 violations
 KiCad DRC      0 errors, 5 / 4 reviewed warnings on A / B
 Sch/PCB parity 0 differences  (both are generated from one model)
+Ratsnest       58 of 80 remaining per board (see hardware/drc-budget.json)
 Outputs        4-layer gerbers, drill, CPL, assembly PDF, STEP, schematic PDF, BOM
 ```
 
