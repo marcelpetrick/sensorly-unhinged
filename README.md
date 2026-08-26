@@ -11,7 +11,7 @@ compactness can be measured instead of guessed.
                  +------------------------+------------------------+
                  |                                                 |
          Variant A - Compact                        Variant B - Thermally isolated
-         30 x 34 mm, one rectangle                  28 x 51 mm, milled sensor island
+         30 × 34 mm, one rectangle                  28 × 51 mm, milled sensor island
          sensor 11.3 mm from the                    on a 3.5 x 8 mm FR-4 neck,
          nearest heat source                        sensor 23.1 mm away, 57x less
                                                     conduction from the electronics
@@ -46,12 +46,19 @@ Outputs        4-layer gerbers, drill, CPL, assembly PDF, STEP, schematic PDF, B
 Everything runs from `make`. If a step cannot, it is not part of the build.
 
 ```bash
+./localPipeline.sh   # everything below, with a PASS/FAIL summary
+```
+
+Or step by step:
+
+```bash
 make check     # generator rule checks   (Python only, no KiCad needed)
 make gen       # regenerate the schematic, both boards, project files, rules, SVGs
 make erc       # KiCad ERC on the shared schematic
 make drc       # KiCad DRC + schematic/PCB parity gate on both variants
 make bom       # BOM + netlist from the shared design model
 make thermal   # regenerate the thermal model from the live geometry
+make cost      # regenerate the manufacturing estimate from the real design
 make outputs   # gerbers, drill, CPL, assembly PDF, STEP
 make render    # KiCad 3D renders
 make all
@@ -85,6 +92,8 @@ lives in a designer's memory gets widened the first time a route is awkward.
 | [`hardware/outputs/schematic/env-sensor.pdf`](hardware/outputs/schematic/env-sensor.pdf) | the schematic, as built |
 | [`docs/45-thermal-model.md`](docs/45-thermal-model.md) | generated screening model |
 | [`docs/50-thermal-ab-test-plan.md`](docs/50-thermal-ab-test-plan.md) | the experiment and its decision gate |
+| [`docs/60-manufacturing-cost.md`](docs/60-manufacturing-cost.md) | generated cost estimate, from the real joint count |
+| [`docs/70-what-the-board-can-do.md`](docs/70-what-the-board-can-do.md) | what firmware alone unlocks — three radios, one board |
 | [`docs/vision.md`](docs/vision.md) | the original transcript this was distilled from |
 
 ## Layout

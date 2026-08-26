@@ -7,7 +7,7 @@ VARIANTS  := a b
 ROOT      := $(CURDIR)
 BUILD     := $(ROOT)/_build
 
-.PHONY: all gen check erc drc outputs render bom thermal clean help
+.PHONY: all gen check erc drc outputs render bom thermal cost clean help
 .DEFAULT_GOAL := help
 
 help:
@@ -19,9 +19,10 @@ help:
 	@echo "make outputs  - gerbers, drill, BOM, CPL, STEP, PDF into hardware/outputs"
 	@echo "make render   - KiCad 3D renders + schematic SVG into docs/img"
 	@echo "make thermal  - regenerate docs/45-thermal-model.md from the geometry"
+	@echo "make cost     - regenerate docs/60-manufacturing-cost.md from the design"
 	@echo "make all      - gen + check + drc + bom + outputs"
 
-all: gen check erc drc bom thermal outputs
+all: gen check erc drc bom thermal cost outputs
 
 gen:
 	$(PY) -m tools.boardgen
@@ -35,6 +36,9 @@ bom:
 thermal:
 	@$(PY) -m tools.mkthermal
 	@echo "wrote docs/45-thermal-model.md"
+
+cost:
+	@$(PY) -m tools.cost --write
 
 # Zones are left unfilled in the committed source so that `make gen` is
 # byte-reproducible; the outputs pipeline fills them into a scratch copy.

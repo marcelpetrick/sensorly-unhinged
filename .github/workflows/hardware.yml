@@ -20,14 +20,18 @@ jobs:
       - name: Generator rule checks
         run: make check
 
+      - name: Documented figures match the model
+        run: python -m tools.check_docs
+
       # AGENTS.md: generated files are committed AND reproducible.
       - name: Regenerate and fail on drift
         run: |
-          make gen thermal bom
+          make gen thermal bom cost
           git diff --exit-code -- hardware/schematic hardware/variant-a \
-              hardware/variant-b hardware/outputs/bom.csv \
+              hardware/variant-b hardware/lib hardware/outputs/bom.csv \
               hardware/outputs/netlist.txt docs/img/floorplan-a.svg \
               docs/img/floorplan-b.svg docs/45-thermal-model.md \
+              docs/60-manufacturing-cost.md \
             || { echo "::error::generated files differ from the committed ones - run 'make gen thermal bom' and commit"; exit 1; }
 
   kicad:
