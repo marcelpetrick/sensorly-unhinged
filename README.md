@@ -4,6 +4,12 @@ A battery-powered indoor temperature and humidity node, developed as **one
 electrical platform in two physical implementations** so that the cost of
 compactness can be measured instead of guessed.
 
+**Author: Marcel Petrick <mail@marcelpetrick.it>**
+
+**License: GPLv3 or later. See `LICENSE`.**
+
+**Note: project is generated with AI.**
+
 ```
                     ESP32-C6-MINI-1 + SHT45-AD1F + BQ24074 + TPS62840
                     1S LiPo · USB-C · deep sleep · BLE provisioning · MQTT/TLS
