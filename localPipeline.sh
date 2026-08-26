@@ -142,14 +142,14 @@ generator_rules() {
 
 reproducibility() {
   local log="$tmp_dir/gen.log"
-  make gen thermal bom cost >"$log" 2>&1 || {
+  make gen thermal bom cost mech >"$log" 2>&1 || {
     STEP_DETAIL="$(last_line "$log")"
     return 1
   }
   local paths=(hardware/schematic hardware/variant-a hardware/variant-b
                hardware/lib hardware/outputs/bom.csv hardware/outputs/netlist.txt
                docs/45-thermal-model.md docs/60-manufacturing-cost.md
-               docs/61-cost-reduction.md
+               docs/61-cost-reduction.md docs/80-enclosure.md mechanical
                docs/img/floorplan-a.svg docs/img/floorplan-b.svg)
   if ! git diff --quiet -- "${paths[@]}"; then
     printf 'generated files differ from the committed ones:\n'
@@ -158,6 +158,17 @@ reproducibility() {
     return 1
   fi
   STEP_DETAIL="schematic, both boards and all generated docs regenerate identically"
+}
+
+enclosure() {
+  local log="$tmp_dir/mech.log"
+  if ! make mech 2>&1 | tee "$log"; then
+    STEP_DETAIL="$(last_line "$log")"
+    return 1
+  fi
+  local warn
+  warn="$(grep -c '⚠️' docs/80-enclosure.md || true)"
+  STEP_DETAIL="model built; $warn open mechanical issue(s) recorded"
 }
 
 doc_consistency() {
@@ -235,6 +246,7 @@ run_step "Syntax" syntax
 run_step "Libraries" libraries
 run_step "Generator Rules" generator_rules
 run_step "Reproducibility" reproducibility
+run_step "Enclosure" enclosure
 run_step "Doc Consistency" doc_consistency
 run_step "BOM" bom_sanity
 

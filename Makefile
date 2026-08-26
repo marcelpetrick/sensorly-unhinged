@@ -7,7 +7,7 @@ VARIANTS  := a b
 ROOT      := $(CURDIR)
 BUILD     := $(ROOT)/_build
 
-.PHONY: all gen check erc drc outputs render bom thermal cost clean help
+.PHONY: all gen check erc drc outputs render bom thermal cost mech clean help
 .DEFAULT_GOAL := help
 
 help:
@@ -20,9 +20,10 @@ help:
 	@echo "make render   - KiCad 3D renders + schematic SVG into docs/img"
 	@echo "make thermal  - regenerate docs/45-thermal-model.md from the geometry"
 	@echo "make cost     - regenerate docs/60-manufacturing-cost.md from the design"
+	@echo "make mech     - enclosure model, checks, OpenSCAD params (+ STL if openscad)"
 	@echo "make all      - gen + check + drc + bom + outputs"
 
-all: gen check erc drc bom thermal cost outputs
+all: gen check erc drc bom thermal cost mech outputs
 
 gen:
 	$(PY) -m tools.boardgen
@@ -39,6 +40,21 @@ thermal:
 
 cost:
 	@$(PY) -m tools.cost --write
+
+mech:
+	@$(PY) -m tools.boardgen.enclosure --write >/dev/null
+	@echo "wrote docs/80-enclosure.md and mechanical/params-*.scad"
+	@if command -v openscad >/dev/null 2>&1; then \
+	  for v in $(VARIANTS); do \
+	    for p in base lid; do \
+	      openscad -D "part=\"$$p\"" -o mechanical/case-$$v-$$p.stl \
+	        mechanical/case-$$v.scad 2>/dev/null && \
+	        echo "wrote mechanical/case-$$v-$$p.stl"; \
+	    done; \
+	  done; \
+	else \
+	  echo "openscad not installed - STL export skipped (sudo pacman -S openscad)"; \
+	fi
 
 # Zones are left unfilled in the committed source so that `make gen` is
 # byte-reproducible; the outputs pipeline fills them into a scratch copy.

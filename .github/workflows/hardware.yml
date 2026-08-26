@@ -26,12 +26,13 @@ jobs:
       # AGENTS.md: generated files are committed AND reproducible.
       - name: Regenerate and fail on drift
         run: |
-          make gen thermal bom cost
+          make gen thermal bom cost mech
           git diff --exit-code -- hardware/schematic hardware/variant-a \
               hardware/variant-b hardware/lib hardware/outputs/bom.csv \
               hardware/outputs/netlist.txt docs/img/floorplan-a.svg \
               docs/img/floorplan-b.svg docs/45-thermal-model.md \
               docs/60-manufacturing-cost.md docs/61-cost-reduction.md \
+              docs/80-enclosure.md mechanical \
             || { echo "::error::generated files differ from the committed ones - run 'make gen thermal bom' and commit"; exit 1; }
 
   kicad:
