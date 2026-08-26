@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Turn a kicad-cli DRC report into a build gate with an explicit policy.
 
 kicad-cli's own --exit-code-violations counts unconnected nets as failures.

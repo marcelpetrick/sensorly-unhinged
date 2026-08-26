@@ -27,6 +27,8 @@ compactness can be measured instead of guessed.
 |---|---|
 | ![Variant A](docs/img/render-a.png) | ![Variant B](docs/img/render-b.png) |
 | **A — Compact** (HW A1) | **B — Thermally isolated** (HW B1) |
+| ![Case A](docs/img/case-a-base.png) | ![Case B](docs/img/case-b-base.png) |
+| 41 × 39 × 20 mm, one chamber | 41 × 56 × 20 mm, two chambers, wall at the neck |
 
 Build 5 of each, put them next to a reference instrument, and let the data pick
 the design. The decision gate is written down in
@@ -61,6 +63,7 @@ Everything runs from `make`. If a step cannot, it is not part of the build.
 Or step by step:
 
 ```bash
+make license   # every authored source carries an SPDX header
 make check     # generator rule checks   (Python only, no KiCad needed)
 make gen       # regenerate the schematic, both boards, project files, rules, SVGs
 make erc       # KiCad ERC on the shared schematic
@@ -106,7 +109,7 @@ lives in a designer's memory gets widened the first time a route is awkward.
 | [`docs/61-cost-reduction.md`](docs/61-cost-reduction.md) | what would make it cheaper, and what each saving costs |
 | [`docs/62-fabrication-3-boards.md`](docs/62-fabrication-3-boards.md) | who makes three boards, and what the antenna needs from them |
 | [`docs/70-what-the-board-can-do.md`](docs/70-what-the-board-can-do.md) | what firmware alone unlocks — three radios, one board |
-| [`docs/80-enclosure.md`](docs/80-enclosure.md) | generated enclosure model, and the two requirements it breaks |
+| [`docs/80-enclosure.md`](docs/80-enclosure.md) | generated enclosure model, and the requirements it breaks |
 | [`docs/vision.md`](docs/vision.md) | the original transcript this was distilled from |
 
 ## Layout
@@ -128,7 +131,10 @@ firmware/        ESP-IDF application (not started)
 
 **GPL-3.0-or-later** — see [`LICENSE`](LICENSE). That covers everything authored
 here: the generator, the schematic and both boards, the enclosure model, the
-documents.
+documents. Every authored source file carries an SPDX header, the generated
+KiCad files carry it in their title block, and `make license` fails the build if
+one is missing — a licence that only exists at the repository root stops
+travelling the moment a file is copied out.
 
 Two things in the tree are not ours and keep their own terms:
 

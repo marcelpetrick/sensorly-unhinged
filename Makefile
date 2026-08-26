@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 # ENV sensor - everything the project builds, buildable from here.
 # AGENTS.md rule: if a step cannot be run from make, it is not part of the build.
 
@@ -7,12 +9,13 @@ VARIANTS  := a b
 ROOT      := $(CURDIR)
 BUILD     := $(ROOT)/_build
 
-.PHONY: all gen check erc drc outputs render bom thermal cost mech clean help
+.PHONY: all gen check erc drc outputs render bom thermal cost mech license clean help
 .DEFAULT_GOAL := help
 
 help:
 	@echo "make gen      - regenerate the schematic, both boards, project files, DRC rules and SVGs"
 	@echo "make check    - generator-side rule checks only (no KiCad needed)"
+	@echo "make license  - verify every authored source carries an SPDX header"
 	@echo "make erc      - KiCad ERC on the shared schematic"
 	@echo "make drc      - KiCad DRC + schematic parity on both variants"
 	@echo "make bom      - BOM + placement CSVs from the shared design model"
@@ -23,13 +26,16 @@ help:
 	@echo "make mech     - enclosure model, checks, OpenSCAD params (+ STL if openscad)"
 	@echo "make all      - gen + check + drc + bom + outputs"
 
-all: gen check erc drc bom thermal cost mech outputs
+all: license gen check erc drc bom thermal cost mech outputs
 
 gen:
 	$(PY) -m tools.boardgen
 
 check:
 	$(PY) -m tools.boardgen --check-only
+
+license:
+	@$(PY) -m tools.check_license
 
 bom:
 	$(PY) -m tools.bom
@@ -52,6 +58,16 @@ mech:
 	        echo "wrote mechanical/case-$$v-$$p.stl"; \
 	    done; \
 	  done; \
+	  $(PY) -m tools.check_stl; \
+	  for v in $(VARIANTS); do \
+	    openscad -D 'part="base"' --camera=20,28,10,55,0,25,190 \
+	      --imgsize=640,640 --colorscheme=Tomorrow \
+	      -o docs/img/case-$$v-base.png mechanical/case-$$v.scad >/dev/null 2>&1; \
+	    openscad -D 'part="lid"' --camera=20,28,2,235,0,25,190 \
+	      --imgsize=640,640 --colorscheme=Tomorrow \
+	      -o docs/img/case-$$v-lid.png mechanical/case-$$v.scad >/dev/null 2>&1; \
+	  done; \
+	  echo "wrote docs/img/case-*.png"; \
 	else \
 	  echo "openscad not installed - STL export skipped (sudo pacman -S openscad)"; \
 	fi

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Manufacturing cost estimate, computed from the actual design.
 
 Joint counts, component counts and board areas come from the board model, so

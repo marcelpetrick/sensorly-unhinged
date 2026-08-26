@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """A two-layer maze router for the rest of the board.
 
 The four sensor-island nets are routed by `route.py` under their own rules.

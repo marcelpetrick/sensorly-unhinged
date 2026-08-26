@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Emit the KiCad project file, the fp-lib-table and the custom DRC rules.
 
 The point of generating these rather than clicking them in: the thermal rule

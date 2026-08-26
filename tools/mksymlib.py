@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Rebuild hardware/lib/sensorly.kicad_sym from the upstream KiCad symbol library.
 
 The result is committed (like the footprints) so a checkout needs no system

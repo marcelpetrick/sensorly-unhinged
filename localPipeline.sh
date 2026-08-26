@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 # Local pipeline for the ENV sensor hardware project.
 #
 # Same shape as the one in GarminActivityMap: each step is a function, sets
@@ -84,6 +86,19 @@ syntax() {
   # The Makefile is the single build entry point; a broken one is a broken repo.
   make -n help >/dev/null 2>&1 || { STEP_DETAIL="Makefile does not parse"; return 1; }
   STEP_DETAIL="shell, Python and Makefile parse"
+}
+
+licensing() {
+  local log="$tmp_dir/license.log"
+  if ! "$PYTHON" -m tools.check_license 2>&1 | tee "$log"; then
+    STEP_DETAIL="$(last_line "$log")"
+    return 1
+  fi
+  if [ ! -s LICENSE ]; then
+    STEP_DETAIL="LICENSE file is missing or empty"
+    return 1
+  fi
+  STEP_DETAIL="$(last_line "$log")"
 }
 
 libraries() {
@@ -243,6 +258,7 @@ fab_outputs() {
 # --------------------------------------------------------------------------
 run_step "Toolchain" toolchain
 run_step "Syntax" syntax
+run_step "Licensing" licensing
 run_step "Libraries" libraries
 run_step "Generator Rules" generator_rules
 run_step "Reproducibility" reproducibility

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Rule checks we can run without KiCad installed.
 
 This is not a substitute for `kicad-cli pcb drc`. It catches the class of

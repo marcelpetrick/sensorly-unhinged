@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Footprint geometry: load the project library, transform courtyards, check overlaps.
 
 This is what lets us produce two boards from one model and still be sure that

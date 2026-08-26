@@ -17,6 +17,9 @@ jobs:
       # The offline checks need nothing but Python: courtyard overlaps, parts
       # off the outline, copper in the antenna keep-out, heat sources too near
       # the sensor, and anything at all on Variant B's thermal neck.
+      - name: Licence headers
+        run: python -m tools.check_license
+
       - name: Generator rule checks
         run: make check
 

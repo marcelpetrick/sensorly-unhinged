@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Parametric enclosure model, derived from the board.
 
 The enclosure is part of the instrument, not packaging: `docs/45-thermal-model.md`
@@ -34,6 +36,7 @@ LID = 2.0
 CLEAR_XY = 0.6            # board edge to inner wall
 BOARD_T = 1.6
 RIB_W = 1.6               # board support ribs
+HOLDDOWN_D = 2.2          # lid hold-down pillar diameter
 VENT_W = 1.2              # vent slot width
 VENT_GAP = 1.4            # material between slots
 FILLET = 1.5
@@ -76,7 +79,8 @@ DEFAULT_H = 1.0           # everything else: 0402/0603, SOT-23, SON
 class Cutout:
     name: str
     wall: str              # "left" | "right" | "top" | "bottom" | "lid"
-    centre: float          # position along that wall, mm from the origin corner
+    cx: float              # board coordinates of the part it serves
+    cy: float
     width: float
     height: float
     z: float               # above the board's top face
@@ -98,14 +102,39 @@ class Case:
     cutouts: list[Cutout] = field(default_factory=list)
     vents: list[tuple[float, float, float, float]] = field(default_factory=list)
     divider_y: float | None = None
+    side_vents: list[tuple[float, float, float]] = field(default_factory=list)
+    holddowns: list[tuple[float, float, float]] = field(default_factory=list)
     neck_slot: tuple[float, float] | None = None
     batt_bay: tuple[float, float, float, float] | None = None
     antenna_free: float = 0.0
     connector: str = "PH"
+    vent_wall: str = "bottom"
 
 
 def _height(ref: str) -> float:
     return HEIGHTS.get(ref, (DEFAULT_H, ""))[0]
+
+
+def _free_spot(v: Variant, boxes, target, d: float, y_max: float | None = None):
+    """Nearest point to `target` with `d` mm of bare board, inside the outline."""
+    ax0, ax1, ay0, ay1 = antenna_keepout(v)
+    for r in range(0, 40):
+        for dy in range(-r, r + 1):
+            for dx in range(-r, r + 1):
+                if max(abs(dx), abs(dy)) != r:
+                    continue
+                x, y = target[0] + dx * 0.5, target[1] + dy * 0.5
+                box = (x - d / 2, x + d / 2, y - d / 2, y + d / 2)
+                if not G.box_inside_polys(box, v.polys, margin=0.5):
+                    continue
+                if ay0 <= y <= ay1:
+                    continue        # nothing dense behind the antenna (M-04)
+                if y_max is not None and y > y_max:
+                    continue        # never on the sensor side of the wall
+                if any(G.boxes_overlap(box, b, 0.25) for b in boxes):
+                    continue
+                return x, y
+    return None
 
 
 def build(v: Variant, connector: str = "PH") -> Case:
@@ -140,14 +169,14 @@ def build(v: Variant, connector: str = "PH") -> Case:
 
     # --- cut-outs, positioned from the parts themselves --------------------
     j1, j2 = placed["J1"], placed["J2"]
-    case.cutouts.append(Cutout(
-        "USB-C", "left", j1.y, 9.2 + TOL, height("J1") + TOL, 0.0, "J1"))
-    case.cutouts.append(Cutout(
-        "battery wire", "right", j2.y, 6.0 + TOL, 4.0, 1.0, "J2"))
-    case.cutouts.append(Cutout(
-        "button", "lid", placed["SW1"].x, 4.0, 4.0, 0.0, "SW1"))
-    case.cutouts.append(Cutout(
-        "status LED", "lid", placed["D1"].x, 2.0, 2.0, 0.0, "D1"))
+    case.cutouts.append(Cutout("USB-C", "left", j1.x, j1.y,
+                               9.2 + TOL, height("J1") + TOL, 0.0, "J1"))
+    case.cutouts.append(Cutout("battery wire", "right", j2.x, j2.y,
+                               6.0 + TOL, 4.0, 1.0, "J2"))
+    sw, d1 = placed["SW1"], placed["D1"]
+    case.cutouts.append(Cutout("button", "lid", sw.x, sw.y, 4.0, 4.0, 0.0, "SW1"))
+    case.cutouts.append(Cutout("status LED", "lid", d1.x, d1.y,
+                               2.0, 2.0, 0.0, "D1"))
 
     # --- vents, over the sensor -------------------------------------------
     if v.key == "b":
@@ -164,6 +193,60 @@ def build(v: Variant, connector: str = "PH") -> Case:
     for i in range(n):
         vy = y0 + i * (VENT_W + VENT_GAP)
         case.vents.append((x0, vy, x1 - x0, VENT_W))
+
+    # --- side vents, so the sensor chamber breathes sideways too -----------
+    # M-03 wants ambient air at the sensor with a small dead volume. Slots in
+    # the lid alone leave the chamber a cup; the wall nearest the sensor gets
+    # slots as well.
+    s_ref = placed["U2"]
+    vent_wall = "bottom" if s_ref.y > v.height / 2 else "top"
+    span = 12.0
+    n_side = int(span // (VENT_W + VENT_GAP))
+    for i in range(n_side):
+        cx = s_ref.x - span / 2 + i * (VENT_W + VENT_GAP) + VENT_W / 2
+        case.side_vents.append((cx, VENT_W, 3.0))
+    case.vent_wall = vent_wall
+
+    # --- lid hold-downs ----------------------------------------------------
+    # The board rests on ribs; without something pressing on it, it rattles.
+    # Short pillars come down from the lid onto bare board - found by searching
+    # for free space, not by assuming a corner is empty.
+    # A pillar on the sensor side of the chamber wall would be a plastic
+    # thermal bridge straight into the island - the one thing Variant B exists
+    # to avoid. Hold-downs live in the electronics chamber only.
+    #
+    # They also walk the board perimeter rather than aiming at the middle: on a
+    # board this dense the interior has no 2.5 mm of bare copper anywhere, but
+    # the edge band usually does.
+    body_h = B_NECK_RECT[1] if v.key == "b" else v.height
+    # On B, body_h *is* the chamber wall, so keep clear of the wall itself too.
+    y_max = (body_h - (HOLDDOWN_D / 2 + WALL + 0.5) if v.key == "b"
+             else body_h - 1.5)
+    boxes = [p.box for p in placed.values()]
+    ax0, ax1, ay0, ay1 = antenna_keepout(v)
+    perimeter = []
+    step = 1.0
+    n = int(body_h / step)
+    for i in range(n):
+        y = 1.6 + i * step
+        perimeter += [(1.6, y), (v.width - 1.6, y)]
+    for i in range(int(v.width / step)):
+        x = 1.6 + i * step
+        perimeter += [(x, body_h - 1.6), (x, ay1 + 1.6)]
+    for sep, dia in ((9.0, HOLDDOWN_D), (6.0, 1.8)):
+        for (px, py) in perimeter:
+            if len(case.holddowns) >= 4:
+                break
+            if any(math.hypot(px - hx, py - hy) < sep
+                   for hx, hy, _ in case.holddowns):
+                continue
+            spot = _free_spot(v, boxes, (px, py), dia, y_max=y_max)
+            if spot and math.hypot(spot[0] - px, spot[1] - py) < 1.0:
+                case.holddowns.append((spot[0], spot[1], dia))
+                boxes.append((spot[0] - dia / 2, spot[0] + dia / 2,
+                              spot[1] - dia / 2, spot[1] + dia / 2))
+        if len(case.holddowns) >= 3:
+            break
 
     # --- battery bay -------------------------------------------------------
     ax0, ax1, ay0, ay1 = antenna_keepout(v)
@@ -206,8 +289,7 @@ def check(v: Variant, c: Case) -> list[str]:
     # cut-outs must line up with the parts they are for
     for co in c.cutouts:
         p = placed[co.ref]
-        pos = p.y if co.wall in ("left", "right") else p.x
-        if abs(pos - co.centre) > 0.01:
+        if abs(p.x - co.cx) > 0.01 or abs(p.y - co.cy) > 0.01:
             out.append(f"{co.name} cut-out is not on {co.ref}")
 
     # battery must not sit under the antenna or under the sensor
@@ -223,6 +305,20 @@ def check(v: Variant, c: Case) -> list[str]:
     if not any(vx <= s.x <= vx + vw and vy - 2 <= s.y <= vy + vh + 6
                for vx, vy, vw, vh in c.vents):
         out.append("no vent slot lies over the sensor")
+    if not c.side_vents:
+        out.append("the sensor chamber has no side vents")
+    if len(c.holddowns) < 2:
+        out.append(f"only {len(c.holddowns)} lid hold-down pillar(s) fit - "
+                   f"the electronics chamber has no bare board left. The board "
+                   f"needs a different retention scheme; see the note below")
+    ax0, ax1, ay0, ay1 = antenna_keepout(v)
+    for hx, hy, d in c.holddowns:
+        if ay0 <= hy <= ay1:
+            out.append("a hold-down pillar sits behind the antenna (M-04)")
+        if c.divider_y is not None and abs(hy - c.divider_y) < (d / 2 + WALL):
+            out.append("a hold-down pillar clashes with the chamber divider")
+        if hy > (c.divider_y or 1e9):
+            out.append("a hold-down pillar is on the sensor side of the wall")
 
     if v.key == "b":
         if c.divider_y is None:
@@ -253,7 +349,10 @@ def fitted_mah(c: Case) -> float:
 # --------------------------------------------------------------------------
 def scad_params(v: Variant, c: Case) -> str:
     placed = {p.ref: p for p in place(v)}
-    lines = [f"// Generated by tools/boardgen/enclosure.py for variant "
+    lines = ["// SPDX-FileCopyrightText: 2026 Marcel Petrick "
+             "<mail@marcelpetrick.it>",
+             "// SPDX-License-Identifier: GPL-3.0-or-later",
+             f"// Generated by tools/boardgen/enclosure.py for variant "
              f"{v.key.upper()} ({v.name}). Do not edit.",
              f"variant = \"{v.key}\";",
              f"board_w = {v.width}; board_h = {v.height}; board_t = {BOARD_T};",
@@ -276,9 +375,16 @@ def scad_params(v: Variant, c: Case) -> str:
     lines.append("// [x, y, w, h] on the board, in board coordinates")
     lines.append("vents = [" + ", ".join(
         f"[{x}, {y}, {w}, {h}]" for x, y, w, h in c.vents) + "];")
-    lines.append("// [wall, centre, width, height, z]")
+    lines.append(f'vent_wall = "{c.vent_wall}";')
+    lines.append("// [centre, width, height] on the sensor-chamber wall")
+    lines.append("side_vents = [" + ", ".join(
+        f"[{x}, {w}, {h}]" for x, w, h in c.side_vents) + "];")
+    lines.append("// [x, y, diameter] hold-down pillars, board coordinates")
+    lines.append("holddowns = [" + ", ".join(
+        f"[{x}, {y}, {d}]" for x, y, d in c.holddowns) + "];")
+    lines.append("// [wall, x, y, width, height, z] - x,y in board coordinates")
     lines.append("cutouts = [" + ", ".join(
-        f'["{co.wall}", {co.centre}, {co.width}, {co.height}, {co.z}]'
+        f'["{co.wall}", {co.cx}, {co.cy}, {co.width}, {co.height}, {co.z}]'
         for co in c.cutouts) + "];")
     lines.append("board_outline = [" + ", ".join(
         f"[{x}, {y}]" for x, y in v.outline) + "];")
@@ -310,7 +416,9 @@ def report() -> str:
          f"{c.batt_bay[2] - c.batt_bay[0]:.0f} × "
          f"{c.batt_bay[3] - c.batt_bay[1]:.0f} × {BATT_Z:.0f} mm"),
         ("Approximate capacity", lambda c: f"{fitted_mah(c):.0f} mAh"),
-        ("Vent slots over the sensor", lambda c: f"{len(c.vents)}"),
+        ("Vent slots over the sensor", lambda c:
+         f"{len(c.vents)} in the lid + {len(c.side_vents)} in the wall"),
+        ("Lid hold-down pillars", lambda c: f"{len(c.holddowns)}"),
         ("Chambers", lambda c: "2, divided at the neck" if c.divider_y else "1"),
         ("Solid material beyond the antenna", lambda c: f"{c.antenna_free:.1f} mm"),
     ]
@@ -336,7 +444,28 @@ def report() -> str:
           "what you pay in. Recorded as a Rev 2 item; Rev 1 keeps the PH because "
           "a connector you can actually plug in at the bench is worth 4 mm while "
           "we are still bringing boards up.", ""]
-    o += ["## The battery does not fit, and that is a finding", "",
+    o += ["## Board retention, and a decision coming back around", "",
+          f"The board rests on four ribs and is meant to be pinned by short "
+          f"pillars from the lid onto bare copper-free board. The generator "
+          f"searches the placement for room rather than assuming a corner is "
+          f"empty, and finds **{len(cases['a'].holddowns)} on Variant A** but "
+          f"only **{len(cases['b'].holddowns)} on Variant B** - B's electronics "
+          f"chamber carries all 41 parts in a narrower body, and there is no "
+          f"bare board left.", "",
+          "The first attempt put two of B's pillars *on the sensor island*: "
+          "plastic bridging the lid straight into the thermally isolated part, "
+          "which would have quietly wrecked the experiment the island exists "
+          "for. That is now a hard check.", "",
+          "The real fix is two M2 nylon screws through the lid into bosses - "
+          "and the board has no holes for them, because `40-floorplans.md` "
+          "decided against mounting holes on the grounds that M-04 forbids "
+          "metal near the antenna and a nylon boss costs 19 mm² of a 1000 mm² "
+          "board. That was a reasonable call in the PCB phase and it is now a "
+          "retention problem in the mechanical phase. Nylon screws are not "
+          "metal; the antenna objection does not actually apply to them. **Rev 2 "
+          "should carry two nylon M2 holes in the electronics chamber**, which "
+          "costs a little copper and solves this cleanly.", "",
+          "## The battery does not fit, and that is a finding", "",
           f"Requirement E-02 asks for 500-1000 mAh. The bay in Variant A holds "
           f"about **{fitted_mah(cases['a']):.0f} mAh** and Variant B about "
           f"**{fitted_mah(cases['b']):.0f} mAh**, because the cell may sit "
@@ -383,6 +512,9 @@ if __name__ == "__main__":
         for k, v in VARIANTS.items():
             (d / f"params-{k}.scad").write_text(scad_params(v, build(v)))
             (d / f"case-{k}.scad").write_text(
+                f"// SPDX-FileCopyrightText: 2026 Marcel Petrick "
+                f"<mail@marcelpetrick.it>\n"
+                f"// SPDX-License-Identifier: GPL-3.0-or-later\n"
                 f"// Generated wrapper for variant {k.upper()}. "
                 f"Edit env-sensor-case.scad or the generator, not this file.\n"
                 f'include <params-{k}.scad>\n'

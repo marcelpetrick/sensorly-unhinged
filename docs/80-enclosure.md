@@ -34,7 +34,8 @@ solids.
 | Tallest part | J2 at 7.50 mm | J2 at 7.50 mm |
 | Largest cell the bay holds | 35 × 21 × 5 mm | 35 × 26 × 5 mm |
 | Approximate capacity | 337 mAh | 403 mAh |
-| Vent slots over the sensor | 1 | 2 |
+| Vent slots over the sensor | 1 in the lid + 4 in the wall | 2 in the lid + 4 in the wall |
+| Lid hold-down pillars | 3 | 1 |
 | Chambers | 1 | 2, divided at the neck |
 | Solid material beyond the antenna | 2.6 mm | 2.6 mm |
 
@@ -48,6 +49,14 @@ solids.
 Requirement M-01 asks for a case 13-18 mm thick. As designed it is **19.7 mm** - the JST PH battery header alone is 7.5 mm, three times the height of the radio module, and it sets the whole cavity. Moving to a 1.0 mm-pitch JST SH brings the case to **15.7 mm**, inside the requirement, at the cost of a fiddlier connector to mate by hand.
 
 That is the honest shape of the trade: *user-replaceable battery* is not free, and on a device this small the connector, not the cell, is what you pay in. Recorded as a Rev 2 item; Rev 1 keeps the PH because a connector you can actually plug in at the bench is worth 4 mm while we are still bringing boards up.
+
+## Board retention, and a decision coming back around
+
+The board rests on four ribs and is meant to be pinned by short pillars from the lid onto bare copper-free board. The generator searches the placement for room rather than assuming a corner is empty, and finds **3 on Variant A** but only **1 on Variant B** - B's electronics chamber carries all 41 parts in a narrower body, and there is no bare board left.
+
+The first attempt put two of B's pillars *on the sensor island*: plastic bridging the lid straight into the thermally isolated part, which would have quietly wrecked the experiment the island exists for. That is now a hard check.
+
+The real fix is two M2 nylon screws through the lid into bosses - and the board has no holes for them, because `40-floorplans.md` decided against mounting holes on the grounds that M-04 forbids metal near the antenna and a nylon boss costs 19 mm² of a 1000 mm² board. That was a reasonable call in the PCB phase and it is now a retention problem in the mechanical phase. Nylon screws are not metal; the antenna objection does not actually apply to them. **Rev 2 should carry two nylon M2 holes in the electronics chamber**, which costs a little copper and solves this cleanly.
 
 ## The battery does not fit, and that is a finding
 
@@ -67,5 +76,6 @@ One unplanned consequence worth noticing: **Variant B's case is 17 mm longer, so
 - ⚠️ battery bay 35 x 21 x 5 mm holds about 337 mAh, below requirement E-02's 500 mAh minimum
 
 **Variant B checks:** 
+- ⚠️ only 1 lid hold-down pillar(s) fit - the electronics chamber has no bare board left. The board needs a different retention scheme; see the note below
 - ⚠️ battery bay 35 x 26 x 5 mm holds about 403 mAh, below requirement E-02's 500 mAh minimum
 

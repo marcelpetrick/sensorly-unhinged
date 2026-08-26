@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+// SPDX-License-Identifier: GPL-3.0-or-later
 // ENV sensor enclosure - common geometry for both variants.
 //
 // Do not edit the numbers here. Every dimension comes from params-<variant>.scad,
@@ -35,32 +37,61 @@ module cavity(height) {
 }
 
 // ---- cut-outs -------------------------------------------------------------
-module wall_cutout(w, centre, cw, ch, z) {
-    // `centre` is in board coordinates along the wall
+module wall_cutout(w, cx, cy, cw, ch, z) {
+    // cx, cy are the board coordinates of the part the opening serves
     zz = bz + board_t + z;
     if (w == "left")
-        translate([-eps, by + centre - cw / 2, zz - ch / 2])
+        translate([-eps, by + cy - cw / 2, zz - ch / 2])
             cube([wall + 2 * eps, cw, ch + tol]);
     else if (w == "right")
-        translate([outer_w - wall - eps, by + centre - cw / 2, zz - ch / 2])
+        translate([outer_w - wall - eps, by + cy - cw / 2, zz - ch / 2])
             cube([wall + 2 * eps, cw, ch + tol]);
     else if (w == "top")
-        translate([bx + centre - cw / 2, -eps, zz - ch / 2])
+        translate([bx + cx - cw / 2, -eps, zz - ch / 2])
             cube([cw, wall + 2 * eps, ch + tol]);
     else if (w == "bottom")
-        translate([bx + centre - cw / 2, outer_h - wall - eps, zz - ch / 2])
+        translate([bx + cx - cw / 2, outer_h - wall - eps, zz - ch / 2])
             cube([cw, wall + 2 * eps, ch + tol]);
 }
 
-module lid_cutout(centre_x, d) {
-    translate([bx + centre_x, by + inner_h / 2, -eps])
-        cylinder(d = d, h = lid_t + 2 * eps);
+// The lid is the plate PLUS the locating lip, so anything cut in it has to go
+// through both. Cutting only `lid_t` deep leaves the lip filling the slots
+// straight back in - which is exactly what the first render showed.
+lid_total = lid_t + 1.2;
+
+module lid_cutout(centre_x, centre_y, d) {
+    translate([bx + centre_x, by + centre_y, -eps])
+        cylinder(d = d, h = lid_total + 2 * eps);
 }
 
 module vent_slots() {
     for (v = vents)
         translate([bx + v[0], by + v[1], -eps])
-            cube([v[2], v[3], lid_t + 2 * eps]);
+            cube([v[2], v[3], lid_total + 2 * eps]);
+}
+
+// Slots in the wall next to the sensor. Lid slots alone leave the sensor
+// chamber a cup; M-03 wants ambient air at the sensor, not a pocket of it.
+module side_vent_slots() {
+    zz = bz + board_t + 1.0;
+    for (s = side_vents) {
+        if (vent_wall == "bottom")
+            translate([bx + s[0] - s[1] / 2, outer_h - wall - eps, zz])
+                cube([s[1], wall + 2 * eps, s[2]]);
+        else
+            translate([bx + s[0] - s[1] / 2, -eps, zz])
+                cube([s[1], wall + 2 * eps, s[2]]);
+    }
+}
+
+// Short pillars from the lid down onto bare board, so the PCB cannot rattle
+// on its ribs. Positions come from the generator, which searched the placement
+// for free space rather than assuming a corner was empty.
+module holddown_pillars() {
+    h = inner_z - (board_z + board_t);
+    for (p = holddowns)
+        translate([bx + p[0], by + p[1], lid_total - eps])
+            cylinder(d = p[2], h = h + eps);
 }
 
 // ---- support --------------------------------------------------------------
@@ -101,24 +132,27 @@ module base() {
             divider();
         }
         for (c = cutouts)
-            if (c[0] != "lid") wall_cutout(c[0], c[1], c[2], c[3], c[4]);
-        // battery bay is simply the space under the board; nothing to cut,
-        // but mark it so the model documents itself in the preview
+            if (c[0] != "lid") wall_cutout(c[0], c[1], c[2], c[3], c[4], c[5]);
+        side_vent_slots();
     }
 }
 
 module lid() {
-    difference() {
-        union() {
-            linear_extrude(lid_t) rrect(outer_w, outer_h, fillet);
-            // lip that locates the lid in the cavity
-            translate([wall + 0.3, wall + 0.3, lid_t])
-                linear_extrude(1.2)
-                    rrect(inner_w - 0.6, inner_h - 0.6, max(0.5, fillet - wall));
+    union() {
+        difference() {
+            union() {
+                linear_extrude(lid_t) rrect(outer_w, outer_h, fillet);
+                // lip that locates the lid in the cavity
+                translate([wall + 0.3, wall + 0.3, lid_t])
+                    linear_extrude(1.2)
+                        rrect(inner_w - 0.6, inner_h - 0.6,
+                              max(0.5, fillet - wall));
+            }
+            vent_slots();
+            for (c = cutouts)
+                if (c[0] == "lid") lid_cutout(c[1], c[2], c[3]);
         }
-        vent_slots();
-        for (c = cutouts)
-            if (c[0] == "lid") lid_cutout(c[1], c[2]);
+        holddown_pillars();
     }
 }
 

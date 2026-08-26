@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Render a variant to SVG - the review drawing, not a manufacturing output.
 
 Shows what a reviewer needs at floorplan stage: outline, the RF and thermal

@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """A small orthogonal maze router, used for the four sensor-island nets only.
 
 The rest of the board is left for interactive routing in KiCad. These four are

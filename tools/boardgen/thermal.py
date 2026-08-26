@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """First-order thermal model of the two floorplans.
 
 Deliberately simple: 1-D conduction through the PCB from the electronics to the

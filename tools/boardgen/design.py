@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Single source of truth for the ENV sensor electrical design.
 
 Everything here is common to Variant A and Variant B: same parts, same values,

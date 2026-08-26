@@ -85,4 +85,5 @@ more than 20 units.
 | R-4 | TWT available on deployment APs? | firmware bring-up |
 | R-5 | Sensor tongue neck width vs mechanical strength | first bare-PCB inspection |
 | R-6 | **Case is 19.7 mm, not 13–18 mm (M-01).** The JST PH battery header is 7.5 mm on its own. A 1.0 mm-pitch JST SH brings it to 15.7 mm. | Rev 2, see `80-enclosure.md` |
+| R-8 | **Board retention.** Only 2 lid hold-down pillars fit on A and 1 on B — no bare board is left. Rev 2 should carry two **nylon** M2 holes; the M-04 objection to fasteners near the antenna is about metal, and nylon is not metal. | Rev 2 |
 | R-7 | **Battery bay holds ~340 mAh (A) / ~400 mAh (B), not 500–1000 mAh (E-02).** The cell may sit neither under the antenna nor under the sensor. E-04 is runtime, not capacity — decide from the measured energy per upload. | prototype power measurement |

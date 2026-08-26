@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Placement: anchored parts by hand, passives packed automatically.
 
 The anchored parts (module, connectors, ICs, inductor, sensor, mounting holes)
