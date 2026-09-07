@@ -16,11 +16,13 @@ from .sch import write as write_sch
 from .autoroute import route_rest
 from .route import route_island, stitch_ground
 from .variants import VARIANTS
+from .validate import validate
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def main(argv: list[str]) -> int:
+    validate()
     check_only = "--check-only" in argv
     failed = False
     if not check_only:

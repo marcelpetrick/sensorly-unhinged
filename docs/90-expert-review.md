@@ -38,3 +38,7 @@ Repository corrections can be verified here. Battery safety, finished routing,
 RF/rail measurements, physical enclosure fit, and firmware behavior cannot be
 closed by a document or a green generator check. The final disposition below
 will record what was actually verified.
+
+Model integrity: `tools/boardgen/validate.py` runs before schematic generation.
+Fault-injection tests reject duplicate references, multiply assigned pins,
+unknown pads and bypassed passives, including the original R5 regression.
