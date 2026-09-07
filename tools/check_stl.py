@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import re
 import sys
+import math
+import struct
 from pathlib import Path
 
 from .boardgen.enclosure import FLOOR, LID, build
@@ -22,9 +24,20 @@ TOL = 0.05
 
 
 def bbox(path: Path):
-    t = path.read_text()
-    v = [tuple(map(float, m.groups())) for m in
-         re.finditer(r"vertex\s+([-\d.e+]+)\s+([-\d.e+]+)\s+([-\d.e+]+)", t)]
+    data = path.read_bytes()
+    count = struct.unpack_from("<I", data, 80)[0] if len(data) >= 84 else 0
+    if count and len(data) == 84 + 50 * count:
+        v = [struct.unpack_from("<3f", data, 84 + 50 * i + 12 + 12 * j)
+             for i in range(count) for j in range(3)]
+    else:
+        try:
+            t = data.decode("ascii")
+        except UnicodeDecodeError:
+            return None
+        v = [tuple(map(float, m.groups())) for m in
+             re.finditer(r"vertex\s+(\S+)\s+(\S+)\s+(\S+)", t)]
+    if any(not math.isfinite(n) for p in v for n in p):
+        return None
     if not v:
         return None
     xs, ys, zs = zip(*v)
@@ -44,8 +57,12 @@ def main() -> int:
             f = ROOT / "mechanical" / f"case-{k}-{part}.stl"
             if not f.exists():
                 print(f"    {f.name} not rendered (openscad not run)")
+                bad += 1
                 continue
-            got = bbox(f)
+            try:
+                got = bbox(f)
+            except (OSError, ValueError, struct.error):
+                got = None
             checked += 1
             if got is None:
                 print(f"    {f.name} is empty")

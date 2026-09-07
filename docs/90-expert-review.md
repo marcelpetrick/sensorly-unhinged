@@ -54,3 +54,5 @@ DRC development waivers are capped per violation type and item UUID set in
 checks and reports for another board fail. Release requires zero warnings.
 KiCad 10 disables five checks by default; the generated project enables them
 explicitly so the report cannot silently omit those checks.
+Mesh verification rejects missing/nonfinite files and reads both ASCII and
+binary STL; all three axes, including pillar height, are checked.
