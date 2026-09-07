@@ -65,7 +65,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: fab-package
+          name: draft-design-review-not-for-fabrication
           path: |
             hardware/outputs/
             mechanical/*.stl

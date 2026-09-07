@@ -17,6 +17,7 @@ BUILD     := $(ROOT)/_build
 
 .PHONY: all gen check erc drc outputs render bom thermal cost mech license clean help test
 .DEFAULT_GOAL := help
+.PHONY: release-check release
 
 help:
 	@echo "make gen      - regenerate the schematic, both boards, project files, DRC rules and SVGs"
@@ -119,10 +120,20 @@ drc: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	done
 	@echo "DRC gate passed for all variants"
 
-outputs: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb) bom
+release-check: erc drc
+	$(PY) -m tools.release_gate
+
+# Qualification runs before any release export. Development exports stay draft.
+release: release-check
+	$(MAKE) outputs
+	@echo "Qualification gate passed; outputs are available for final manufacturing review"
+
+outputs: drc bom
 	@for v in $(VARIANTS); do \
 	  o=hardware/outputs/rev-$$v; \
 	  mkdir -p $$o/gerber $$o/drill $$o/assembly $$o/step; \
+	  printf '%s\n' 'DRAFT DESIGN REVIEW ONLY - NOT FOR FABRICATION' \
+	    'Unfinished routing and qualification are tracked in hardware/release-readiness.json.' > $$o/DRAFT.txt; \
 	  $(KICAD_CLI) pcb export gerbers --no-protel-ext \
 	    --layers "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Mask,B.Mask,F.Paste,B.Paste,F.SilkS,B.SilkS,Edge.Cuts" \
 	    -o $$o/gerber/ $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \

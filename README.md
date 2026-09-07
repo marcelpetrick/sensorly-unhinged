@@ -37,6 +37,13 @@ boards exist, including the thresholds under which A wins.
 
 ## Status
 
+**Engineering prototype; not ready for fabrication or use.** The
+[twenty-finding review](docs/90-expert-review.md) records corrective work and
+unresolved qualification. `make outputs` produces explicitly marked draft
+review files. `make release-check` requires complete routing, clean DRC/parity
+and the evidence listed in `hardware/release-readiness.json`. A development
+pipeline pass does not imply a working sensor or safe battery charging.
+
 Placement- and rule-complete, DRC-clean, **partially routed** — 80 ratsnest
 connections per board down to 58; the sensor island, the power fan-out to the
 planes and the ground stitching are done, the fine-pitch escapes are not.
