@@ -18,6 +18,10 @@ BUILD     := $(ROOT)/_build
 .PHONY: all gen check erc drc outputs render bom thermal cost mech license clean help test
 .DEFAULT_GOAL := help
 .PHONY: release-check release
+.PHONY: power
+
+power:
+	$(PY) -m tools.power_budget
 
 help:
 	@echo "make gen      - regenerate the schematic, both boards, project files, DRC rules and SVGs"
