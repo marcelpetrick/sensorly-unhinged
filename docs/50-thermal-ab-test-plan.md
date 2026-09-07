@@ -1,117 +1,114 @@
 # 50 — A/B Thermal Test Plan
 
-The prototype batch is an experiment, not a first production run. This document
-defines the experiment before the boards exist, so the result cannot be chosen
-after the fact.
+The experiment compares complete enclosures at equal operating conditions.
+Both variants may pass, fail, or remain inconclusive. No simulated isolation
+ratio is treated as evidence.
 
-## Hypothesis
+## Units and controlled factors
 
-> **H1** — In an enclosure, at the same duty cycle, Variant B's reported
-> temperature is closer to true ambient than Variant A's, and the difference is
-> larger than the unit-to-unit spread within each group.
+Build five A and five B in one assembly lot using the same parts, pack model,
+copper stackup, firmware binary and printing settings. The primary experiment
+uses 3.3 V on all ten boards (EDS §4.1). Pair A01/B01 through A05/B05 and record
+serial, component lot, R6, pack serial/capacity, PCB revision and firmware hash.
+The physical pack must fit both cases before this protocol starts.
 
-**H0** — the difference between the A group and the B group is not distinguishable
-from the spread within the groups.
+Run any 3.0 V characterization separately after the primary experiment. Record
+rework and analyze matched units before/after; never pool different rails as
+five interchangeable samples of a geometry.
 
-Rejecting H1 is a legitimate and useful outcome: it would mean A's compactness
-is free, and we ship A.
+## Reference, positioning and uncertainty
 
-## Units
+Use a calibrated temperature/RH reference with certificate, stated uncertainty
+and valid range. The ±0.3 °C system target cannot be verified just by observing
+a mean within ±0.3 °C against an uncertain reference.
 
-5 × A + 5 × B, one assembly lot, one reel of each part. Within each group,
-boards 1–3 built at 3.0 V, boards 4–5 at 3.3 V (R6 = 52.3 kΩ / 267 kΩ, EDS §4.1)
-so the rail question is answered by the same batch.
+Place the ten DUTs on a circle of 150 mm radius around the reference, with equal
+angular spacing and identical orientation. Nearest-neighbor centres are about
+93 mm apart (2 × 150 × sin(18°)); do not also require 100 mm separation and a
+100 mm reference distance. Map temperature/RH gradients at all ten positions
+before testing; record their contribution to uncertainty. A and B alternate.
+Rotate each unit by two positions between five repeated equilibrium/charging
+runs, then repeat with A/B swapping adjacent positions. Record the permutation.
+If room gradients exceed the error budget, use a controlled chamber or local
+references rather than correcting away an unexplained variant effect.
 
-Serials `ENV-A01…A05`, `ENV-B01…B05`. Every unit gets an as-built record.
+Choose and document the reference, timing and spatial uncertainty budget before
+collecting acceptance data. Use conservative total uncertainty U including
+certificate, spatial gradient and timestamp mismatch. Guard-band temperature
+acceptance with max(abs(DUT − reference)) + U ≤ 0.3 °C over the declared
+operating conditions. RH uses the equivalent 3 %RH limit and its own U.
+If uncertainty prevents classification, the result is inconclusive.
 
-## Reference and conditions
+## Acquisition and radio schedule
 
-| Item | Requirement |
-|---|---|
-| Reference instrument | calibrated hygro-thermometer, ≤ ±0.2 °C, certificate on file |
-| Reference placement | centre of the array, same height, same airflow, ≤ 100 mm from any DUT |
-| Environment | indoor room, doors shut, no direct sun, no HVAC vent within 2 m |
-| Array | all 10 units + reference in one plane, 100 mm spacing, same orientation |
-| Settling | 60 min at each new condition before recording |
-| Logging | 1 sample/min per unit via MQTT, plus reference logged at 1 sample/min |
-| Duration | ≥ 12 h per test, spanning at least one night |
+Acquisition timestamps describe when the sensor converted, not when MQTT
+received the batch. For Tests 1 and 4, sample every five minutes and upload
+every fifteen minutes; buffer the samples between uploads. Do not introduce
+one-minute MQTT traffic to observe a sleeping device. Read before radio start.
+The reference logs at least once per minute, with synchronized UTC times.
 
-**Confounder control.** Rotate the physical positions of the units between runs
-(Latin square over 4 runs). Position in the array is a bigger effect than most
-people expect, and without rotation it is indistinguishable from variant.
+For charging and step tests, acquire once per minute into local storage and
+upload every fifteen minutes. This deliberate non-default cadence is identical
+for A and B and is recorded in the run metadata. Establish a matched baseline
+at this cadence before interpreting its charging excursion. Missing samples,
+reset events and retransmitted batches remain visible.
 
 ## Tests
 
-| # | Test | Condition | What it isolates |
-|---|---|---|---|
-| **1** | Deep-sleep equilibrium | normal duty cycle, battery, 12 h | the floor: how good can either variant be |
-| **2** | Heavy Wi-Fi | forced upload every 60 s, 4 h | self-heating from the radio |
-| **3** | **Charging** | USB connected, cell at 20 %, through to termination | the charger's 0.40 W — the dominant predicted error |
-| **4** | Normal duty cycle | 5 min measure / 15 min upload, 24 h | the shipping condition |
-| **5** | Temperature step | move array 18 °C → 26 °C room, log 2 h | response time and lag, incl. the -AD1F membrane |
-| **6** | Humidity step | 40 %RH → 70 %RH chamber or controlled room, 2 h | RH response and any thermal-bias-driven RH error |
+| Test | Condition and acquisition | Duration / analysis window |
+|---|---|---|
+| 1 | Battery, normal 5/15-minute cadence | 60-minute settling, then 12 hours |
+| 2 | Battery, deliberate 1-minute sampling/upload stress | 60-minute settling, then 4 hours |
+| 3 | Qualified enclosed charging, same initial measured state of charge, 1/15-minute cadence | 60-minute battery baseline, then charge through termination and cooldown |
+| 4 | Battery, default 5/15-minute cadence | 60-minute settling, then 24 hours |
+| 5 | Temperature step, nominal 18 → 26 °C, 1/15-minute cadence | Pre-step equilibrium then 2 hours; do not discard the transient |
+| 6 | Humidity step, nominal 40 → 70 %RH, 1/15-minute cadence | Pre-step equilibrium then 2 hours; reference measures actual step |
 
-Tests 1–4 run on both A and B simultaneously. Test 3 is the decisive one.
+Test 3 starts only after EDS-9 battery-temperature/charge qualification.
+Match charger current, source and pack between variants. Log actual current;
+charger power is not a fixed 0.40 W across the run. Continue until the
+temperature returns to the predeclared equilibrium band, recording cooldown.
 
-## Recorded per sample
+## Immutable records and metrics
 
-`serial, variant, rail_v, timestamp, temperature_c, humidity_rh, battery_v,
-charging, rssi_dbm, firmware, reference_temp_c, reference_rh, position_in_array`
+CSV samples carry:
+`run_id, serial, variant, position, acquired_at_utc, sequence, temperature_c,
+humidity_rh, battery_v, rail_v, usb_present, charging, quality, reset_reason,
+firmware_sha256, reference_temp_c, reference_rh`.
 
-Raw logs land in `measurements/thermal/` as CSV, one file per run, never edited.
-Analysis is a script in the same directory, so a number in a report can always be
-traced to a row in a file.
+The run manifest records duty cycle, initial state of charge, reference
+certificate/uncertainty, enclosure/pack/PCB identifiers, timestamps, and the
+position permutation. Raw logs go to `measurements/thermal/`, never edited.
+Retain invalid readings with quality flags; never turn a failed read into zero.
+Deduplicate only by (serial, sequence, boot identity), keeping the raw data.
 
-## Metrics
+Report per-unit mean bias, maximum absolute error, standard deviation and
+coverage. Summarize one result per unit per condition, with five paired A/B
+differences; thousands of serially correlated samples are not thousands of
+independent devices. Report unit spread and uncertainty, not just a group mean.
+Charging excursion uses the matched 1/15-minute baseline. Step response is time
+to 63% of the measured reference step from the pre-step baseline; report
+insufficient settling or sampling resolution instead of inventing a time constant.
 
-For each unit *i* and test *t*:
+## Ordered decision gate
 
-- **bias** `b(i,t)` = mean(DUT − reference) over the settled window
-- **noise** `σ(i,t)` = standard deviation of (DUT − reference)
-- **charging excursion** `Δ(i)` = max(DUT − reference) during Test 3 minus `b(i,1)`
-- **response time** `τ(i)` = time to 63 % of the step in Test 5
+Apply these steps in order; endpoints belong to exactly one branch.
 
-Group statistics: mean and range of `b` within A and within B; the between-group
-difference; and the within-group spread. With n = 5 per group we report the
-difference with its range, not a p-value — five samples do not support a
-significance claim, and pretending otherwise would be worse than saying so.
+1. Invalid runs, insufficient coverage or unresolved uncertainty: repeat or
+   improve the setup. No winner.
+2. If neither variant meets guarded F-01/F-02 limits in normal operation, fix the
+   design and repeat. Passing on average does not excuse a failing unit.
+3. Reject B if any neck shows cracking, warping or intermittent continuity. A
+   may advance only if it independently passes the functional requirements.
+4. If exactly one variant passes, advance that variant subject to all other
+   requirements and mechanical qualification.
+5. If both pass, define D as mean absolute unit bias of A minus that of B in
+   Test 4. Use the uncertainty interval for the paired comparison: if entirely
+   below 0.15 °C, prefer compact A; if entirely above 0.30 °C, prefer B.
+6. If the entire interval lies in [0.15, 0.30] °C, prefer B only when A's
+   uncertainty-guarded charging excursion exceeds 1.0 °C. Otherwise prefer A.
+   An interval crossing either threshold is inconclusive. A proposed charge
+   current change requires repeating the relevant tests on both variants.
 
-## Decision gate
-
-| Result | Decision |
-|---|---|
-| `mean(b_B)` closer to 0 than `mean(b_A)` by **> 0.3 °C**, and the A and B ranges do not overlap | **Adopt B.** Rev 2 is B. |
-| Difference **< 0.15 °C**, or the ranges overlap substantially | **Adopt A.** Compactness is free; ship the smaller board. |
-| Difference between 0.15 and 0.3 °C | **Adopt B only if** Test 3's charging excursion on A exceeds 1.0 °C. Otherwise A, with the charge current reduced to 100 mA. |
-| Either variant fails F-01 (±0.3 °C) in Test 4 | Neither is done. Re-open the enclosure design before choosing. |
-| B's neck cracks, warps or shows continuity failures in any unit | **B is disqualified on mechanics**, regardless of thermal result. Go to A, or to Variant C (flex). |
-
-The gate is written down now specifically so that "B is the one I designed more
-carefully" cannot become the reason B wins.
-
-## Secondary outputs from the same batch
-
-- **3.0 V vs 3.3 V**: compare energy per upload and RSSI across the two build
-  options within each group (closes R-1 / EDS-5).
-- **Battery model**: integrate measured current over Test 4 → mAh/day → runtime
-  against E-04's >3 months.
-- **Charge-current decision**: Test 3 tells us whether 250 mA is acceptable in an
-  enclosure or whether the series build drops to 100 mA (closes EDS-4).
-- **Neck width**: mechanical inspection of all 5 B boards (closes EDS-8).
-
-## What would make this experiment invalid
-
-Worth stating, because each of these has quietly ruined someone's A/B test:
-
-- **boards from different fabs, or different copper weights.** Inner-plane
-  copper weight is the dominant term in Variant A's conduction; 0.5 oz inner
-  layers instead of 1 oz would halve it and shrink the effect being measured.
-  One fab, one stackup, one order — and record the stackup with the data. See
-  `62-fabrication-3-boards.md` §3;
-- units built from different part lots, or hand-soldered instead of assembled;
-- different enclosure prints (different material, layer height, or infill);
-- the reference sitting closer to one group than the other;
-- not rotating positions between runs;
-- firmware differing between groups in any way, including build date;
-- comparing runs taken on different days without a shared reference trace;
-- any unit that has been opened, reflowed or touched at the sensor between runs.
+A product choice is not permission to fabricate or distribute. Release gates
+also require power, firmware, RF, sourcing and mechanical evidence.
