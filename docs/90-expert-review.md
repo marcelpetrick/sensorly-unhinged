@@ -58,3 +58,9 @@ Mesh verification rejects missing/nonfinite files and reads both ASCII and
 binary STL; all three axes, including pillar height, are checked.
 Isolated build tests inject failing KiCad/OpenSCAD executables and verify that
 the first failed export terminates its recipe without a success message.
+
+Verification exposed another model-integrity failure under finding 20: J1's four
+SH pads have different lengths, but the parser kept only the last length. After
+the LED correction this caused a real 0.18 mm clearance on B against a 0.20 mm
+rule. The parser now conservatively retains the largest repeated-pad dimensions;
+the library land pattern itself is unchanged.

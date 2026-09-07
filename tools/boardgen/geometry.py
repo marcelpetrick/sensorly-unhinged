@@ -99,7 +99,12 @@ def load(name: str) -> Footprint:
             continue
         pads.setdefault(name, []).append((float(at.group(1)), float(at.group(2))))
         if sz:
-            size[name] = (float(sz.group(1)), float(sz.group(2)))
+            # Repeated numbers need not have identical shapes (USB shield
+            # lugs are 1x2.1 and 1x1.6 mm). Router obstacles must conservatively
+            # cover every occurrence, not inherit whichever was parsed last.
+            w, h = float(sz.group(1)), float(sz.group(2))
+            old_w, old_h = size.get(name, (0.0, 0.0))
+            size[name] = (max(w, old_w), max(h, old_h))
     bottom = '(layer "B.Cu")' in text.split("(pad", 1)[0]
     return Footprint(short, text, cy, pads, size, bottom)
 
