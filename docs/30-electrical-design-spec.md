@@ -316,6 +316,23 @@ here so the reviewer sees it was a decision, not an oversight.
 D+/D− route to IO13/IO12 as a differential pair, 90 Ω target, kept short and
 away from the antenna and the inductor.
 
+### 7.1 Source-current limitation — open, not automatic USB negotiation
+
+EN2/EN1 select a fixed ILIM mode; the two Rd resistors do not tell firmware how
+much current a source permits. R11's 502 mA is nominal, not a guaranteed 500 mA
+ceiling including tolerance. The circuit has no implemented attach/configuration
+policy for an arbitrary USB host. See [TI SLUS810N, Input Current Limit](https://www.ti.com/lit/gpn/BQ24074).
+
+Until EDS-10 closes, bench power uses a regulated 5 V supply whose documented
+current capability exceeds the measured worst-case input limit; a 1 A-capable
+bench source is the planning fixture assumption. That does not qualify generic
+host-powered charging/debug operation. Test attach, source removal, low-battery
+TX, current limiting and VBUS transients. A release design must select a supported
+source policy and implement appropriate current control/negotiation, with source
+and cable compatibility evidence. Owner: hardware/firmware maintainer; closing
+gate: before unrestricted USB use. Do not close this by changing documentation
+alone.
+
 ---
 
 ## 8. Battery connector (J2)
@@ -368,6 +385,7 @@ side, all within one rectangular region so the fixture is a simple plate.
 | EDS-7 | Antenna: flush with board edge (Rev 1) vs overhanging the outline | RF test in the finished enclosure |
 | EDS-8 | Neck width 3.0 / 3.5 / 5.0 mm for Variant B | first bare-PCB mechanical inspection + Test 1 |
 | EDS-9 | Pack-temperature charge inhibit, selected protected pack and timer tests; owner: hardware maintainer | before enclosed battery charging |
+| EDS-10 | USB source-current policy/control and worst-case input draw; owner: hardware/firmware maintainer | before unrestricted USB use |
 
 ## 11. Review checklist for this spec
 
