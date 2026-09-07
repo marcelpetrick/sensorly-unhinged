@@ -398,6 +398,9 @@ def report() -> str:
          "antenna keep-out and every connector position are read from it, never",
          "retyped. `mechanical/env-sensor-case.scad` turns these numbers into",
          "solids.", "",
+         "The lid uses a perimeter locating ring. Hold-down reach is measured",
+         "from the lid seating face, not from the ring tip; `make mech` checks",
+         "the full XYZ mesh extent to catch PCB interference.", "",
          "## Component heights", "",
          "| Ref | Height | Source |", "|---|---:|---|"]
     for ref, (h, src) in sorted(HEIGHTS.items(), key=lambda kv: -kv[1][0]):

@@ -38,7 +38,7 @@ def main() -> int:
         c = build(v)
         want = {
             "base": (c.outer_w, c.outer_h, FLOOR + c.inner_z),
-            "lid": (c.outer_w, c.outer_h, LID + 1.2),
+            "lid": (c.outer_w, c.outer_h, LID + c.top_clear),
         }
         for part, w in want.items():
             f = ROOT / "mechanical" / f"case-{k}-{part}.stl"
@@ -51,8 +51,8 @@ def main() -> int:
                 print(f"    {f.name} is empty")
                 bad += 1
                 continue
-            # the lid carries hold-down pillars, so only X and Y are exact
-            axes = (0, 1) if part == "lid" else (0, 1, 2)
+            # Pillars end at the PCB top when the lid seating face is closed.
+            axes = (0, 1, 2)
             for i in axes:
                 if abs(got[i] - w[i]) > TOL:
                     print(f"    {f.name} axis {'XYZ'[i]}: model says "

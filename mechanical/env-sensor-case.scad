@@ -90,7 +90,7 @@ module side_vent_slots() {
 module holddown_pillars() {
     h = inner_z - (board_z + board_t);
     for (p = holddowns)
-        translate([bx + p[0], by + p[1], lid_total - eps])
+        translate([bx + p[0], by + p[1], lid_t - eps])
             cylinder(d = p[2], h = h + eps);
 }
 
@@ -145,8 +145,12 @@ module lid() {
                 // lip that locates the lid in the cavity
                 translate([wall + 0.3, wall + 0.3, lid_t])
                     linear_extrude(1.2)
-                        rrect(inner_w - 0.6, inner_h - 0.6,
-                              max(0.5, fillet - wall));
+                        difference() {
+                            rrect(inner_w - 0.6, inner_h - 0.6,
+                                  max(0.5, fillet - wall));
+                            translate([1.2, 1.2])
+                                rrect(inner_w - 3.0, inner_h - 3.0, 0.5);
+                        }
             }
             vent_slots();
             for (c = cutouts)
