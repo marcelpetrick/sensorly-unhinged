@@ -8,7 +8,8 @@ ratio is treated as evidence.
 
 Build five A and five B in one assembly lot using the same parts, pack model,
 copper stackup, firmware binary and printing settings. The primary experiment
-uses 3.3 V on all ten boards (EDS §4.1). Pair A01/B01 through A05/B05 and record
+uses 3.3 V on all ten boards (EDS §4.1). Use F-11 serials ENV-0001…0005 for A,
+ENV-0006…0010 for B, paired by offset five, and record
 serial, component lot, R6, pack serial/capacity, PCB revision and firmware hash.
 The physical pack must fit both cases before this protocol starts.
 

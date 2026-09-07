@@ -283,8 +283,10 @@ Requirement F-10, E-05.
 | C13 | 100 nF 0402 at `VBAT_SENSE` |
 
 Divider ratio 0.5: 4.20 V → 2.10 V, comfortably inside ADC1 range with 12 dB
-attenuation. Source impedance 1.1 MΩ, buffered by C13; firmware averages 16
-samples after a 20 ms settle.
+attenuation. Source impedance 1.1 MΩ with C13 gives RC = 110 ms. After first
+energization use at least 550 ms (5 RC, engineering target), not 20 ms, and
+validate ADC acquisition/calibration against a meter. The continuously powered
+divider is already settled on normal deep-sleep wake. See `71-firmware-contract.md`.
 
 **Deviation from the vision document, deliberately.** The vision specified a
 *switched* divider (MOSFET or high-side switch) to avoid continuous drain. We
