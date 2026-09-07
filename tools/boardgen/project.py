@@ -14,6 +14,7 @@ from pathlib import Path
 
 from .design import NETCLASSES
 from .variants import Variant
+from .route import ISLAND_WIDTH
 
 
 def kicad_pro(v: Variant) -> str:
@@ -148,11 +149,18 @@ def dru(v: Variant) -> str:
     if v.key == "b":
         rules += [
             '(rule "nothing but the sensor nets crosses the neck"',
-            '\t(constraint disallow track via pad zone)',
-            '\t(condition "A.NetClass != \'SensorIsland\' && A.NetClass != \'Power\' '
-            '&& A.insideArea(\'Thermal isolation - no inner copper\')")',
+            '\t(constraint disallow track via pad)',
+            '\t(condition "A.NetName != \'SDA\' && A.NetName != \'SCL\' '
+            '&& A.NetName != \'+3V0\' && A.NetName != \'GND\' '
+            '&& A.intersectsArea(\'Sensor island - traces only, no pour\')")',
             '\t# EDS S3.1.1: exactly four nets reach the sensor. This rule is the',
             '\t# machine-readable form of that sentence.',
+            ')',
+            '',
+            '(rule "all four island tracks stay thin"',
+            f'\t(constraint track_width (min {ISLAND_WIDTH}mm) (max {ISLAND_WIDTH}mm))',
+            '\t(condition "A.Type == \'Track\' && '
+            'A.intersectsArea(\'Sensor island - traces only, no pour\')")',
             ')',
             '',
         ]

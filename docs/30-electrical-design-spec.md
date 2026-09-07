@@ -121,6 +121,12 @@ DFN-4, 1.5 × 1.5 × 0.5 mm, no central pad. I²C address **0x44**.
 5. No LED, regulator, charger, inductor or battery within the island.
 6. Pull-ups sit on the main board so their (small) dissipation stays there.
 
+The B spatial DRC rules name these four nets explicitly, including supply and
+ground, and enforce 0.15 mm on every track entering the island rule area.
+Membership in the broad Power net class does not permit VBAT/VBUS/VSYS there.
+The spatial width rule follows generic width defaults so it takes precedence.
+KiCad expression semantics: [custom rules](https://docs.kicad.org/10.0/en/pcbnew/pcbnew.html#custom_design_rules).
+
 **Why trace width is the primary lever** — first-order conduction through the
 Variant-B neck (3.5 mm wide × 8.0 mm long × 1.6 mm FR-4, four 0.15 mm traces in
 35 µm copper), using k(FR-4) ≈ 0.3 W/m·K and k(Cu) = 385 W/m·K:
