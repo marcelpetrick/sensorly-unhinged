@@ -335,6 +335,8 @@ def check(v: Variant, c: Case) -> list[str]:
             out.append("chamber divider intersects the PCB body or island")
 
     # E-02 asks for 500-1000 mAh. Report what the bay can actually hold.
+    if not planning_cell_fits(c):
+        out.append("the actual 35 x 30 x 5 mm planning cell does not fit the battery bay")
     if fitted_mah(c) < 500:
         out.append(f"battery bay {bx1 - bx0:.0f} x {by1 - by0:.0f} x "
                    f"{BATT_Z:.0f} mm holds about {fitted_mah(c):.0f} mAh, "
@@ -348,8 +350,16 @@ MAH_PER_CM3 = 90.0
 
 
 def fitted_mah(c: Case) -> float:
+    """Volume proxy only: neither an available pack nor a rated capacity."""
     bx0, by0, bx1, by1 = c.batt_bay
     return (bx1 - bx0) * (by1 - by0) * BATT_Z / 1000.0 * MAH_PER_CM3
+
+
+def planning_cell_fits(c: Case) -> bool:
+    x0, y0, x1, y1 = c.batt_bay
+    width, length = x1 - x0, y1 - y0
+    return any(x + 2 * BATT_CLEAR <= width and y + 2 * BATT_CLEAR <= length
+               for x, y in ((BATT_X, BATT_Y), (BATT_Y, BATT_X)))
 
 
 # --------------------------------------------------------------------------
@@ -427,7 +437,8 @@ def report() -> str:
         ("Largest cell the bay holds", lambda c:
          f"{c.batt_bay[2] - c.batt_bay[0]:.0f} × "
          f"{c.batt_bay[3] - c.batt_bay[1]:.0f} × {BATT_Z:.0f} mm"),
-        ("Approximate capacity", lambda c: f"{fitted_mah(c):.0f} mAh"),
+        ("Volume proxy, NOT rated pack capacity", lambda c: f"{fitted_mah(c):.0f} mAh equivalent"),
+        ("Planning cell fits with clearance", lambda c: "yes" if planning_cell_fits(c) else "NO"),
         ("Vent slots over the sensor", lambda c:
          f"{len(c.vents)} in the lid + {len(c.side_vents)} in the wall"),
         ("Lid hold-down pillars", lambda c: f"{len(c.holddowns)}"),
@@ -483,28 +494,15 @@ def report() -> str:
           f"**{fitted_mah(cases['b']):.0f} mAh**, because the cell may sit "
           f"neither under the antenna keep-out nor under the sensor, and what "
           f"is left is a strip.", "",
-          "Three ways out, none of them free:", "",
-          "1. **A thicker cell.** 8 mm instead of 5 mm reaches 500 mAh in the "
-          "same footprint and adds 3 mm to a case that is already over its "
-          "height target.",
-          "2. **A longer case.** Extending the A case by ~11 mm in Y gets the "
-          "planning cell in, at the cost of the 40-45 mm square envelope M-01 "
-          "asks for.",
-          "3. **Accept less capacity and check it against measurement.** "
-          "Requirement E-04 is *runtime*, not capacity; 330 mAh may well carry "
-          "three months at the real duty cycle. Nobody knows yet, because the "
-          "energy per upload is a Rev-1 measurement.", "",
-          "Option 3 is the right one to hold open. Capacity is a proxy; runtime "
-          "is the requirement, and we are four weeks from being able to measure "
-          "it. This is now an entry in the open-items table rather than a "
-          "number chosen today.", "",
-          f"One unplanned consequence worth noticing: **Variant B's case is "
-          f"{cases['b'].outer_h - cases['a'].outer_h:.0f} mm longer, so it "
-          f"holds a {fitted_mah(cases['b']) - fitted_mah(cases['a']):.0f} mAh "
-          f"bigger cell** - about {100 * (fitted_mah(cases['b']) / fitted_mah(cases['a']) - 1):.0f} % "
-          "more energy. The thermally-isolated variant partially pays for its "
-          "own size in battery life. That was not designed in; it fell out of "
-          "the geometry.", ""]
+          "These mAh figures are only a volume-density proxy. No compatible",
+          "protected pack of that capacity has been selected or demonstrated to",
+          "fit. They must not enter a runtime claim or purchasing BOM.", "",
+          "EDS-3 remains open: select one actual protected pack for both variants,",
+          "including connector, lead bend radius, swelling allowance and insulation.",
+          "The current planning cell fails the dimension check. Validate support",
+          "ribs and retention against the actual cell, then print and assemble both",
+          "cases before closing the mechanical release gate. Case dimensions alone",
+          "do not prove battery fit or safe retention.", ""]
     for k, v in VARIANTS.items():
         probs = check(v, cases[k])
         o.append(f"**Variant {k.upper()} checks:** "
