@@ -56,3 +56,5 @@ KiCad 10 disables five checks by default; the generated project enables them
 explicitly so the report cannot silently omit those checks.
 Mesh verification rejects missing/nonfinite files and reads both ASCII and
 binary STL; all three axes, including pillar height, are checked.
+Isolated build tests inject failing KiCad/OpenSCAD executables and verify that
+the first failed export terminates its recipe without a success message.
