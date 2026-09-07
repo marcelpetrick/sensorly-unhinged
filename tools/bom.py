@@ -51,7 +51,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     rows = bom_rows()
     with (out / "bom.csv").open("w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=list(rows[0]))
+        w = csv.DictWriter(fh, fieldnames=list(rows[0]), lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
 

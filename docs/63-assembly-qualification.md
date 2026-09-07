@@ -24,3 +24,4 @@ parts. CPL export excludes DNP, and fixture-only footprints are explicitly
 excluded from placement files. Qty is the number of references on a line;
 assemble it only when Populate is yes. These are KiCad placement coordinates;
 the assembler still must approve orientation and through-hole connector handling.
+The committed BOM uses LF line endings for readable, reproducible Git diffs.
