@@ -52,3 +52,5 @@ generation writes inputs to subsequent checks.
 DRC development waivers are capped per violation type and item UUID set in
 `hardware/drc-budget.json`; missing parity, omitted severity checks, ignored
 checks and reports for another board fail. Release requires zero warnings.
+KiCad 10 disables five checks by default; the generated project enables them
+explicitly so the report cannot silently omit those checks.

@@ -44,6 +44,13 @@ def kicad_pro(v: Variant) -> str:
     doc = {
         "board": {
             "design_settings": {
+                "rule_severities": {
+                    "missing_courtyard": "warning",
+                    "track_not_centered_on_via": "warning",
+                    "tuning_profile_track_geometries": "warning",
+                    "footprint_filters_mismatch": "warning",
+                    "footprint_type_mismatch": "warning",
+                },
                 "defaults": {
                     "board_outline_line_width": 0.1,
                     "copper_line_width": 0.2,
