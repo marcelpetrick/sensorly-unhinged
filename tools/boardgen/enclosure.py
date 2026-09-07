@@ -24,7 +24,7 @@ from pathlib import Path
 from . import geometry as G
 from .design import PART_BY_REF
 from .place import place
-from .variants import (B_ISLAND_RECT, B_NECK_RECT, Variant, VARIANTS,
+from .variants import (B_BODY_H, B_ISLAND_RECT, B_NECK_RECT, Variant, VARIANTS,
                        antenna_keepout, sensor_keepout)
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -183,7 +183,9 @@ def build(v: Variant, connector: str = "PH") -> Case:
         ix0, iy0, ix1, iy1 = B_ISLAND_RECT
         vent_area = (ix0 + 1.5, iy0 + 1.5, ix1 - 1.5, iy1 - 1.5)
         nx0, ny0, nx1, ny1 = B_NECK_RECT
-        case.divider_y = ny0
+        # B_NECK_RECT includes a 0.5 mm electrical-rule overlap onto the body.
+        # The physical wall must start beyond the full-width PCB, not there.
+        case.divider_y = B_BODY_H + TOL + WALL / 2
         case.neck_slot = (nx1 - nx0 + 2 * TOL, BOARD_T + 2 * TOL)
     else:
         sx0, sx1, sy0, sy1 = sensor_keepout(v)
@@ -327,6 +329,10 @@ def check(v: Variant, c: Case) -> list[str]:
             out.append("chamber divider is not at the neck")
         if c.neck_slot and c.neck_slot[0] < (B_NECK_RECT[2] - B_NECK_RECT[0]):
             out.append("neck slot is narrower than the neck")
+        if c.divider_y is not None and (
+                c.divider_y - WALL / 2 < B_BODY_H + TOL - 1e-9 or
+                c.divider_y + WALL / 2 > B_ISLAND_RECT[1] - TOL + 1e-9):
+            out.append("chamber divider intersects the PCB body or island")
 
     # E-02 asks for 500-1000 mAh. Report what the bay can actually hold.
     if fitted_mah(c) < 500:
@@ -401,6 +407,9 @@ def report() -> str:
          "The lid uses a perimeter locating ring. Hold-down reach is measured",
          "from the lid seating face, not from the ring tip; `make mech` checks",
          "the full XYZ mesh extent to catch PCB interference.", "",
+         "Variant B's divider lies wholly inside the physical neck span, with",
+         "printing clearance from the body and island; the electrical rule",
+         "zone boundary is not used as a mechanical wall position.", "",
          "## Component heights", "",
          "| Ref | Height | Source |", "|---|---:|---|"]
     for ref, (h, src) in sorted(HEIGHTS.items(), key=lambda kv: -kv[1][0]):
