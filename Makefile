@@ -9,7 +9,7 @@ VARIANTS  := a b
 ROOT      := $(CURDIR)
 BUILD     := $(ROOT)/_build
 
-.PHONY: all gen check erc drc outputs render bom thermal cost mech license clean help
+.PHONY: all gen check erc drc outputs render bom thermal cost mech license clean help test
 .DEFAULT_GOAL := help
 
 help:
@@ -33,6 +33,9 @@ gen:
 
 check:
 	$(PY) -m tools.boardgen --check-only
+
+test:
+	$(PY) -m unittest discover -s tools/tests -v
 
 license:
 	@$(PY) -m tools.check_license

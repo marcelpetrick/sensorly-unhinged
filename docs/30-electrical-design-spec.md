@@ -87,6 +87,11 @@ Espressif's RED/CE type examination. 13.20 × 16.60 × 2.40 mm, 53 pads
 | D1 | LED 0603, green | status |
 | R2 | 3.3 kΩ 0402 | LED series — ~0.5 mA at 3.0 V; the LED is a diagnostic, not a lamp |
 
+Active-low current path: `+3V0 → R2.1 → R2.2 → D1.2 (A) → D1.1 (K)
+→ U1.25 (LED_N)`. Pin names are verified against the vendored KiCad LED
+symbol and LED_0603 footprint; their geometry and rotation are unchanged.
+`make test` guards this path and charger timer wiring for both variants.
+
 ---
 
 ## 3. U2 — SHT45-AD1F (environmental sensor)

@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
+# SPDX-License-Identifier: GPL-3.0-or-later
+import unittest
+
+from tools.boardgen.design import NETS
+
+
+class ElectricalTests(unittest.TestCase):
+    def test_charger_timers_not_disabled(self):
+        self.assertFalse(any(("U4", "14") in pads for pads in NETS.values()))
+
+    def test_active_low_led_current_path(self):
+        self.assertIn(("R2", "1"), NETS["+3V0"])
+        self.assertEqual(set(NETS["LED_A"]), {("R2", "2"), ("D1", "2")})
+        self.assertEqual(set(NETS["LED_N"]), {("U1", "25"), ("D1", "1")})
+
+
+if __name__ == "__main__":
+    unittest.main()
