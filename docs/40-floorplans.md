@@ -21,8 +21,8 @@ KiCad renders of the same two files: `img/render-a.png`, `img/render-b.png`.
 | Sensor position | bottom edge, board centre | on a 18 × 9 mm island |
 | Neck | — | 3.5 × 8.0 mm FR-4, 4 × 0.15 mm traces |
 | Nearest heat source to the sensor | **11.3 mm** (D1) | **23.1 mm** (J1) |
-| Conduction, electronics → sensor | **70 mW/K** | **1.2 mW/K** |
-| Isolation | — | **57× better** |
+| Idealized slab / neck conductance (not actual A/B coupling) | **70 mW/K** | **1.2 mW/K** |
+| Hypothetical slab / neck ratio | — | **57×**, not a performance claim |
 | Assembly difficulty | identical (single-sided SMT, same stencil apertures) | identical |
 | Panel area / PCB cost | lower | ~28 % more area |
 | Mechanical risk | none | the neck: 3.5 mm of FR-4 carrying an island |
@@ -54,29 +54,20 @@ assembly drawing (`F.Fab`/`B.Fab`, exported to `hardware/outputs/*/assembly/`)
 carries every reference. The silkscreen carries what a human needs while holding
 the board: name, revision, battery polarity, USB and pogo labels.
 
-## Why A cannot be fixed by moving the sensor
+## Thermal interpretation
 
-See `45-thermal-model.md` for the derivation. The short version:
-
-> On a 4-layer board the copper planes conduct **112×** more heat than the FR-4.
-> The board is an isothermal slab. Moving the sensor from 11 mm to 23 mm on the
-> *same* copper changes the conduction path by about a factor of two — against a
-> convection path that is 20–60× weaker. Variant A's sensor reads the printed
-> circuit board, not the room, under every plausible enclosure assumption.
-
-That is the case for B, and it is also the case against spending more effort on
-A's placement. A is not a bad layout; it is a good layout of a geometry that
-cannot win. Its value is as the **control** in the experiment.
+`45-thermal-model.md` compares a hypothetical solid slab with B's thin neck.
+The slab has a **112×** copper/FR-4 conductance ratio, but A's actual sensor
+quiet zone removes pours on every layer. Neither this ratio nor 57× describes
+the actual comparison. The experiment must remain capable of choosing A.
 
 ## Why B is not obviously right either
 
 1. **The neck is 3.5 mm of FR-4 holding an island.** Bare-board handling, depanel
    and assembly all apply force there. First bare-PCB inspection has to check it
    (open item EDS-8: 3.0 / 3.5 / 5.0 mm).
-2. **B's coupling depends on the enclosure**, A's does not. B without a proper
-   two-chamber case and vents at the island is worth much less than the 57×
-   suggests. That moves risk from the PCB, where we control it, to the printed
-   part, where we control it less.
+2. **Both variants depend on their enclosure.** Chamber walls, ribs, vents and
+   battery placement create heat paths omitted by the slab calculation.
 3. **28 % more board area, a longer enclosure, and a shape that is harder to
    panelise.** Real money at 20 units, and more at 200.
 4. The four island traces are the entire electrical path to the sensor and they

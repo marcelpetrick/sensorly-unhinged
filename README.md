@@ -19,8 +19,8 @@ compactness can be measured instead of guessed.
          Variant A - Compact                        Variant B - Thermally isolated
          30 × 34 mm, one rectangle                  28 × 51 mm, milled sensor island
          sensor 11.3 mm from the                    on a 3.5 x 8 mm FR-4 neck,
-         nearest heat source                        sensor 23.1 mm away, 57x less
-                                                    conduction from the electronics
+         nearest heat source                        sensor 23.1 mm away;
+                                                    thermal benefit unmeasured
 ```
 
 | | |
