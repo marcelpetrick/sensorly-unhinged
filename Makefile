@@ -73,6 +73,7 @@ mech:
 	    done; \
 	  done; \
 	  $(PY) -m tools.check_stl; \
+	  $(PY) -m tools.check_case_interference; \
 	else \
 	  echo "openscad not installed - STL export skipped"; \
 	fi
