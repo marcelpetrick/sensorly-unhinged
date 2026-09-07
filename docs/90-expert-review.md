@@ -49,3 +49,6 @@ Mesh export retains OpenSCAD diagnostics; optional PNG previews are explicitly
 Filled-board prerequisites include schematic, symbols, footprints, project rules
 and the Makefile. Aggregate builds are serialized even with `make -j` because
 generation writes inputs to subsequent checks.
+DRC development waivers are capped per violation type and item UUID set in
+`hardware/drc-budget.json`; missing parity, omitted severity checks, ignored
+checks and reports for another board fail. Release requires zero warnings.

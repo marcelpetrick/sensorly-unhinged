@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,15 +45,32 @@ ACCEPTED_WARNINGS = {
 
 
 def main(argv: list[str]) -> int:
+    if len(argv) != 2 or argv[1] not in ("a", "b"):
+        print("usage: python -m tools.drc_gate REPORT.json a|b")
+        return 1
     report_path, variant = Path(argv[0]), argv[1]
-    d = json.loads(report_path.read_text())
+    try:
+        d = json.loads(report_path.read_text())
+        validate_report(d, variant)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"    INVALID DRC REPORT: {exc}")
+        return 1
     budgets = json.loads(BUDGET.read_text()) if BUDGET.exists() else {}
     expected = budgets.get(variant, {}).get("unconnected")
 
-    parity = d.get("schematic_parity") or []
+    parity = d["schematic_parity"]
     errors = [v for v in d["violations"] if v["severity"] == "error"]
     warnings = [v for v in d["violations"] if v["severity"] == "warning"]
-    unexpected = [w for w in warnings if w["type"] not in ACCEPTED_WARNINGS]
+    reviewed = budgets.get(variant, {}).get("warnings", [])
+    allowance = Counter({(r["type"], tuple(sorted(r["items"]))): r["count"]
+                         for r in reviewed})
+    unexpected = []
+    for w in warnings:
+        key = warning_key(w)
+        if w["type"] not in ACCEPTED_WARNINGS or allowance[key] <= 0:
+            unexpected.append(w)
+        else:
+            allowance[key] -= 1
     unconnected = len(d["unconnected_items"])
 
     print(f"  variant {variant}: {len(errors)} errors, {len(warnings)} warnings "
@@ -86,6 +104,30 @@ def main(argv: list[str]) -> int:
               f"Good - record it in hardware/drc-budget.json.")
         bad = True
     return 1 if bad else 0
+
+
+def warning_key(w):
+    return w["type"], tuple(sorted(i["uuid"] for i in w["items"]))
+
+
+def validate_report(d, variant):
+    for key in ("violations", "unconnected_items", "schematic_parity",
+                "included_severities", "ignored_checks"):
+        if not isinstance(d.get(key), list):
+            raise ValueError(f"missing or invalid {key}")
+    if not {"error", "warning"} <= set(d["included_severities"]):
+        raise ValueError("both error and warning checks are required")
+    if d["ignored_checks"]:
+        raise ValueError("ignored checks are not allowed")
+    if Path(d.get("source", "")).name != f"env-sensor-{variant}.kicad_pcb":
+        raise ValueError("report is for the wrong board")
+    for violation in d["violations"]:
+        if violation.get("severity") not in ("error", "warning"):
+            raise ValueError("unrecognized severity")
+        if not violation.get("type") or not isinstance(violation.get("items"), list):
+            raise ValueError("invalid violation")
+        if not violation["items"] or any(not i.get("uuid") for i in violation["items"]):
+            raise ValueError("violation has no item identity")
 
 
 if __name__ == "__main__":
