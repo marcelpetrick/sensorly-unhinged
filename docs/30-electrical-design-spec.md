@@ -149,7 +149,7 @@ SON-8 (DLC), 2 × 2 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq**
 | 1 | GND | `GND` |
 | 2 | VIN | `VSYS` |
 | 3 | MODE | `GND` — low = Power-Save Mode, automatic PFM/PWM. Must be terminated. |
-| 4 | EN | `VSYS` via R5 — always enabled; the MCU controls its own sleep |
+| 4 | EN | `EN_REG`, connected to `VSYS` **only through R5**; removing R5 isolates EN for fixture control (never leave the enabled pin floating) |
 | 5 | VSET | via R6 to `GND` |
 | 6 | STOP | `GND` — normal operation (STOP costs 70 µA, never used here) |
 | 7 | SW | `L1` |

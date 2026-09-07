@@ -6,6 +6,11 @@ from tools.boardgen.design import NETS
 
 
 class ElectricalTests(unittest.TestCase):
+    def test_enable_link_can_be_removed(self):
+        self.assertIn(("R5", "1"), NETS["VSYS"])
+        self.assertEqual(set(NETS["EN_REG"]), {("U3", "4"), ("R5", "2")})
+        self.assertNotIn(("U3", "4"), NETS["VSYS"])
+
     def test_charger_timers_not_disabled(self):
         self.assertFalse(any(("U4", "14") in pads for pads in NETS.values()))
 

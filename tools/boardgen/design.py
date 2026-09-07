@@ -194,7 +194,6 @@ NETS = {
 # fold the helper nets into their real ones
 NETS["+3V0"] += NETS.pop("L_OUT")
 NETS["GND"] += NETS.pop("VSET_GND")
-NETS["VSYS"] += NETS.pop("EN_REG")
 
 # --------------------------------------------------------------------------
 # Net classes / design rules  (AGENTS.md: rules live in the model, not in a GUI)
