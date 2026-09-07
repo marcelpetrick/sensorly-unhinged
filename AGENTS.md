@@ -45,7 +45,7 @@ from the repository, it was not made properly.
 
 | Purpose | Tool | Notes |
 |---|---|---|
-| Schematic / PCB | **KiCad 9+** (`kicad-cli`) | canonical source of truth is the `.kicad_sch` / `.kicad_pcb` text |
+| Schematic / PCB | **KiCad 10** (`kicad-cli`) | canonical source of truth is the `.kicad_sch` / `.kicad_pcb` text |
 | Board geometry | `tools/boardgen/` (Python) | parametric generator: **A and B are emitted from one model** |
 | Routing | `tools/boardgen/autoroute.py` | in-generator, so a rule change re-routes both boards; hand-routing the remainder in KiCad is expected and fine |
 | ERC / DRC / outputs | `kicad-cli` via `make` | never click-and-export by hand |
@@ -57,8 +57,11 @@ from the repository, it was not made properly.
 **Rule:** if a step cannot be run from `make`, it is not part of the build.
 `./localPipeline.sh` runs every gate in order and prints a PASS/FAIL summary;
 run it before you push.
-Generated files (`hardware/outputs/**`, `docs/img/*.svg`) are committed *and*
-reproducible — CI regenerates them and fails on drift.
+Deterministic generated sources, BOM/netlist and model SVGs are committed and
+checked for drift. Timestamp-bearing fab outputs and nondeterministically
+triangulated STL meshes are build artifacts (see `.gitignore`); CI publishes
+them as draft review artifacts, not release packages. Use `make release-check`
+before claiming manufacturing readiness.
 
 ---
 

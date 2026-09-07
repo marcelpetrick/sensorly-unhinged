@@ -17,6 +17,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 PYTHON="${PYTHON:-python3}"
 KICAD_CLI="${KICAD_CLI:-kicad-cli}"
 SKIP_OUTPUTS="${SKIP_OUTPUTS:-0}"
+export PY="$PYTHON" KICAD_CLI
 
 tmp_dir="$(mktemp -d)" || exit 1
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -68,9 +69,11 @@ toolchain() {
   local py kc
   py="$("$PYTHON" --version 2>&1)" || return 1
   if have_kicad; then
-    kc="kicad-cli $("$KICAD_CLI" version 2>/dev/null)"
+    kc="$("$KICAD_CLI" version)" || return 1
+    [[ "$kc" == 10.* ]] || { STEP_DETAIL="KiCad 10 required; found $kc"; return 1; }
   else
-    kc="kicad-cli MISSING (ERC/DRC/outputs will be skipped)"
+    STEP_DETAIL="kicad-cli MISSING; this cannot be a complete hardware gate"
+    return 1
   fi
   command -v make >/dev/null 2>&1 || { STEP_DETAIL="make not found"; return 1; }
   STEP_DETAIL="$py; $kc"
@@ -169,7 +172,7 @@ reproducibility() {
                mechanical/params-b.scad mechanical/case-a.scad
                mechanical/case-b.scad
                docs/img/floorplan-a.svg docs/img/floorplan-b.svg)
-  if ! git diff --quiet -- "${paths[@]}"; then
+  if [ -n "$(git status --porcelain --untracked-files=all -- "${paths[@]}")" ]; then
     printf 'generated files differ from the committed ones:\n'
     git diff --stat -- "${paths[@]}"
     STEP_DETAIL="regenerated output drifted; commit it or fix the generator"
@@ -261,6 +264,7 @@ fab_outputs() {
 # --------------------------------------------------------------------------
 run_step "Toolchain" toolchain
 run_step "Syntax" syntax
+run_step "Regression Tests" make test
 run_step "Licensing" licensing
 run_step "Libraries" libraries
 run_step "Generator Rules" generator_rules

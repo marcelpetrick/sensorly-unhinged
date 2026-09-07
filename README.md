@@ -72,6 +72,7 @@ Or step by step:
 ```bash
 make license   # every authored source carries an SPDX header
 make check     # generator rule checks   (Python only, no KiCad needed)
+make test      # fault-injection regressions for electrical, build and model failures
 make gen       # regenerate the schematic, both boards, project files, rules, SVGs
 make erc       # KiCad ERC on the shared schematic
 make drc       # KiCad DRC + schematic/PCB parity gate on both variants
@@ -81,6 +82,9 @@ make cost      # regenerate the manufacturing estimate from the real design
 make mech      # enclosure model + checks + OpenSCAD params (STL if openscad)
 make outputs   # gerbers, drill, CPL, assembly PDF, STEP
 make render    # KiCad 3D renders
+make mech-render # optional enclosure PNG previews (requires a graphics display)
+make power     # illustrative battery-side charge budget; replace inputs with measurements
+make release-check # fails until routing and qualification are complete
 make all
 ```
 
