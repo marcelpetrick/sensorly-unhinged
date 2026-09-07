@@ -13,7 +13,7 @@ important physical assumptions contradict the generated geometry.
 
 | Rank | Severity / domain | Finding and evidence at review baseline | Corrective work |
 |---|---|---|---|
-| 1 | Critical / battery | `design.py` ties charger TS to a fixed resistor and CE to ground; EDS §5.2 calls indoor, low-current charging acceptable without a selected pack or temperature inhibit. | Remove the unsupported safety acceptance; make pack/temperature qualification an explicit release blocker. Physical charging protection remains open. |
+| 1 | Critical / battery | TMR is grounded, disabling safety timers while EDS claims they are enabled. TS is fixed and CE grounded; enclosed charging is called acceptable without pack qualification. | Leave TMR open for default timers; remove unsupported safety acceptance. Pack-temperature protection remains a release blocker. |
 | 2 | Critical / manufacturing | Both boards have 58 unconnected items, but `make outputs` and CI publish a “fab-package”. | Separate draft exports from a release target that rejects unfinished routing and unresolved qualification. Routing remains open. |
 | 3 | High / electrical | D1 anode (pin 2) is grounded; its cathode reaches a GPIO through R2. The active-low LED cannot work. | Wire supply → R2 → anode, cathode → GPIO; regenerate both boards and schematic. |
 | 4 | High / electrical | Folding `EN_REG` into `VSYS` puts both R5 terminals on one net. Lifting R5 cannot disable U3. | Preserve the enable net and test resistor isolation. |

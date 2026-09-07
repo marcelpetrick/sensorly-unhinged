@@ -197,7 +197,7 @@ VQFN-16 3 × 3 mm with exposed pad (EP → `GND`).
 | 10, 11 | OUT | `VSYS` |
 | 12 | ILIM | R11 (see below) |
 | 13 | IN | `VBUS` |
-| 14 | TMR | `GND` — safety timers on, default |
+| 14 | TMR | **NC** — default safety timers enabled; grounding this pin disables them (TI SLUS810N, Pin Functions) |
 | 15 | ITERM | R12 (see below) |
 | 16 | ISET | R13 (see below) |
 
@@ -236,10 +236,19 @@ Rev 1 uses a bare cell plus a separate protection PCM, so there is no NTC in the
 pack. Datasheet: "for applications that do not use the TS function, connect a
 10 kΩ fixed resistor from TS" — R7 does exactly that, holding TS mid-range so
 charging is always permitted. **This is a Rev-1 simplification with a real
-consequence: we lose pack-temperature-based charge inhibit.** It is acceptable
-because the charge current is deliberately small and the device is indoor-only;
-it goes on the Rev 2 review list, and a pack *with* an NTC can populate R7 as
-the pull-up instead with no board change.
+consequence: we lose pack-temperature-based charge inhibit.** Low current and
+indoor use do not establish safe pack temperature. This is an unresolved release
+blocker, not an accepted safety justification. A two-pin pack connector has no
+NTC contact: adding pack sensing requires a connector/wiring design and verified
+thermistor network, not simply changing R7 into a pull-up.
+
+[TI SLUS810N](https://www.ti.com/lit/gpn/BQ24074), Pin Functions and Battery Pack
+Temperature Monitoring, defines TMR and TS separately. TMR is now left open to
+enable the default timers; they do not replace pack-temperature monitoring.
+EDS-9 owner: hardware maintainer; close before charging prototypes in an enclosure
+by selecting the protected pack, implementing temperature inhibit, and testing
+hot/cold, missing-sensor, charge termination and timer behavior. No unattended
+charging qualification is claimed.
 
 | Ref | Value | Purpose |
 |---|---|---|
@@ -345,6 +354,7 @@ side, all within one rectangular region so the fixture is a simple plate.
 | EDS-6 | Whether the 32.768 kHz crystal on IO0/IO1 is needed | deep-sleep timing drift measurement |
 | EDS-7 | Antenna: flush with board edge (Rev 1) vs overhanging the outline | RF test in the finished enclosure |
 | EDS-8 | Neck width 3.0 / 3.5 / 5.0 mm for Variant B | first bare-PCB mechanical inspection + Test 1 |
+| EDS-9 | Pack-temperature charge inhibit, selected protected pack and timer tests; owner: hardware maintainer | before enclosed battery charging |
 
 ## 11. Review checklist for this spec
 
