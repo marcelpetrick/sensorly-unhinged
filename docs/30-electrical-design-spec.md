@@ -30,7 +30,7 @@ USB-C VBUS ─┬─ ESD ─ IN ┐
 | `VBUS` | 5.0 V | USB-C, sink only |
 | `VSYS` | 3.6–5.0 V | BQ24074 `OUT`, power-path output; supplies the buck |
 | `VBAT` | 3.0–4.2 V | protected 1S LiPo at `BAT` |
-| `+3V0` | **3.00 V** | TPS62840 output — see §4 for the 3.0 V vs 3.3 V decision |
+| `+3V0` | **3.30 V baseline** | historical net name retained for both build options; R6 sets actual voltage |
 | `GND` | — | single net, solid L2 plane (except the Variant-B neck) |
 
 ---
@@ -161,27 +161,29 @@ SON-8 (DLC), 2 × 2 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq**
 | C7 | 4.7 µF / 10 V X5R 0603 (input) | "a 4.7-µF ceramic capacitor is required" at VIN |
 | C8 | 10 µF / 6.3 V X5R 0603 (output) | datasheet §9.2.2.2 |
 | R5 | 0 Ω 0402 | EN tie (a resistor, not a short, so EN can be lifted for current measurement) |
-| **R6** | **52.3 kΩ 1 % 0402 → V<sub>OUT</sub> = 3.0 V** | datasheet Table 1 (E96 nominal) |
-| *R6 alt* | *267 kΩ 1 % → V<sub>OUT</sub> = 3.3 V* | same table |
+| **R6** | **267 kΩ 1 % 0402 → V<sub>OUT</sub> = 3.3 V baseline** | datasheet Table 1 (E96 nominal) |
+| *R6 characterization* | *52.3 kΩ 1 % → V<sub>OUT</sub> = 3.0 V* | controlled characterization only; same table |
 
-### 4.1 The 3.0 V vs 3.3 V decision — closed by design, not by argument
+### 4.1 Rail margin and controlled characterization
 
-Requirement R-1 asked us to choose. We do not have to: **the rail voltage is one
-0402 resistor.** R6 = 52.3 kΩ gives 3.0 V, R6 = 267 kΩ gives 3.3 V, everything
-else on the board is identical.
+The shared baseline is now **3.3 V**. The [ESP32-C6-MINI-1 datasheet,
+Recommended Operating Conditions](https://www.espressif.com/sites/default/files/documentation/esp32-c6-mini-1_datasheet_en.pdf)
+specifies 3.0–3.6 V at the module. A nominal 3.0 V leaves no allowance for
+regulator error, trace loss or TX transients. R6 = 267 kΩ selects 3.3 V for the
+DLC part ([TI SLVSEC6D, Table 1](https://www.ti.com/lit/ds/symlink/tps62840.pdf)).
+The historical `+3V0` net name is not a voltage guarantee.
 
-Rev 1 therefore ships **both**: within each 5-board variant group, boards 1–3 are
-built at 3.0 V and boards 4–5 at 3.3 V, giving us a real measurement instead of
-a preference. Baseline for the BOM is **3.0 V** because:
-- ESP32-C6 operating range is 3.0–3.6 V, and the module flash needs ≥ 2.7 V;
-- at 3.0 V the buck stays in step-down regulation over almost the whole LiPo
-  discharge curve, and when V<sub>BAT</sub> finally falls near 3.0 V the
-  TPS62840 enters 100 % duty and simply passes the battery through
-  (120 nA in 100 % mode) — a graceful, not a cliff-edge, end of discharge;
-- lower rail = lower dynamic power in the MCU and lower LED/pull-up current.
+All ten initial units use 267 kΩ for the primary A/B experiment. Only after
+baseline testing may matched A/B units be reworked to 52.3 kΩ for a separate
+3.0 V characterization run, with new as-built records. This does not qualify
+3.0 V for normal use; EDS-5 remains open.
 
-The 3.3 V build exists to check that we have not left RF output power or ADC
-headroom on the table.
+Measure module-pin minimum/maximum voltage during boot, TX and supply switching
+across the selected pack's usable discharge range. A buck in 100% duty cannot
+maintain its setpoint below dropout. Stop operation before the rail leaves the
+module specification; test brownout/recovery and retained records. Required
+cutoff depends on measured path loss, pack and transient load, not just nominal
+cell voltage. Owner: hardware/firmware maintainer; gate: prototype power test.
 
 ---
 

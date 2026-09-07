@@ -50,7 +50,7 @@ BLOCK_DEFS = [
      ["U4", "R7", "R8", "R9", "R10", "R11", "R12", "R13",
       "C9", "C10", "C11", "C12"], 6),
     ("06  Battery + measurement", 1, ["J2", "R14", "R15", "C13"], 4),
-    ("03  System regulator  3.00 V", 2,
+    ("03  System regulator  3.30 V baseline", 2,
      ["U3", "L1", "C7", "C8", "R5", "R6"], 3),
     ("07  Button + status LED", 2, ["SW1", "C5", "D1", "R2"], 4),
 ]

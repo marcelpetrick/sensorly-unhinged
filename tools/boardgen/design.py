@@ -70,7 +70,7 @@ PARTS = [
     Part("C7", "4.7uF/10V X5R", C0603, desc="buck input - 4.7 uF required at VIN"),
     Part("C8", "10uF/6.3V X5R", C0603, desc="buck output"),
     Part("R5", "0R", R0402, desc="EN tie - a resistor so EN can be lifted to measure Iq"),
-    Part("R6", "52k3 1%", R0402, desc="VSET -> 3.00 V. BOM option: 267k -> 3.30 V"),
+    Part("R6", "267k 1%", R0402, desc="VSET -> 3.30 V. Characterization only: 52k3 -> 3.00 V"),
 
     # --- 04 Charger ---------------------------------------------------------
     Part("U4", "BQ24074RGTR", f"{FP}:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm", "BQ24074RGTR",

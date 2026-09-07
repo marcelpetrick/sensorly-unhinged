@@ -2,10 +2,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import unittest
 
-from tools.boardgen.design import NETS
+from tools.boardgen.design import NETS, PART_BY_REF
 
 
 class ElectricalTests(unittest.TestCase):
+    def test_baseline_has_rail_margin(self):
+        self.assertEqual(PART_BY_REF["R6"].value, "267k 1%")
+
     def test_enable_link_can_be_removed(self):
         self.assertIn(("R5", "1"), NETS["VSYS"])
         self.assertEqual(set(NETS["EN_REG"]), {("U3", "4"), ("R5", "2")})
