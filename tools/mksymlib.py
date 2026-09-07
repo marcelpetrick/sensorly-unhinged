@@ -125,7 +125,7 @@ def tps62840() -> str:
              "16 VSET-selectable outputs, SON-8", 0, 0, True),
         prop("ki_keywords", "buck step-down regulator low Iq DCS-Control",
              0, 0, True),
-        prop("ki_fp_filters", "SON*2x1.5mm*P0.5mm*", 0, 0, True),
+        prop("ki_fp_filters", "sensorly:TI_DLC0008B_VSON-HR-8_2x1.5mm_P0.5mm", 0, 0, True),
         '\t\t(symbol "TPS62840DLC_1_1"',
         "\t\t\t(rectangle", "\t\t\t\t(start -10.16 10.16)", "\t\t\t\t(end 10.16 -12.7)",
         "\t\t\t\t(stroke", "\t\t\t\t\t(width 0.254)", "\t\t\t\t\t(type default)",
@@ -138,7 +138,11 @@ def main(argv):
     out = ["(kicad_symbol_lib", "\t(version 20251024)",
            '\t(generator "sensorly-boardgen")', '\t(generator_version "10.0")']
     for lib, name in VENDORED:
-        out.append("\t" + read(src, lib, name).replace("\n\t", "\n\t\t"))
+        body = read(src, lib, name)
+        if name == "Conn_01x02_MountingPin":
+            body = body.replace("Connector*:*_1x??-1MP*",
+                                "sensorly:JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal")
+        out.append("\t" + body.replace("\n\t", "\n\t\t"))
     for lib, child, parent in FLATTEN:
         out.append("\t" + flatten(src, lib, child, parent).replace("\n\t", "\n\t\t"))
     out.append(tps62840())

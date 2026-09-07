@@ -26,6 +26,12 @@ the whole pogo field lives on the bare side and the fixture is a flat plate.
 
 ## Substitution on the record
 
+The connector symbol's footprint filter is adapted to the project library
+namespace, and the authored TPS62840 symbol filter names its actual footprint.
+This metadata-only change enables footprint-filter parity checks; it changes
+no pins, land patterns or rotations. `tools/mksymlib.py` reproduces it. The
+adapted connector symbol retains the upstream library licence.
+
 `L_Murata_DFE201610P` is used for the **DFE201612E-2R2M** inductor. Same 2.0 ×
 1.6 mm land pattern; only the body height differs (1.0 mm vs 1.2 mm), which
 affects the 3D model and the enclosure clearance, not the copper. Flagged so the

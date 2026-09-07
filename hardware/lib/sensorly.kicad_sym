@@ -2452,7 +2452,7 @@
 					)
 				)
 			)
-			(property "ki_fp_filters" "Connector*:*_1x??-1MP*"
+			(property "ki_fp_filters" "sensorly:JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -4576,7 +4576,7 @@
 				)
 			)
 		)
-		(property "ki_fp_filters" "SON*2x1.5mm*P0.5mm*"
+		(property "ki_fp_filters" "sensorly:TI_DLC0008B_VSON-HR-8_2x1.5mm_P0.5mm"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
