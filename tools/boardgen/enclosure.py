@@ -420,6 +420,9 @@ def report() -> str:
          "Variant B's divider lies wholly inside the physical neck span, with",
          "printing clearance from the body and island; the electrical rule",
          "zone boundary is not used as a mechanical wall position.", "",
+         "The perimeter lip is relieved where it crosses B's divider. The",
+         "OpenSCAD `interference` mode intersects the closed lid with the base;",
+         "the expected result is empty. This does not prove pack/PCB fit.", "",
          "## Component heights", "",
          "| Ref | Height | Source |", "|---|---:|---|"]
     for ref, (h, src) in sorted(HEIGHTS.items(), key=lambda kv: -kv[1][0]):

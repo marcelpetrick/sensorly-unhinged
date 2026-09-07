@@ -143,14 +143,21 @@ module lid() {
             union() {
                 linear_extrude(lid_t) rrect(outer_w, outer_h, fillet);
                 // lip that locates the lid in the cavity
-                translate([wall + 0.3, wall + 0.3, lid_t])
-                    linear_extrude(1.2)
-                        difference() {
-                            rrect(inner_w - 0.6, inner_h - 0.6,
-                                  max(0.5, fillet - wall));
-                            translate([1.2, 1.2])
-                                rrect(inner_w - 3.0, inner_h - 3.0, 0.5);
-                        }
+                difference() {
+                    translate([wall + 0.3, wall + 0.3, lid_t])
+                        linear_extrude(1.2)
+                            difference() {
+                                rrect(inner_w - 0.6, inner_h - 0.6,
+                                      max(0.5, fillet - wall));
+                                translate([1.2, 1.2])
+                                    rrect(inner_w - 3.0, inner_h - 3.0, 0.5);
+                            }
+                    // The chamber wall reaches the lid seating plane. Relieve
+                    // the ring where it crosses that wall, not the whole lid.
+                    if (divider_y > 0)
+                        translate([0, by + divider_y - wall/2 - tol, lid_t - eps])
+                            cube([outer_w, wall + 2*tol, 1.2 + 2*eps]);
+                }
             }
             vent_slots();
             for (c = cutouts)
@@ -162,4 +169,11 @@ module lid() {
 
 if (part == "base") base();
 else if (part == "lid") lid();
-else { base(); translate([0, outer_h + 5, 0]) lid(); }
+else if (part == "interference") {
+    intersection() {
+        base();
+        translate([0, 0, floor_t + inner_z + lid_t]) mirror([0, 0, 1]) lid();
+    }
+}
+else if (part == "both") { base(); translate([0, outer_h + 5, 0]) lid(); }
+else assert(false, "unknown enclosure part");
