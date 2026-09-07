@@ -18,18 +18,19 @@ from .boardgen.design import NETS, PARTS
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def bom_rows():
+def bom_rows(parts=None):
     groups: dict[tuple, list[str]] = defaultdict(list)
-    for p in PARTS:
+    for p in PARTS if parts is None else parts:
         if p.exclude_from_bom:
             continue
         groups[(p.value, p.footprint.split(":")[-1], p.mpn, p.manufacturer,
-                p.alt, p.desc)].append(p.ref)
+                p.alt, p.desc, p.dnp)].append(p.ref)
     rows = []
-    for (value, fp, mpn, mfr, alt, desc), refs in groups.items():
+    for (value, fp, mpn, mfr, alt, desc, dnp), refs in groups.items():
         refs.sort(key=lambda r: (r[0], int("".join(c for c in r if c.isdigit()) or 0)))
         rows.append({
             "Qty": len(refs),
+            "Populate": "no" if dnp else "yes",
             "Refs": ",".join(refs),
             "Value": value,
             "Footprint": fp,
@@ -61,7 +62,7 @@ def main():
             conns = ", ".join(f"{r}.{p}" for r, p in NETS[net])
             fh.write(f"{net}\n    {conns}\n\n")
 
-    total = sum(r["Qty"] for r in rows)
+    total = sum(r["Qty"] for r in rows if r["Populate"] == "yes")
     unique = len(rows)
     print(f"wrote hardware/outputs/bom.csv     {unique} lines, {total} placements")
     print(f"wrote hardware/outputs/netlist.txt {len(NETS)} nets")

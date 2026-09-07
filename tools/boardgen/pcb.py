@@ -137,7 +137,7 @@ def _emit_footprint(p: Placement, netidx, padnet) -> str:
 
     attrs = []
     if part.exclude_from_bom:
-        attrs.append("exclude_from_bom")
+        attrs.extend(["exclude_from_bom", "exclude_from_pos_files"])
     if part.dnp:
         attrs.append("dnp")
     if attrs and "(attr " in text:

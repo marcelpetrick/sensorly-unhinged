@@ -129,7 +129,7 @@ outputs: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb) bom
 	  $(KICAD_CLI) pcb export drill --format excellon --drill-origin absolute \
 	    --excellon-units mm --generate-map --map-format gerberx2 -o $$o/drill/ \
 	    $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \
-	  $(KICAD_CLI) pcb export pos --format csv --units mm --side both \
+	  $(KICAD_CLI) pcb export pos --format csv --units mm --side both --exclude-dnp \
 	    -o $$o/assembly/cpl-$$v.csv $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \
 	  $(KICAD_CLI) pcb export pdf --layers "F.Cu,F.SilkS,F.Fab,Edge.Cuts" \
 	    -o $$o/assembly/assembly-top-$$v.pdf $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \

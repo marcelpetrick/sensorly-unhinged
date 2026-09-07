@@ -18,3 +18,9 @@ Validate the KiCad CPL convention against the assembler's preview, with explicit
 pin-1 checks for U1–U5, J1/J2 and D1. The library coordinates are not a guarantee
 of the assembler's zero-degree orientation. Record the approved preview and
 as-built BOM with the board revision. A later substitute invalidates that review.
+
+`Populate=no` BOM lines identify DNP options and are never merged with fitted
+parts. CPL export excludes DNP, and fixture-only footprints are explicitly
+excluded from placement files. Qty is the number of references on a line;
+assemble it only when Populate is yes. These are KiCad placement coordinates;
+the assembler still must approve orientation and through-hole connector handling.
