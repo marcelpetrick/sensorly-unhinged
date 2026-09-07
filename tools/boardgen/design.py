@@ -28,7 +28,7 @@ class Part:
     desc: str = ""
     dnp: bool = False
     exclude_from_bom: bool = False
-    alt: str = ""          # qualified second source (AGENTS.md rule 6)
+    alt: str = ""          # candidate only; see BOM sourcing status and release gate
 
 
 # --------------------------------------------------------------------------

@@ -36,6 +36,9 @@ def bom_rows():
             "MPN": mpn,
             "Manufacturer": mfr,
             "Second source": alt,
+            "Sourcing status": ("single-sourced, accepted risk for design exploration only; "
+                                "alternate is unqualified, do not substitute" if mpn else
+                                "generic specification; purchasing must qualify exact MPN"),
             "Notes": desc,
         })
     rows.sort(key=lambda r: (r["Refs"][0], -r["Qty"]))
@@ -70,8 +73,9 @@ def main():
         print("  AGENTS.md rule 6 - no second source recorded for:",
               ", ".join(missing))
     else:
-        print("  every MPN-specified line has a qualified second source")
+        print("  alternate candidates recorded; NO substitute is qualified for assembly")
+    return 1 if missing else 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
