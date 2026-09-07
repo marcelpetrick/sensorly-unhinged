@@ -42,3 +42,7 @@ will record what was actually verified.
 Model integrity: `tools/boardgen/validate.py` runs before schematic generation.
 Fault-injection tests reject duplicate references, multiply assigned pins,
 unknown pads and bypassed passives, including the original R5 regression.
+
+Build failure propagation: Make recipes use `-eu` and delete failed targets.
+Mesh export retains OpenSCAD diagnostics; optional PNG previews are explicitly
+`make mech-render` so a headless mesh gate needs no graphics display.

@@ -9,6 +9,10 @@ VARIANTS  := a b
 ROOT      := $(CURDIR)
 BUILD     := $(ROOT)/_build
 
+# A successful final echo must never conceal a failed exporter in a loop.
+.SHELLFLAGS := -eu -c
+.DELETE_ON_ERROR:
+
 .PHONY: all gen check erc drc outputs render bom thermal cost mech license clean help test
 .DEFAULT_GOAL := help
 
@@ -57,23 +61,26 @@ mech:
 	  for v in $(VARIANTS); do \
 	    for p in base lid; do \
 	      openscad -D "part=\"$$p\"" -o mechanical/case-$$v-$$p.stl \
-	        mechanical/case-$$v.scad 2>/dev/null && \
+	        mechanical/case-$$v.scad; \
 	        echo "wrote mechanical/case-$$v-$$p.stl"; \
 	    done; \
 	  done; \
 	  $(PY) -m tools.check_stl; \
-	  for v in $(VARIANTS); do \
+	else \
+	  echo "openscad not installed - STL export skipped"; \
+	fi
+
+.PHONY: mech-render
+mech-render:
+	@for v in $(VARIANTS); do \
 	    openscad -D 'part="base"' --camera=20,28,10,55,0,25,190 \
 	      --imgsize=640,640 --colorscheme=Tomorrow \
-	      -o docs/img/case-$$v-base.png mechanical/case-$$v.scad >/dev/null 2>&1; \
+	      -o docs/img/case-$$v-base.png mechanical/case-$$v.scad; \
 	    openscad -D 'part="lid"' --camera=20,28,2,235,0,25,190 \
 	      --imgsize=640,640 --colorscheme=Tomorrow \
-	      -o docs/img/case-$$v-lid.png mechanical/case-$$v.scad >/dev/null 2>&1; \
+	      -o docs/img/case-$$v-lid.png mechanical/case-$$v.scad; \
 	  done; \
-	  echo "wrote docs/img/case-*.png"; \
-	else \
-	  echo "openscad not installed - STL export skipped (sudo pacman -S openscad)"; \
-	fi
+	  echo "wrote docs/img/case-*.png"
 
 # Zones are left unfilled in the committed source so that `make gen` is
 # byte-reproducible; the outputs pipeline fills them into a scratch copy.
@@ -94,6 +101,7 @@ endef
 $(foreach v,$(VARIANTS),$(eval $(call FILLED_RULE,$(v))))
 
 erc:
+	@mkdir -p $(BUILD)
 	@$(KICAD_CLI) sch erc --severity-error --severity-warning --exit-code-violations \
 	  --format json -o $(BUILD)/erc.json hardware/schematic/env-sensor.kicad_sch \
 	  || { echo "ERC violations - see $(BUILD)/erc.json"; exit 1; }
