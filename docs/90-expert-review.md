@@ -46,3 +46,6 @@ unknown pads and bypassed passives, including the original R5 regression.
 Build failure propagation: Make recipes use `-eu` and delete failed targets.
 Mesh export retains OpenSCAD diagnostics; optional PNG previews are explicitly
 `make mech-render` so a headless mesh gate needs no graphics display.
+Filled-board prerequisites include schematic, symbols, footprints, project rules
+and the Makefile. Aggregate builds are serialized even with `make -j` because
+generation writes inputs to subsequent checks.

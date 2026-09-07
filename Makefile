@@ -12,6 +12,8 @@ BUILD     := $(ROOT)/_build
 # A successful final echo must never conceal a failed exporter in a loop.
 .SHELLFLAGS := -eu -c
 .DELETE_ON_ERROR:
+# Generation mutates inputs consumed by later goals, including `make -j all`.
+.NOTPARALLEL:
 
 .PHONY: all gen check erc drc outputs render bom thermal cost mech license clean help test
 .DEFAULT_GOAL := help
@@ -87,12 +89,14 @@ mech-render:
 define FILLED_RULE
 $(BUILD)/$(1)/env-sensor-$(1).kicad_pcb: hardware/variant-$(1)/env-sensor-$(1).kicad_pcb \
                                hardware/variant-$(1)/env-sensor-$(1).kicad_pro \
-                               hardware/variant-$(1)/env-sensor-$(1).kicad_dru
+                               hardware/variant-$(1)/env-sensor-$(1).kicad_dru \
+                               hardware/schematic/env-sensor.kicad_sch \
+                               hardware/lib/sensorly.kicad_sym \
+                               $(wildcard hardware/lib/sensorly.pretty/*.kicad_mod) Makefile
 	@mkdir -p $(BUILD)/$(1)
 	@cp hardware/variant-$(1)/env-sensor-$(1).kicad_pro $(BUILD)/$(1)/env-sensor-$(1).kicad_pro
 	@cp hardware/variant-$(1)/env-sensor-$(1).kicad_dru $(BUILD)/$(1)/env-sensor-$(1).kicad_dru
 	@cp hardware/schematic/env-sensor.kicad_sch $(BUILD)/$(1)/env-sensor-$(1).kicad_sch
-	@cp hardware/lib/sensorly.kicad_sym $(BUILD)/$(1)/ 2>/dev/null || true
 	@printf '(sym_lib_table\n  (version 7)\n  (lib (name "sensorly")(type "KiCad")(uri "%s/hardware/lib/sensorly.kicad_sym")(options "")(descr ""))\n)\n' "$(ROOT)" > $(BUILD)/$(1)/sym-lib-table
 	@printf '(fp_lib_table\n  (version 7)\n  (lib (name "sensorly")(type "KiCad")(uri "%s/hardware/lib/sensorly.pretty")(options "")(descr ""))\n)\n' "$(ROOT)" > $(BUILD)/$(1)/fp-lib-table
 	@cp $$< $$@
