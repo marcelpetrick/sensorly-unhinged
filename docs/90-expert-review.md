@@ -72,3 +72,6 @@ past a via centre. The generator trims only collinear endpoints already wholly
 inside same-net via copper; it neither moves vias nor redirects other routes.
 `make test-kicad` injects VBAT and widened GND tracks into scratch copies of B
 and requires KiCad to report the corresponding island-rule violations.
+The routing audit also found five physical B neck traces: C6 ground detoured to
+the main board. C6 taps are now confined to the island, and every neck cut must
+contain exactly four conductors. This corrects finding 19 beyond net-class rules.

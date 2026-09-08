@@ -126,6 +126,11 @@ ground, and enforce 0.15 mm on every track entering the island rule area.
 Membership in the broad Power net class does not permit VBAT/VBUS/VSYS there.
 The spatial width rule follows generic width defaults so it takes precedence.
 KiCad expression semantics: [custom rules](https://docs.kicad.org/10.0/en/pcbnew/pcbnew.html#custom_design_rules).
+The generator also counts conductors through successive neck cross-sections:
+one trace per named net, all on F.Cu at 0.15 mm. C6 must connect locally on B's
+island; a second ground detour through the neck is a thermal-rule failure even
+though it introduces no new electrical net. Both layouts use the revised routing
+order; A has no neck and does not need this spatial count.
 
 **Why trace width is the primary lever** — first-order conduction through the
 Variant-B neck (3.5 mm wide × 8.0 mm long × 1.6 mm FR-4, four 0.15 mm traces in

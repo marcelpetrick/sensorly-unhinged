@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from . import geometry as G
 from .design import PART_BY_REF
 from .place import Placement
-from .variants import Variant, antenna_keepout, sensor_keepout
+from .variants import B_BODY_H, B_ISLAND_RECT, Variant, antenna_keepout, sensor_keepout
 
 GRID = 0.1
 ISLAND_WIDTH = 0.15          # EDS S3.1 - the dominant thermal term
@@ -70,6 +70,24 @@ def center_track_ends(tracks: list[Track], vias: list[Via]) -> list[Track]:
         if any(a != b for a, b in zip(pts, pts[1:])):
             result.append(Track(track.net, track.width, track.layer, pts))
     return result
+
+
+def validate_neck_crossings(v: Variant, tracks: list[Track]):
+    """Each cut through B's neck must meet exactly four thin top-layer traces."""
+    if v.key != "b":
+        return
+    expected = {"SDA", "SCL", "+3V0", "GND"}
+    for step in range(int((B_ISLAND_RECT[1] - B_BODY_H) / GRID)):
+        y = B_BODY_H + (step + .5) * GRID
+        crossings = set()
+        for t in tracks:
+            for (ax, ay), (bx, by) in zip(t.pts, t.pts[1:]):
+                if min(ay, by) <= y < max(ay, by):
+                    x = ax + (y - ay) * (bx - ax) / (by - ay)
+                    crossings.add((t.net, t.layer, round(x, 6), t.width))
+        if (len(crossings) != 4 or {c[0] for c in crossings} != expected or
+                any(c[1] != "F.Cu" or abs(c[3] - ISLAND_WIDTH) > 1e-9 for c in crossings)):
+            raise ValueError(f"B neck at y={y:.2f}: expected four thin top-layer conductors, got {crossings}")
 
 
 class Grid:
@@ -170,10 +188,10 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
     plan = [
         ("SDA", ("U2", "1"), ("R3", "2"), None),
         ("SCL", ("U2", "2"), ("R4", "2"), None),
-        ("+3V0", ("U2", "3"), None, None),
         ("GND", ("U2", "4"), None, None),
-        ("+3V0", ("C6", "1"), None, "+3V0"),
         ("GND", ("C6", "2"), None, "GND"),
+        ("+3V0", ("U2", "3"), None, None),
+        ("+3V0", ("C6", "1"), None, "+3V0"),
     ]
     tracks: list[Track] = []
     vias: list[Via] = []
@@ -199,6 +217,10 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         goals: set[tuple[int, int]] | None = None
         if tap:
             goals = routed_cells[tap]
+            if v.key == "b":
+                # C6 must tap on the island, never add another neck conductor.
+                g.block_rect(0, 0, v.width, B_ISLAND_RECT[1])
+                goals = {(x, y) for x, y in goals if y * GRID > B_ISLAND_RECT[1]}
             tx = ty = None
         elif dst:
             tx, ty = pads[dst]

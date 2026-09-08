@@ -1,10 +1,19 @@
 # SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
 # SPDX-License-Identifier: GPL-3.0-or-later
 import unittest
-from tools.boardgen.route import Track, Via, center_track_ends
+from tools.boardgen.route import Track, Via, center_track_ends, validate_neck_crossings
+from tools.boardgen.variants import VARIANTS
 
 
 class RoutingTests(unittest.TestCase):
+    def test_exactly_four_neck_conductors(self):
+        tracks = [Track(net, .15, "F.Cu", [(13 + i*.5, 33), (13 + i*.5, 43)])
+                  for i, net in enumerate(("SDA", "SCL", "GND", "+3V0"))]
+        validate_neck_crossings(VARIANTS["b"], tracks)
+        tracks.append(Track("GND", .15, "F.Cu", [(15.2, 33), (15.2, 43)]))
+        with self.assertRaisesRegex(ValueError, "four thin"):
+            validate_neck_crossings(VARIANTS["b"], tracks)
+
     def test_collinear_overshoot_is_trimmed(self):
         track = Track("CHG_N", .2, "B.Cu", [(11.5, 23.3), (11.5, 24.6)])
         result = center_track_ends([track], [Via("CHG_N", 11.5, 24.5)])
