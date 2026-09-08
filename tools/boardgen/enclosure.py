@@ -170,7 +170,7 @@ def build(v: Variant, connector: str = "PH") -> Case:
     # --- cut-outs, positioned from the parts themselves --------------------
     j1, j2 = placed["J1"], placed["J2"]
     case.cutouts.append(Cutout("USB-C", "left", j1.x, j1.y,
-                               9.2 + TOL, height("J1") + TOL, 0.0, "J1"))
+                               9.2 + TOL, height("J1") + TOL, height("J1") / 2, "J1"))
     case.cutouts.append(Cutout("battery wire", "right", j2.x, j2.y,
                                6.0 + TOL, 4.0, 1.0, "J2"))
     sw, d1 = placed["SW1"], placed["D1"]
@@ -423,6 +423,9 @@ def report() -> str:
          "The perimeter lip is relieved where it crosses B's divider. The",
          "OpenSCAD `interference` mode intersects the closed lid with the base;",
          "the expected result is empty. This does not prove pack/PCB fit.", "",
+         "USB opening height is centred on the connector body above the PCB,",
+         "not on the PCB surface. Cable-shell reach through the recessed wall",
+         "still requires a physical fit check with the intended cable.", "",
          "## Component heights", "",
          "| Ref | Height | Source |", "|---|---:|---|"]
     for ref, (h, src) in sorted(HEIGHTS.items(), key=lambda kv: -kv[1][0]):

@@ -2,11 +2,17 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import unittest
 
-from tools.boardgen.enclosure import build, check, planning_cell_fits, TOL, WALL
+from tools.boardgen.enclosure import build, check, planning_cell_fits, HEIGHTS, TOL, WALL
 from tools.boardgen.variants import B_BODY_H, B_ISLAND_RECT, VARIANTS
 
 
 class EnclosureTests(unittest.TestCase):
+    def test_usb_opening_covers_the_connector_above_the_board(self):
+        for v in VARIANTS.values():
+            cut = next(c for c in build(v).cutouts if c.ref == "J1")
+            self.assertLessEqual(cut.z - cut.height/2, 0)
+            self.assertGreaterEqual(cut.z + cut.height/2, HEIGHTS["J1"][0])
+
     def test_oversize_planning_cell_is_rejected(self):
         for v in VARIANTS.values():
             self.assertFalse(planning_cell_fits(build(v)))
