@@ -3,9 +3,8 @@
 """Turn a kicad-cli DRC report into a build gate with an explicit policy.
 
 kicad-cli's own --exit-code-violations counts unconnected nets as failures.
-That is wrong for this repository *right now*: the boards are placement- and
-rule-complete but only the four sensor-island nets are routed, so 80 unconnected
-items is the expected state, not a regression.
+This development gate tracks incomplete routing explicitly in drc-budget.json.
+It is not a manufacturing gate: tools.release_gate requires complete routing.
 
 Policy:
   * any schematic/PCB parity difference -> fail (both come from one model)

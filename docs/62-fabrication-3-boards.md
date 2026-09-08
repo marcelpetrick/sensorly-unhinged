@@ -104,15 +104,12 @@ most of what people assume an RF board needs. What is left is short and specific
 
 This one matters more than the price.
 
-Variant A's whole problem is that its inner copper planes conduct **112×** more
-heat than the FR-4 they sit in. That number is computed for **1 oz (35 µm)
-copper on all four layers**, which is what `docs/45-thermal-model.md` assumes and
-what most fabs supply by default.
-
-OSH Park's 4-layer service is **1 oz outer, 0.5 oz inner**. That halves the inner
-planes and therefore materially reduces Variant A's conduction — moving the
-result *towards* Variant B and shrinking the very effect the experiment is
-trying to measure.
+The hypothetical slab model's **112×** copper/FR-4 ratio assumes **1 oz (35 µm)
+copper on all four layers**. A's actual sensor quiet zone excludes those pours,
+so this is not a measured or routed-board conduction ratio. Stackup still
+affects heat flow and must be controlled; its effect on the actual A/B result
+must be measured. Obtain the selected fab's current stackup rather than assuming
+any vendor uses the model's copper weights by default.
 
 Two consequences, both non-negotiable:
 
