@@ -28,7 +28,7 @@ USB-C VBUS ─┬─ ESD ─ IN ┐
 | Net | Nominal | Notes |
 |---|---|---|
 | `VBUS` | 5.0 V | USB-C, sink only |
-| `VSYS` | 3.6–5.0 V | BQ24074 `OUT`, power-path output; supplies the buck |
+| `VSYS` | mode/load dependent | BQ24074 `OUT`: battery-fed without USB; do not assume a 3.6 V minimum throughout discharge |
 | `VBAT` | 3.0–4.2 V | protected 1S LiPo at `BAT` |
 | `+3V0` | **3.30 V baseline** | historical net name retained for both build options; R6 sets actual voltage |
 | `GND` | — | single net, solid L2 plane (except the Variant-B neck) |
@@ -155,7 +155,7 @@ no convection along the neck — to be validated by Test 1–4.)
 
 ## 4. U3 — TPS62840DLC (system regulator)
 
-SON-8 (DLC), 2 × 2 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq**
+SON-8 (DLC), 1.5 × 2.0 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq**
 (datasheet Table: I<sub>Q_VIN</sub> 36 nA typ / I<sub>Q_VOS</sub> 56 nA typ).
 
 | Pin | Name | Net |
@@ -235,19 +235,21 @@ K<sub>ITERM</sub> = 0.0300 (ISET mode).
 |---|---|---|---|---|
 | R13 | fast charge | R = K<sub>ISET</sub>/I<sub>CHG</sub> = 890/0.25 | **3.57 kΩ 1 %** | I<sub>CHG</sub> = 249 mA |
 | R11 | input limit | R = K<sub>ILIM</sub>/I<sub>IN</sub> = 1550/0.5 | **3.09 kΩ 1 %** | I<sub>IN,max</sub> = 502 mA |
-| R12 | termination | R = I<sub>TERM</sub>·R13/K<sub>ITERM</sub> = 0.025 × 3570 / 0.03 | **3.01 kΩ 1 %** | I<sub>TERM</sub> ≈ 25 mA (0.1 C) |
+| R12 | termination | R = I<sub>TERM</sub>·R13/K<sub>ITERM</sub> = 0.025 × 3570 / 0.03 | **3.01 kΩ 1 %** | I<sub>TERM</sub> ≈ 25 mA; C-rate depends on the selected cell |
 
 *BOM option for the slow build:* R13 = 8.87 kΩ → I<sub>CHG</sub> = 100 mA.
 
 **Dissipation check.** The BQ24074 is a linear charger, so
-P = (V<sub>IN</sub> − V<sub>BAT</sub>) × I<sub>CHG</sub>. Worst case is an empty
-cell: (5.0 − 3.4) × 0.25 = **0.40 W** in a 3 × 3 mm QFN. Typical mid-charge:
+P = (V<sub>IN</sub> − V<sub>BAT</sub>) × I<sub>CHG</sub>. An illustrative
+point is (5.0 − 3.4) × 0.25 = **0.40 W** in a 3 × 3 mm QFN. This is not a
+worst-case bound: input/current tolerances, lower cell voltage and power-path
+load require separate evaluation. Another illustrative point:
 (5.0 − 3.8) × 0.25 = 0.30 W. **This is the largest heat source in the product —
 larger than the radio, and unlike the radio it runs for hours.** It is the
 reason Variant B exists and the reason `PG_N` is wired to a GPIO: firmware must
 flag or suspend environmental reporting while charging (E-08).
 
-At 100 mA the same worst case is 0.16 W. The prototype run will tell us whether
+At 100 mA the same example is 0.16 W. The prototype run will tell us whether
 250 mA is acceptable inside the enclosure or whether the series build drops to
 100 mA and a longer charge time.
 
