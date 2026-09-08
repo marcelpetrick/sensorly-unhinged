@@ -14,7 +14,7 @@ from .project import write_all
 from .render import render, write as write_svg
 from .sch import write as write_sch
 from .autoroute import route_rest
-from .route import route_island, stitch_ground
+from .route import center_track_ends, route_island, stitch_ground
 from .variants import VARIANTS
 from .validate import validate
 
@@ -41,6 +41,7 @@ def main(argv: list[str]) -> int:
         tracks = tracks + rest_t
         vias = vias + rest_v
         vias = vias + stitch_ground(v, placed, tracks, vias)
+        tracks = center_track_ends(tracks, vias)
         total = sum(
             abs(t.pts[i + 1][0] - t.pts[i][0]) + abs(t.pts[i + 1][1] - t.pts[i][1])
             for t in tracks for i in range(len(t.pts) - 1))

@@ -67,3 +67,6 @@ the library land pattern itself is unchanged.
 `make mech` also renders the seated lid/base intersection for each variant;
 it accepts only OpenSCAD's explicit empty-intersection result, not a generic
 export failure. This checks the corrected lid/divider relationship in 3D.
+Enabling the default-ignored via-centering check exposed a 0.1 mm CHG_N stub
+past a via centre. The generator trims only collinear endpoints already wholly
+inside same-net via copper; it neither moves vias nor redirects other routes.

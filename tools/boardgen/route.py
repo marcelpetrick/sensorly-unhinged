@@ -44,6 +44,34 @@ class Via:
     drill: float = 0.3
 
 
+def center_track_ends(tracks: list[Track], vias: list[Via]) -> list[Track]:
+    """Trim collinear terminal stubs contained inside a same-net via annulus.
+
+    Never move a via or introduce a diagonal: that could change clearance away
+    from the already occupied via copper. Non-collinear cases remain for DRC.
+    """
+    result = []
+    for track in tracks:
+        pts = list(track.pts)
+        for end, adjacent in ((0, 1), (-1, -2)):
+            if len(pts) < 2:
+                break
+            x, y = pts[end]
+            ax, ay = pts[adjacent]
+            for via in vias:
+                if via.net != track.net:
+                    continue
+                if math.hypot(x - via.x, y - via.y) > (via.size - track.width)/2 + 1e-9:
+                    continue
+                cross = (x-ax)*(via.y-ay) - (y-ay)*(via.x-ax)
+                if abs(cross) < 1e-9:
+                    pts[end] = (via.x, via.y)
+                    break
+        if any(a != b for a, b in zip(pts, pts[1:])):
+            result.append(Track(track.net, track.width, track.layer, pts))
+    return result
+
+
 class Grid:
     def __init__(self, v: Variant):
         self.v = v
