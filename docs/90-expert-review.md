@@ -11,6 +11,13 @@ The central weakness is that successful generation is too easily confused with
 a working instrument. Neither board is connected completely, and several
 important physical assumptions contradict the generated geometry.
 
+As a product, the strongest potential promise is trustworthy indoor readings
+with predictable maintenance. The repository still needs an explicit deployment
+profile: who operates the MQTT service, how users recognize stale/charging-biased
+data, and what battery replacement and provisioning feel like. Extra radio
+capabilities do not answer those questions. The firmware contract and charge
+budget make those omissions visible without expanding Rev 1's non-goals.
+
 | Rank | Severity / domain | Finding and evidence at review baseline | Corrective work |
 |---|---|---|---|
 | 1 | Critical / battery | TMR is grounded, disabling safety timers while EDS claims they are enabled. TS is fixed and CE grounded; enclosed charging is called acceptable without pack qualification. | Leave TMR open for default timers; remove unsupported safety acceptance. Pack-temperature protection remains a release blocker. |

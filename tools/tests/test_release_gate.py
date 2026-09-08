@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import tempfile
 import unittest
+import json
 from pathlib import Path
-from tools.release_gate import blockers
+from tools.release_gate import REQUIRED, blockers
 
 
 class ReleaseTests(unittest.TestCase):
@@ -11,5 +12,12 @@ class ReleaseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             self.assertGreaterEqual(len(blockers(Path(d))), 3)
 
-    def test_current_unqualified_hardware_cannot_release(self):
-        self.assertTrue(any("qualification evidence" in p for p in blockers()))
+    def test_missing_qualification_cannot_release(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            (root / "hardware").mkdir()
+            manifest = {"schema": 1, "checks": [
+                {"id": key, "owner": "test", "evidence": None} for key in REQUIRED]}
+            (root / "hardware/release-readiness.json").write_text(json.dumps(manifest))
+            self.assertEqual(sum("qualification evidence" in p for p in blockers(root)),
+                             len(REQUIRED))
