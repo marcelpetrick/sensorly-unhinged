@@ -44,16 +44,17 @@ review files. `make release-check` requires complete routing, clean DRC/parity
 and the evidence listed in `hardware/release-readiness.json`. A development
 pipeline pass does not imply a working sensor or safe battery charging.
 
-Placement- and rule-complete, DRC-clean, **partially routed** — 80 ratsnest
-connections per board down to 58; the sensor island, the power fan-out to the
-planes and the ground stitching are done, the fine-pitch escapes are not.
+**Partially routed:** 54 unconnected items on A and 58 on B. The sensor routes
+and some power/ground fan-out are generated; the fine-pitch escapes and other
+main-board connections remain incomplete. Development DRC has zero errors,
+with explicitly limited warnings; it is not a clean manufacturing DRC.
 Phase 6 of 14 — see [`docs/00-plan.md`](docs/00-plan.md).
 
 ```
 KiCad ERC      0 violations
-KiCad DRC      0 errors, 5 / 4 reviewed warnings on A / B
+KiCad DRC      0 errors, 6 / 10 development warnings on A / B (KiCad 10.0.6)
 Sch/PCB parity 0 differences  (both are generated from one model)
-Ratsnest       58 of 80 remaining per board (see hardware/drc-budget.json)
+Ratsnest       A: 54 remaining; B: 58 remaining (see hardware/drc-budget.json)
 Outputs        4-layer gerbers, drill, CPL, assembly PDF, STEP, schematic PDF, BOM
 ```
 
@@ -88,7 +89,9 @@ make release-check # fails until routing and qualification are complete
 make all
 ```
 
-Requires KiCad 10 (`kicad-cli`) for everything except `check`.
+Python-only checks include `check`, `test`, `bom`, `thermal`, `cost`, and `power`.
+ERC/DRC, board renders and exports require KiCad 10 (`kicad-cli`); mesh checks
+require OpenSCAD. Offline checks alone cannot establish hardware readiness.
 
 ## How the two boards stay one design
 
