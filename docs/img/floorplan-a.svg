@@ -39,7 +39,7 @@
 <path class="trk" d="M 16.60 19.50 L 16.60 19.00 L 16.10 19.00"/>
 <path class="trk" d="M 22.50 15.90 L 22.00 15.90"/>
 <path class="trk" d="M 22.00 7.50 L 22.00 8.10 L 21.60 8.10"/>
-<path class="trk" d="M 6.00 16.50 L 6.00 17.10 L 3.70 17.10 L 3.70 17.80"/>
+<path class="trk" d="M 6.00 16.50 L 6.00 16.80 L 3.70 16.80"/>
 <path class="trk" d="M 5.90 13.30 L 5.90 13.50 L 6.40 13.50"/>
 <path class="trk" d="M 25.90 7.20 L 25.90 6.30 L 28.50 6.30 L 28.50 6.70"/>
 <path class="trk" d="M 16.60 22.00 L 22.70 22.00 L 22.70 17.10 L 24.40 17.10 L 24.40 16.80"/>
@@ -47,21 +47,25 @@
 <path class="trk" d="M 14.40 21.00 L 16.60 21.00"/>
 <path class="trk" d="M 14.10 19.50 L 14.10 15.30 L 1.20 15.30"/>
 <path class="trk" d="M 1.20 15.30 L 1.20 12.80 L 1.10 12.80"/>
+<path class="trk" d="M 2.10 15.30 L 2.10 16.60"/>
+<path class="trk" d="M 2.10 16.60 L 2.10 18.10 L 13.30 18.10 L 13.30 20.30 L 14.90 20.30 L 14.90 9.00 L 1.20 9.00 L 1.20 7.50"/>
+<path class="trk" d="M 1.20 7.50 L 1.40 7.50"/>
 <path class="trk" d="M 19.90 12.30 L 17.90 12.30"/>
-<path class="trk" d="M 17.90 12.30 L 17.90 23.30 L 11.50 23.30 L 11.50 24.60"/>
+<path class="trk" d="M 17.90 12.30 L 17.90 23.30 L 11.50 23.30 L 11.50 24.50"/>
 <path class="trk" d="M 11.50 24.50 L 22.30 24.50 L 22.30 22.70 L 28.70 22.70 L 28.70 13.80 L 27.90 13.80"/>
 <path class="trk" d="M 19.90 13.10 L 21.20 13.10 L 21.20 12.90 L 26.80 12.90 L 26.80 7.20 L 26.90 7.20"/>
 <path class="trk" d="M 20.00 25.50 L 20.00 25.70 L 24.00 25.70"/>
 <path class="trk" d="M 24.00 25.70 L 24.00 18.10 L 19.20 18.10 L 19.20 19.50"/>
 <path class="trk" d="M 4.00 10.80 L 4.00 10.90 L 4.90 10.90 L 4.90 10.00 L 5.60 10.00"/>
-<path class="trk" d="M 19.90 14.70 L 20.80 14.70 L 20.80 20.30 L 13.10 20.30 L 13.10 23.70 L 10.70 23.70 L 10.70 26.20 L 14.40 26.20 L 14.40 26.50"/>
+<path class="trk" d="M 2.80 10.80 L 2.80 11.70 L 1.10 11.70"/>
+<path class="trk" d="M 19.90 14.70 L 20.80 14.70 L 20.80 20.30 L 13.00 20.30 L 13.00 23.70 L 10.70 23.70 L 10.70 26.20 L 14.40 26.20 L 14.40 26.50"/>
 <path class="trk" d="M 14.40 26.50 L 16.60 26.50 L 16.60 24.60"/>
-<path class="trk" d="M 19.90 11.50 L 18.30 11.50 L 18.30 10.80"/>
-<path class="trk" d="M 18.30 10.80 L 24.80 10.80 L 24.80 27.30 L 10.30 27.30 L 10.30 20.80 L 14.10 20.80 L 14.10 22.00"/>
-<path class="trk" d="M 19.90 15.50 L 10.10 15.50 L 10.10 10.50"/>
-<path class="trk" d="M 10.10 10.50 L 10.10 10.00 L 25.40 10.00 L 25.40 27.90 L 9.00 27.90"/>
-<path class="trk" d="M 9.00 27.90 L 9.30 27.90 L 9.30 17.30 L 7.00 17.30 L 7.00 14.70 L 4.60 14.70 L 4.60 15.20"/>
+<path class="trk" d="M 19.90 15.50 L 10.80 15.50 L 10.80 8.30 L 18.30 8.30"/>
+<path class="trk" d="M 18.30 8.30 L 18.30 11.50 L 24.80 11.50 L 24.80 27.30 L 9.10 27.30"/>
+<path class="trk" d="M 9.10 27.30 L 9.10 22.00 L 10.50 22.00"/>
+<path class="trk" d="M 8.10 13.10 L 7.20 13.10 L 7.20 15.50 L 6.00 15.50"/>
 <path class="trk" d="M 11.10 27.10 L 11.10 27.30 L 16.30 27.30 L 16.30 27.10"/>
+<path class="trk" d="M 12.10 22.00 L 12.10 18.20 L 7.00 18.20 L 7.00 18.80 L 2.90 18.80 L 2.90 15.20 L 4.60 15.20"/>
 <circle class="via" cx="22.40" cy="29.10" r="0.30"/>
 <circle class="via" cx="26.20" cy="32.30" r="0.30"/>
 <circle class="via" cx="8.50" cy="19.00" r="0.30"/>
@@ -73,17 +77,19 @@
 <circle class="via" cx="16.10" cy="19.00" r="0.30"/>
 <circle class="via" cx="22.00" cy="15.90" r="0.30"/>
 <circle class="via" cx="21.60" cy="8.10" r="0.30"/>
-<circle class="via" cx="3.70" cy="17.80" r="0.30"/>
+<circle class="via" cx="3.70" cy="16.80" r="0.30"/>
 <circle class="via" cx="6.40" cy="13.50" r="0.30"/>
 <circle class="via" cx="28.50" cy="6.70" r="0.30"/>
 <circle class="via" cx="1.20" cy="15.30" r="0.30"/>
+<circle class="via" cx="2.10" cy="15.30" r="0.30"/>
+<circle class="via" cx="2.10" cy="16.60" r="0.30"/>
+<circle class="via" cx="1.20" cy="7.50" r="0.30"/>
 <circle class="via" cx="17.90" cy="12.30" r="0.30"/>
 <circle class="via" cx="11.50" cy="24.50" r="0.30"/>
 <circle class="via" cx="24.00" cy="25.70" r="0.30"/>
 <circle class="via" cx="14.40" cy="26.50" r="0.30"/>
-<circle class="via" cx="18.30" cy="10.80" r="0.30"/>
-<circle class="via" cx="10.10" cy="10.50" r="0.30"/>
-<circle class="via" cx="9.00" cy="27.90" r="0.30"/>
+<circle class="via" cx="18.30" cy="8.30" r="0.30"/>
+<circle class="via" cx="9.10" cy="27.30" r="0.30"/>
 <circle class="via" cx="5.00" cy="22.50" r="0.30"/>
 <circle class="via" cx="5.00" cy="25.00" r="0.30"/>
 <circle class="via" cx="27.50" cy="25.00" r="0.30"/>
@@ -171,10 +177,10 @@
 <rect class="pad" x="0.73" y="26.10" width="1.45" height="0.30" />
 <rect class="pad" x="0.73" y="26.65" width="1.45" height="0.60" />
 <rect class="pad" x="0.73" y="27.45" width="1.45" height="0.60" />
-<rect class="pad" x="1.57" y="28.32" width="1.60" height="1.00" />
-<rect class="pad" x="5.75" y="28.32" width="1.60" height="1.00" />
-<rect class="pad" x="1.57" y="19.68" width="1.60" height="1.00" />
-<rect class="pad" x="5.75" y="19.68" width="1.60" height="1.00" />
+<rect class="pad" x="1.32" y="28.32" width="2.10" height="1.00" />
+<rect class="pad" x="5.50" y="28.32" width="2.10" height="1.00" />
+<rect class="pad" x="1.32" y="19.68" width="2.10" height="1.00" />
+<rect class="pad" x="5.50" y="19.68" width="2.10" height="1.00" />
 <text class="ref" x="5.50" y="24.50">J1</text>
 <rect class="crtyd" x="17.75" y="19.90" width="10.20" height="9.20" />
 <rect class="pad" x="18.25" y="25.00" width="3.50" height="1.00" />

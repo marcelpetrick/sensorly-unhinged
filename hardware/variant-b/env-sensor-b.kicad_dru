@@ -43,8 +43,13 @@
 )
 
 (rule "nothing but the sensor nets crosses the neck"
-	(constraint disallow track via pad zone)
-	(condition "A.NetClass != 'SensorIsland' && A.NetClass != 'Power' && A.insideArea('Thermal isolation - no inner copper')")
+	(constraint disallow track via pad)
+	(condition "A.NetName != 'SDA' && A.NetName != 'SCL' && A.NetName != '+3V0' && A.NetName != 'GND' && A.intersectsArea('Sensor island - traces only, no pour')")
 	# EDS S3.1.1: exactly four nets reach the sensor. This rule is the
 	# machine-readable form of that sentence.
+)
+
+(rule "all four island tracks stay thin"
+	(constraint track_width (min 0.15mm) (max 0.15mm))
+	(condition "A.Type == 'Track' && A.intersectsArea('Sensor island - traces only, no pour')")
 )

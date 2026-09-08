@@ -1,42 +1,42 @@
-Qty,Refs,Value,Footprint,MPN,Manufacturer,Second source,Notes
-1,C1,22uF/6.3V X5R,C_0805_2012Metric,,,,"ESP32 bulk, >=10uF required by Espressif"
-1,C2,100nF/16V X7R,C_0402_1005Metric,,,,ESP32 HF decoupling
-1,C3,1uF/16V X7R,C_0402_1005Metric,,,,ESP32 mid-frequency decoupling
-1,C4,1uF/16V X7R,C_0402_1005Metric,,,,EN RC delay (~10 ms)
-1,C5,100nF/16V X7R,C_0402_1005Metric,,,,SW1 debounce
-1,C6,100nF/16V X7R,C_0402_1005Metric,,,,sensor VDD decoupling - ONLY passive on the island
-1,C7,4.7uF/10V X5R,C_0603_1608Metric,,,,buck input - 4.7 uF required at VIN
-1,C8,10uF/6.3V X5R,C_0603_1608Metric,,,,buck output
-1,C9,10uF/16V X5R,C_0805_2012Metric,,,,charger IN bypass
-1,C10,10uF/6.3V X5R,C_0805_2012Metric,,,,charger OUT bypass
-1,C11,10uF/6.3V X5R,C_0805_2012Metric,,,,charger BAT bypass
-1,C12,100nF/16V X7R,C_0402_1005Metric,,,,charger IN HF bypass
-1,C14,100nF/16V X7R,C_0402_1005Metric,,,,VBUS local
-1,C13,100nF/16V X7R,C_0402_1005Metric,,,,ADC filter
-1,D1,LED_GREEN,LED_0603_1608Metric,KP-1608SGC,Kingbright,"any 0603 green LED, Vf < 2.4 V at 0.5 mA","status LED, active low"
-1,J1,USB-C 16P,USB_C_Receptacle_HRO_TYPE-C-31-M-12,TYPE-C-31-M-12,HRO,GCT USB4085 (different land pattern - do not swap without relayout),"USB-C receptacle, sink only, TH mounting lugs"
-1,J2,JST-PH 2P,JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal,S2B-PH-SM4-TB(LF)(SN),JST,"B2B-PH-SM4-TB (top entry, same land pattern family)","1S LiPo, pin 1 = VBAT(+), pin 2 = GND(-) - PROTECTED cell only"
-1,L1,2.2uH,L_Murata_DFE201610P,DFE201612E-2R2M,Murata,"DFE201210S-2R2M (thinner, same land pattern family)","2.2 uH, DCR 116 mOhm - datasheet SLVSEC6D Table 4"
-1,R1,10k 1%,R_0402_1005Metric,,,,EN pull-up
-1,R2,3k3 1%,R_0402_1005Metric,,,,"LED series, ~0.5 mA"
-1,R3,10k 1%,R_0402_1005Metric,,,,"SDA pull-up - main board, never on the island"
-1,R4,10k 1%,R_0402_1005Metric,,,,"SCL pull-up - main board, never on the island"
-1,R5,0R,R_0402_1005Metric,,,,EN tie - a resistor so EN can be lifted to measure Iq
-1,R6,52k3 1%,R_0402_1005Metric,,,,VSET -> 3.00 V. BOM option: 267k -> 3.30 V
-1,R7,10k 1%,R_0402_1005Metric,,,,"TS - fixed resistor, NTC not used in Rev 1"
-1,R8,100k 1%,R_0402_1005Metric,,,,EN2 pull-up from VBUS -> ILIM resistor mode
-1,R9,100k 1%,R_0402_1005Metric,,,,/PGOOD pull-up
-1,R10,100k 1%,R_0402_1005Metric,,,,/CHG pull-up
-1,R11,3k09 1%,R_0402_1005Metric,,,,ILIM: 1550/3090 = 502 mA input limit
-1,R12,3k01 1%,R_0402_1005Metric,,,,ITERM: 0.03*3010/3570 = 25 mA
-1,R13,3k57 1%,R_0402_1005Metric,,,,ISET: 890/3570 = 249 mA. Slow build option: 8k87 -> 100 mA
-1,R16,5k1 1%,R_0402_1005Metric,,,,CC1 pull-down - UFP advertisement
-1,R17,5k1 1%,R_0402_1005Metric,,,,"CC2 pull-down - separate resistor, never shared"
-1,R14,2M2 1%,R_0402_1005Metric,,,,VBAT divider top
-1,R15,2M2 1%,R_0402_1005Metric,,,,"VBAT divider bottom - 0.95 uA continuous, see EDS S6"
-1,SW1,SW_PROV,Panasonic_EVQPUJ_EVQPUA,EVQ-PUJ02K,Panasonic,TS-1187A-B-A-B (generic 3.5x2.9),provisioning / boot button
-1,U1,ESP32-C6-MINI-1-N4,ESP32-C6-MINI-1,ESP32-C6-MINI-1-N4,Espressif,"ESP32-C6-MINI-1U-N4 (u.FL, needs external antenna)","Wi-Fi 6 / BLE 5.3 / 802.15.4 module, 4 MB flash"
-1,U2,SHT45-AD1F,Sensirion_DFN-4_1.5x1.5mm_P0.8mm_SHT4x_NoCentralPad,SHT45-AD1F-R2,Sensirion,"SHT40-AD1B (cost-down, same footprint) / HDC3022 (2nd source, alt FP)","+-0.1 C / +-1.0 %RH, integrated PTFE filter membrane, I2C 0x44"
-1,U3,TPS62840DLC,TI_DLC0008B_VSON-HR-8_2x1.5mm_P0.5mm,TPS62840DLCR,Texas Instruments,TPS62841DLCR (lower Vout range - NOT drop-in for 3.0 V),"750 mA buck, 60 nA Iq, 16 VSET-selectable outputs"
-1,U4,BQ24074RGTR,VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm,BQ24074RGTR,Texas Instruments,"BQ24075RGTR (same pinout, different DPPM/timer defaults)","1S Li-ion charger with power path, NTC, status outputs"
-1,U5,USBLC6-2SC6,SOT-23-6,USBLC6-2SC6,STMicroelectronics,PRTR5V0U2X,USB ESD protection array
+Qty,Populate,Refs,Value,Footprint,MPN,Manufacturer,Second source,Sourcing status,Notes
+1,yes,C1,22uF/6.3V X5R,C_0805_2012Metric,,,,generic specification; purchasing must qualify exact MPN,"ESP32 bulk, >=10uF required by Espressif"
+1,yes,C2,100nF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ESP32 HF decoupling
+1,yes,C3,1uF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ESP32 mid-frequency decoupling
+1,yes,C4,1uF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,EN RC delay (~10 ms)
+1,yes,C5,100nF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,SW1 debounce
+1,yes,C6,100nF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,sensor VDD decoupling - ONLY passive on the island
+1,yes,C7,4.7uF/10V X5R,C_0603_1608Metric,,,,generic specification; purchasing must qualify exact MPN,buck input - 4.7 uF required at VIN
+1,yes,C8,10uF/6.3V X5R,C_0603_1608Metric,,,,generic specification; purchasing must qualify exact MPN,buck output
+1,yes,C9,10uF/16V X5R,C_0805_2012Metric,,,,generic specification; purchasing must qualify exact MPN,charger IN bypass
+1,yes,C10,10uF/6.3V X5R,C_0805_2012Metric,,,,generic specification; purchasing must qualify exact MPN,charger OUT bypass
+1,yes,C11,10uF/6.3V X5R,C_0805_2012Metric,,,,generic specification; purchasing must qualify exact MPN,charger BAT bypass
+1,yes,C12,100nF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,charger IN HF bypass
+1,yes,C14,100nF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,VBUS local
+1,yes,C13,100nF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ADC filter
+1,yes,D1,LED_GREEN,LED_0603_1608Metric,KP-1608SGC,Kingbright,"any 0603 green LED, Vf < 2.4 V at 0.5 mA","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","status LED, active low"
+1,yes,J1,USB-C 16P,USB_C_Receptacle_HRO_TYPE-C-31-M-12,TYPE-C-31-M-12,HRO,GCT USB4085 (different land pattern - do not swap without relayout),"single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","USB-C receptacle, sink only, TH mounting lugs"
+1,yes,J2,JST-PH 2P,JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal,S2B-PH-SM4-TB(LF)(SN),JST,"B2B-PH-SM4-TB (top entry, same land pattern family)","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","1S LiPo, pin 1 = VBAT(+), pin 2 = GND(-) - PROTECTED cell only"
+1,yes,L1,2.2uH,L_Murata_DFE201610P,DFE201612E-2R2M,Murata,"DFE201210S-2R2M (thinner, same land pattern family)","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","2.2 uH, DCR 116 mOhm - datasheet SLVSEC6D Table 4"
+1,yes,R1,10k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,EN pull-up
+1,yes,R2,3k3 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"LED series, ~0.5 mA"
+1,yes,R3,10k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"SDA pull-up - main board, never on the island"
+1,yes,R4,10k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"SCL pull-up - main board, never on the island"
+1,yes,R5,0R,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,EN tie - a resistor so EN can be lifted to measure Iq
+1,yes,R6,267k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,VSET -> 3.30 V. Characterization only: 52k3 -> 3.00 V
+1,yes,R7,10k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"TS - fixed resistor, NTC not used in Rev 1"
+1,yes,R8,100k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,EN2 pull-up from VBUS -> ILIM resistor mode
+1,yes,R9,100k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,/PGOOD pull-up
+1,yes,R10,100k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,/CHG pull-up
+1,yes,R11,3k09 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ILIM: 1550/3090 = 502 mA input limit
+1,yes,R12,3k01 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ITERM: 0.03*3010/3570 = 25 mA
+1,yes,R13,3k57 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ISET: 890/3570 = 249 mA. Slow build option: 8k87 -> 100 mA
+1,yes,R16,5k1 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,CC1 pull-down - UFP advertisement
+1,yes,R17,5k1 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"CC2 pull-down - separate resistor, never shared"
+1,yes,R14,2M2 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,VBAT divider top
+1,yes,R15,2M2 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"VBAT divider bottom - 0.95 uA continuous, see EDS S6"
+1,yes,SW1,SW_PROV,Panasonic_EVQPUJ_EVQPUA,EVQ-PUJ02K,Panasonic,TS-1187A-B-A-B (generic 3.5x2.9),"single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute",provisioning / boot button
+1,yes,U1,ESP32-C6-MINI-1-N4,ESP32-C6-MINI-1,ESP32-C6-MINI-1-N4,Espressif,"ESP32-C6-MINI-1U-N4 (u.FL, needs external antenna)","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","Wi-Fi 6 / BLE 5.3 / 802.15.4 module, 4 MB flash"
+1,yes,U2,SHT45-AD1F,Sensirion_DFN-4_1.5x1.5mm_P0.8mm_SHT4x_NoCentralPad,SHT45-AD1F-R2,Sensirion,"SHT40-AD1B (cost-down, same footprint) / HDC3022 (2nd source, alt FP)","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","+-0.1 C / +-1.0 %RH, integrated PTFE filter membrane, I2C 0x44"
+1,yes,U3,TPS62840DLC,TI_DLC0008B_VSON-HR-8_2x1.5mm_P0.5mm,TPS62840DLCR,Texas Instruments,TPS62841DLCR (lower Vout range - NOT drop-in for 3.0 V),"single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","750 mA buck, 60 nA Iq, 16 VSET-selectable outputs"
+1,yes,U4,BQ24074RGTR,VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm,BQ24074RGTR,Texas Instruments,"BQ24075RGTR (same pinout, different DPPM/timer defaults)","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","1S Li-ion charger with power path, NTC, status outputs"
+1,yes,U5,USBLC6-2SC6,SOT-23-6,USBLC6-2SC6,STMicroelectronics,PRTR5V0U2X,"single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute",USB ESD protection array

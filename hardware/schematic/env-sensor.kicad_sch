@@ -793,7 +793,7 @@
 							)
 						)
 					)
-					(property "ki_fp_filters" "Connector*:*_1x??-1MP*"
+					(property "ki_fp_filters" "sensorly:JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal"
 						(at 0 0 0)
 						(show_name no)
 						(do_not_autoplace no)
@@ -3150,7 +3150,7 @@
 						)
 					)
 				)
-				(property "ki_fp_filters" "SON*2x1.5mm*P0.5mm*"
+				(property "ki_fp_filters" "sensorly:TI_DLC0008B_VSON-HR-8_2x1.5mm_P0.5mm"
 					(at 0 0 0)
 					(show_name no)
 					(do_not_autoplace no)
@@ -4831,7 +4831,7 @@
 		)
 		(uuid "894dcddb-aebd-597c-a190-70ee261ff75d")
 	)
-	(text "03  System regulator  3.00 V"
+	(text "03  System regulator  3.30 V baseline"
 		(exclude_from_sim yes)
 		(at 533.4 33.02 0)
 		(effects
@@ -4841,7 +4841,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "1263c5f1-93e8-5750-91a2-fcf5f71b6ab1")
+		(uuid "86b94f3d-95eb-5f29-aa5c-4c1e996c1361")
 	)
 	(text "07  Button + status LED"
 		(exclude_from_sim yes)
@@ -6012,7 +6012,7 @@
 				)
 			)
 		)
-		(property "Value" "52k3 1%"
+		(property "Value" "267k 1%"
 			(at 673.1 151.13 0)
 			(effects
 				(font
@@ -9014,16 +9014,6 @@
 	)
 	(wire
 		(pts
-			(xy 304.8 219.71) (xy 300.99 219.71)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b7a35ce3-2ab3-5f7d-a960-672eccf061c7")
-	)
-	(wire
-		(pts
 			(xy 304.8 212.09) (xy 300.99 212.09)
 		)
 		(stroke
@@ -10512,7 +10502,7 @@
 		)
 		(uuid "13507160-46f2-5463-9b04-438867d2bc40")
 	)
-	(global_label "LED_A"
+	(global_label "LED_N"
 		(shape bidirectional)
 		(at 679.45 226.06 180.0)
 		(fields_autoplaced yes)
@@ -10524,7 +10514,7 @@
 		)
 		(uuid "c81c7451-14c7-53c3-b43e-b7cc1c79b33f")
 	)
-	(global_label "GND"
+	(global_label "LED_A"
 		(shape bidirectional)
 		(at 694.69 226.06 0.0)
 		(fields_autoplaced yes)
@@ -10536,7 +10526,7 @@
 		)
 		(uuid "e23628b4-f38d-5e0d-ba8f-611ff6efa085")
 	)
-	(global_label "LED_A"
+	(global_label "+3V0"
 		(shape bidirectional)
 		(at 558.8 255.27 90.0)
 		(fields_autoplaced yes)
@@ -10548,7 +10538,7 @@
 		)
 		(uuid "90e04df5-f64a-5d54-a07b-ab0362f6050b")
 	)
-	(global_label "LED_N"
+	(global_label "LED_A"
 		(shape bidirectional)
 		(at 558.8 270.51 270.0)
 		(fields_autoplaced yes)
@@ -10716,7 +10706,7 @@
 		)
 		(uuid "495603df-4334-5cd3-9864-8a8cecd89845")
 	)
-	(global_label "VSYS"
+	(global_label "EN_REG"
 		(shape bidirectional)
 		(at 554.99 87.63 180.0)
 		(fields_autoplaced yes)
@@ -10860,7 +10850,7 @@
 		)
 		(uuid "4eb0e39b-7966-5631-a847-057fdc3e849e")
 	)
-	(global_label "VSYS"
+	(global_label "EN_REG"
 		(shape bidirectional)
 		(at 615.95 146.05 270.0)
 		(fields_autoplaced yes)
@@ -10955,18 +10945,6 @@
 			(justify left)
 		)
 		(uuid "a19ad345-ae75-588c-b55a-d4f10dbb91a6")
-	)
-	(global_label "GND"
-		(shape bidirectional)
-		(at 300.99 219.71 180.0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "8b0f6faa-5256-5f46-8bae-6d751653c9de")
 	)
 	(global_label "ITERM"
 		(shape bidirectional)
@@ -12103,6 +12081,10 @@
 	(no_connect
 		(at 50.8 95.25)
 		(uuid "d0c92368-b11c-5659-a2df-63eac3b6f9fb")
+	)
+	(no_connect
+		(at 304.8 219.71)
+		(uuid "fce3bcd7-1513-5adb-bed2-5b2bea5b0d34")
 	)
 	(no_connect
 		(at 81.28 278.13)
