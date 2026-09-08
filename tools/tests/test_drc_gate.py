@@ -1,10 +1,33 @@
 # SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
 # SPDX-License-Identifier: GPL-3.0-or-later
 import unittest
+import contextlib
+import io
+import json
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+from tools import drc_gate
 from tools.drc_gate import validate_report, warning_key
 
 
 class DrcTests(unittest.TestCase):
+    def test_warning_count_cannot_exceed_reviewed_allowance(self):
+        with tempfile.TemporaryDirectory() as d:
+            directory = Path(d)
+            budget = directory / "budget.json"
+            budget.write_text(json.dumps({"a": {"unconnected": 0, "warnings": [
+                {"type": "isolated_copper", "items": ["zone-1"], "count": 1}]}}))
+            report = directory / "report.json"
+            data = self.report()
+            warning = dict(type="isolated_copper", severity="warning",
+                           items=[dict(uuid="zone-1", description="test zone")])
+            with patch.object(drc_gate, "BUDGET", budget), contextlib.redirect_stdout(io.StringIO()):
+                for count, expected in ((1, 0), (2, 1)):
+                    data["violations"] = [warning] * count
+                    report.write_text(json.dumps(data))
+                    self.assertEqual(drc_gate.main([str(report), "a"]), expected)
+
     def report(self):
         return dict(violations=[], unconnected_items=[], schematic_parity=[],
                     included_severities=["error", "warning"], ignored_checks=[],

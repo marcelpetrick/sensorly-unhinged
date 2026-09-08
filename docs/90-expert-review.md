@@ -84,3 +84,5 @@ the main board. C6 taps are now confined to the island, and every neck cut must
 contain exactly four conductors. This corrects finding 19 beyond net-class rules.
 The injected tracks use B.Cu to avoid KiCad associating a touching test track
 with an existing F.Cu sensor net; both tests assert the actual named DRC rule.
+An additional fault-injection test verifies that one reviewed warning passes
+but two occurrences of the same warning exceed its allowance and fail.
