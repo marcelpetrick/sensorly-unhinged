@@ -276,6 +276,7 @@ run_step "BOM" bom_sanity
 if have_kicad; then
   run_step "ERC" erc_step
   run_step "DRC + Parity" drc_step
+  run_step "DRC Negative Tests" make test-kicad
   if [ "$SKIP_OUTPUTS" = "1" ]; then
     skip_step "Fab Outputs" "SKIP_OUTPUTS=1"
   else

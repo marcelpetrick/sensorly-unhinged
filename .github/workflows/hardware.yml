@@ -56,7 +56,7 @@ jobs:
       # Zero DRC errors, only the reviewed warnings, and a ratsnest budget that
       # may go down but never up. Policy lives in tools/drc_gate.py.
       - name: ERC + DRC + schematic parity gate
-        run: make erc drc
+        run: make erc drc test-kicad
 
       - name: Manufacturing outputs
         run: make outputs
