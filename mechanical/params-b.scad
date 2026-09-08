@@ -13,7 +13,7 @@ batt = [35.0, 30.0, 5.0];
 // battery bay in BOARD coordinates; it may extend past the
 // board edge, because the cavity is sized to the cell, not the PCB
 batt_bay = [-3.5, 6.9, 31.5, 32.5];
-divider_y = 33.5;
+divider_y = 35.35;
 neck_slot = [4.2, 2.3];
 antenna_keepout = [0.0, 0.0, 28.0, 5.9];
 // [x, y, w, h] on the board, in board coordinates
@@ -24,5 +24,5 @@ side_vents = [[8.6, 1.2, 3.0], [11.2, 1.2, 3.0], [13.799999999999999, 1.2, 3.0],
 // [x, y, diameter] hold-down pillars, board coordinates
 holddowns = [[1.6, 15.6, 2.2]];
 // [wall, x, y, width, height, z] - x,y in board coordinates
-cutouts = [["left", 5.5, 24.5, 9.549999999999999, 3.5100000000000002, 0.0], ["right", 22.85, 24.5, 6.35, 4.0, 1.0], ["lid", 13.7, 28.0, 4.0, 4.0, 0.0], ["lid", 11.3, 22.0, 2.0, 2.0, 0.0]];
+cutouts = [["left", 5.5, 24.5, 9.549999999999999, 3.5100000000000002, 1.58], ["right", 22.85, 24.5, 6.35, 4.0, 1.0], ["lid", 13.7, 28.0, 4.0, 4.0, 0.0], ["lid", 11.3, 22.0, 2.0, 2.0, 0.0]];
 board_outline = [[0, 0], [28.0, 0], [28.0, 34.0], [15.75, 34.0], [15.75, 42.0], [23.0, 42.0], [23.0, 51.0], [5.0, 51.0], [5.0, 42.0], [12.25, 42.0], [12.25, 34.0], [0, 34.0]];

@@ -7,6 +7,22 @@ antenna keep-out and every connector position are read from it, never
 retyped. `mechanical/env-sensor-case.scad` turns these numbers into
 solids.
 
+The lid uses a perimeter locating ring. Hold-down reach is measured
+from the lid seating face, not from the ring tip; `make mech` checks
+the full XYZ mesh extent to catch PCB interference.
+
+Variant B's divider lies wholly inside the physical neck span, with
+printing clearance from the body and island; the electrical rule
+zone boundary is not used as a mechanical wall position.
+
+The perimeter lip is relieved where it crosses B's divider. The
+OpenSCAD `interference` mode intersects the closed lid with the base;
+the expected result is empty. This does not prove pack/PCB fit.
+
+USB opening height is centred on the connector body above the PCB,
+not on the PCB surface. Cable-shell reach through the recessed wall
+still requires a physical fit check with the intended cable.
+
 ## Component heights
 
 | Ref | Height | Source |
@@ -33,7 +49,8 @@ solids.
 | Clearance above board | 8.1 mm | 8.1 mm |
 | Tallest part | J2 at 7.50 mm | J2 at 7.50 mm |
 | Largest cell the bay holds | 35 × 21 × 5 mm | 35 × 26 × 5 mm |
-| Approximate capacity | 337 mAh | 403 mAh |
+| Volume proxy, NOT rated pack capacity | 337 mAh equivalent | 403 mAh equivalent |
+| Planning cell fits with clearance | NO | NO |
 | Vent slots over the sensor | 1 in the lid + 4 in the wall | 2 in the lid + 4 in the wall |
 | Lid hold-down pillars | 3 | 1 |
 | Chambers | 1 | 2, divided at the neck |
@@ -62,20 +79,23 @@ The real fix is two M2 nylon screws through the lid into bosses - and the board 
 
 Requirement E-02 asks for 500-1000 mAh. The bay in Variant A holds about **337 mAh** and Variant B about **403 mAh**, because the cell may sit neither under the antenna keep-out nor under the sensor, and what is left is a strip.
 
-Three ways out, none of them free:
+These mAh figures are only a volume-density proxy. No compatible
+protected pack of that capacity has been selected or demonstrated to
+fit. They must not enter a runtime claim or purchasing BOM.
 
-1. **A thicker cell.** 8 mm instead of 5 mm reaches 500 mAh in the same footprint and adds 3 mm to a case that is already over its height target.
-2. **A longer case.** Extending the A case by ~11 mm in Y gets the planning cell in, at the cost of the 40-45 mm square envelope M-01 asks for.
-3. **Accept less capacity and check it against measurement.** Requirement E-04 is *runtime*, not capacity; 330 mAh may well carry three months at the real duty cycle. Nobody knows yet, because the energy per upload is a Rev-1 measurement.
-
-Option 3 is the right one to hold open. Capacity is a proxy; runtime is the requirement, and we are four weeks from being able to measure it. This is now an entry in the open-items table rather than a number chosen today.
-
-One unplanned consequence worth noticing: **Variant B's case is 17 mm longer, so it holds a 66 mAh bigger cell** - about 20 % more energy. The thermally-isolated variant partially pays for its own size in battery life. That was not designed in; it fell out of the geometry.
+EDS-3 remains open: select one actual protected pack for both variants,
+including connector, lead bend radius, swelling allowance and insulation.
+The current planning cell fails the dimension check. Validate support
+ribs and retention against the actual cell, then print and assemble both
+cases before closing the mechanical release gate. Case dimensions alone
+do not prove battery fit or safe retention.
 
 **Variant A checks:** 
+- ⚠️ the actual 35 x 30 x 5 mm planning cell does not fit the battery bay
 - ⚠️ battery bay 35 x 21 x 5 mm holds about 337 mAh, below requirement E-02's 500 mAh minimum
 
 **Variant B checks:** 
 - ⚠️ only 1 lid hold-down pillar(s) fit - the electronics chamber has no bare board left. The board needs a different retention scheme; see the note below
+- ⚠️ the actual 35 x 30 x 5 mm planning cell does not fit the battery bay
 - ⚠️ battery bay 35 x 26 x 5 mm holds about 403 mAh, below requirement E-02's 500 mAh minimum
 
