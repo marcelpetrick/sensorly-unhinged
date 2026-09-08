@@ -19,12 +19,14 @@ class IslandRuleTests(unittest.TestCase):
             stem = "env-sensor-b"
             for suffix in ("kicad_pcb", "kicad_pro", "kicad_dru"):
                 shutil.copyfile(ROOT / f"_build/b/{stem}.{suffix}", directory / f"{stem}.{suffix}")
+            shutil.copyfile(ROOT / "_build/b/fp-lib-table", directory / "fp-lib-table")
             pcb = directory / f"{stem}.kicad_pcb"
             source = pcb.read_text().rstrip()
             self.assertTrue(source.endswith(")"))
-            # Absolute board coordinates: x=114, y=96..99 lies in B's neck.
+            # B.Cu avoids touching the existing F.Cu traces, which KiCad can
+            # otherwise use to reassociate an overlapping test segment's net.
             segment = (f'(segment (start 114 96) (end 114 99) (width {width}) '
-                       f'(layer "F.Cu") (net "{net}") '
+                       f'(layer "B.Cu") (net "{net}") '
                        '(uuid "d4b9a941-e7bc-4a72-84f2-182ea326870b"))')
             pcb.write_text(source[:-1] + segment + "\n)\n")
             report = directory / "drc.json"
@@ -35,7 +37,9 @@ class IslandRuleTests(unittest.TestCase):
 
     def test_vbat_cannot_use_power_class_to_enter_neck(self):
         violations = self.violations("VBAT", .15)
-        self.assertTrue(any(v["type"] == "disallowed_items" for v in violations), violations)
+        self.assertTrue(any(v["type"] == "items_not_allowed" and
+                            "nothing but the sensor nets crosses the neck" in v["description"]
+                            for v in violations), violations)
 
     def test_ground_track_cannot_be_widened(self):
         violations = self.violations("GND", .30)
