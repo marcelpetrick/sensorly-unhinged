@@ -129,8 +129,11 @@ KiCad expression semantics: [custom rules](https://docs.kicad.org/10.0/en/pcbnew
 The generator also counts conductors through successive neck cross-sections:
 one trace per named net, all on F.Cu at 0.15 mm. C6 must connect locally on B's
 island; a second ground detour through the neck is a thermal-rule failure even
-though it introduces no new electrical net. Both layouts use the revised routing
-order; A has no neck and does not need this spatial count.
+though it introduces no new electrical net. B routes the ground tap before its
+supply feed and searches for plane access just above the neck, always excluding
+the neck from via placement. These search seeds are geometry assumptions, not
+fixed electrical values. A has no neck and retains its existing routing order
+and fan-out. Both variants retain the same circuit and netlist.
 
 **Why trace width is the primary lever** — first-order conduction through the
 Variant-B neck (3.5 mm wide × 8.0 mm long × 1.6 mm FR-4, four 0.15 mm traces in

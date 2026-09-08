@@ -193,6 +193,9 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         ("+3V0", ("U2", "3"), None, None),
         ("+3V0", ("C6", "1"), None, "+3V0"),
     ]
+    if v.key == "a":
+        # A has no neck; retain its existing routing order and fan-out.
+        plan = [plan[i] for i in (0, 1, 4, 2, 5, 3)]
     tracks: list[Track] = []
     vias: list[Via] = []
     extra_blocked: list[tuple] = []
@@ -232,7 +235,15 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
             gv.blocked = bytearray(g.blocked)
             if quiet:
                 gv.block_rect(quiet[0], quiet[2], quiet[1], quiet[3])
-            tx, ty = _free_spot(gv, PLANE_VIA[net], 0.55)
+            preferred = PLANE_VIA[net]
+            if v.key == "b":
+                gv.block_rect(0, B_BODY_H - .5, v.width, v.height)
+                # Geometry seed, not an electrical value: search for legal
+                # main-board plane access just above the neck. Long lateral
+                # fan-outs unnecessarily block the other dense board routes.
+                preferred = (v.width/2 + (1.5 if net == "GND" else -2),
+                             B_BODY_H - 2)
+            tx, ty = _free_spot(gv, preferred, 0.55)
         path = _dijkstra(g, (sx, sy), (tx, ty) if goals is None else None,
                          goals=goals)
         if path is None:
