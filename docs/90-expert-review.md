@@ -118,3 +118,28 @@ and assembly review, then build controlled prototypes for firmware bring-up and
 the revised A/B experiment. Pack selection can change both geometry and charging
 requirements, so the current generated boards should not be ordered as a final
 design.
+
+### Verification record — 2026-09-08
+
+`./localPipeline.sh` completed with exit status 0 against committed design
+sources at `eafb7d3`, using Python 3.14.7 and KiCad 10.0.6. All 14 pipeline
+stages passed; none was skipped.
+
+| Check | Observed result |
+|---|---|
+| Offline regression tests | 35 passed, including injected electrical, report and export failures. |
+| KiCad negative-rule tests | 2 passed: forbidden VBAT and widened GND in B's island region are rejected. |
+| Generator and reproducibility | Zero model-rule errors; schematic, both boards and generated reports regenerate identically. |
+| Electrical rules | Zero ERC violations. |
+| PCB rules and parity | A: 0 errors, 6 reviewed warnings, 0 parity differences, 54 unconnected items. B: 0 errors, 10 reviewed warnings, 0 parity differences, 58 unconnected items. |
+| Mechanical geometry | Four STL parts match XYZ bounds; seated lid/base intersections are empty for both variants. Five documented mechanical issues remain open. |
+| Documentation and BOM | 19/19 checked figures match the model; BOM generated with 41 lines/41 populated placements. This is not sourcing qualification. |
+| Draft export | Four-layer Gerbers, drill files, CPL and STEP produced for both variants. Board and enclosure previews refreshed. |
+| Release rejection | `make release-check` exited 2 as expected: A/B warnings and routing gaps plus all seven missing qualification evidence categories blocked release. |
+
+Local diagnostic logs are `_build/review-pipeline.log` and
+`_build/review-release-check.log` (ignored build artifacts; rerun the commands to
+reproduce). The committed record here preserves the results without treating
+temporary logs as release evidence. No hardware was fabricated, powered,
+charged, radio-tested or measured during this review. No firmware implementation
+or physical qualification is claimed.
