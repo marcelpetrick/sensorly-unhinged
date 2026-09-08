@@ -86,3 +86,35 @@ The injected tracks use B.Cu to avoid KiCad associating a touching test track
 with an existing F.Cu sensor net; both tests assert the actual named DRC rule.
 An additional fault-injection test verifies that one reviewed warning passes
 but two occurrences of the same warning exceed its allowance and fail.
+
+## Final disposition
+
+The review is documented and corrective changes are retained as atomic local
+commits after `038b3ca`. **This is still an unfinished prototype, not a released
+instrument.** Repository-level corrections address findings **3, 4, 5, 7, 8,
+10, 11, 12, 14, 15, 16, 17, 18, 19 and 20**. This means the identified circuit,
+geometry, tooling or documentation defect is corrected; it does not mean the
+resulting physical product has been qualified.
+
+Five findings are only partially addressed:
+
+| Finding | Completed here | Required to close |
+|---|---|---|
+| 1 — Battery safety | Default safety timers restored; unsupported charging acceptance removed. | Select the protected pack, implement pack-temperature inhibition, and test charging and faults. |
+| 2 — Manufacturing readiness | Draft outputs clearly separated from gated release. | Finish A's 54 and B's 58 unconnected items, resolve release warnings, and review the finished layouts. |
+| 6 — USB current | Documented the limited bench-source scope and current assumptions. | Decide supported source types and implement/qualify the corresponding current-control policy. |
+| 9 — Battery fit | Actual dimension checks reject the planning cell in both bays; misleading capacity claims removed. | Select a purchasable pack, revise the enclosure as needed, and verify retention, tolerances and connector access physically. |
+| 13 — Firmware/product behavior | Added the [firmware and acceptance contract](71-firmware-contract.md). | Implement the ESP-IDF application and pass the contract's device tests. |
+
+The [release evidence inventory](../hardware/release-readiness.json) additionally
+requires measured rail/runtime, assembly/sourcing, RF and instrument-accuracy
+qualification. None of those evidence slots has been filled with assumptions.
+The [charge budget](35-power-budget.md) and thermal calculations are planning
+models, not measured battery life or accuracy.
+
+Recommended order of remaining engineering work: select the pack and supported
+USB sources first, close the resulting circuit/enclosure changes, finish routing
+and assembly review, then build controlled prototypes for firmware bring-up and
+the revised A/B experiment. Pack selection can change both geometry and charging
+requirements, so the current generated boards should not be ordered as a final
+design.
