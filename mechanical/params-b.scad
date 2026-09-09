@@ -5,14 +5,14 @@ variant = "b";
 board_w = 28.0; board_h = 51.0; board_t = 1.6;
 wall = 2.0; floor_t = 2.0; lid_t = 2.0;
 clear_xy = 0.6; fillet = 1.5; tol = 0.35;
-rib_w = 1.6;
-inner_w = 37.0; inner_h = 52.2; inner_z = 15.7;
-board_z = 6.0; top_clear = 8.1;
-outer_w = 41.0; outer_h = 56.2; outer_z = 19.7;
-batt = [35.0, 30.0, 5.0];
+rib_w = 1.6; support_h = 0.8;
+inner_w = 43.0; inner_h = 52.2; inner_z = 14.8;
+board_z = 9.100000000000001; top_clear = 4.1;
+outer_w = 47.0; outer_h = 56.2; outer_z = 18.8;
+batt = [42.0, 20.5, 7.3];
 // battery bay in BOARD coordinates; it may extend past the
 // board edge, because the cavity is sized to the cell, not the PCB
-batt_bay = [-3.5, 6.9, 31.5, 32.5];
+batt_bay = [-7.0, 9.45, 35.0, 29.95];
 divider_y = 35.35;
 neck_slot = [4.2, 2.3];
 antenna_keepout = [0.0, 0.0, 28.0, 5.9];
@@ -22,7 +22,7 @@ vent_wall = "bottom";
 // [centre, width, height] on the sensor-chamber wall
 side_vents = [[8.6, 1.2, 3.0], [11.2, 1.2, 3.0], [13.799999999999999, 1.2, 3.0], [16.4, 1.2, 3.0]];
 // [x, y, diameter] hold-down pillars, board coordinates
-holddowns = [[1.6, 15.6, 2.2]];
+holddowns = [];
 // [wall, x, y, width, height, z] - x,y in board coordinates
-cutouts = [["left", 5.5, 24.5, 9.549999999999999, 3.5100000000000002, 1.58], ["right", 22.85, 24.5, 6.35, 4.0, 1.0], ["lid", 13.7, 28.0, 4.0, 4.0, 0.0], ["lid", 11.3, 22.0, 2.0, 2.0, 0.0]];
+cutouts = [["left", 5.5, 24.5, 9.549999999999999, 3.5100000000000002, 1.58], ["lid", 13.7, 28.0, 4.0, 4.0, 0.0], ["lid", 11.3, 22.0, 2.0, 2.0, 0.0]];
 board_outline = [[0, 0], [28.0, 0], [28.0, 34.0], [15.75, 34.0], [15.75, 42.0], [23.0, 42.0], [23.0, 51.0], [5.0, 51.0], [5.0, 42.0], [12.25, 42.0], [12.25, 34.0], [0, 34.0]];

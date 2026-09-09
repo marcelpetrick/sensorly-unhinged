@@ -15,10 +15,10 @@ Each row includes the ones above it.
 
 | Change | Assembly (USD) | Per finished unit | Saved |
 |---|---:|---:|---:|
-| Baseline — two separate orders | $78–110 | €25.17–46.12 | — |
-| Panelise A and B on one panel | $49–66 | €21.77–40.32 | 14–13 % |
-| + all-SMD USB-C, fewer extended parts | $33–43 | €19.99–37.83 | 21–18 % |
-| + SHT40-AD1F instead of SHT45-AD1F | $33–43 | €18.24–35.72 | 28–23 % |
+| Baseline — two separate orders | $84–118 | €26.28–47.58 | — |
+| Panelise A and B on one panel | $52–70 | €22.55–41.32 | 14–13 % |
+| + all-SMD USB-C, fewer extended parts | $33–43 | €20.45–38.37 | 22–19 % |
+| + SHT40-AD1F instead of SHT45-AD1F | $33–43 | €18.70–36.26 | 29–24 % |
 
 ## Why each one works
 
@@ -32,7 +32,7 @@ Each row includes the ones above it.
 ## The single biggest lever is free
 
 Panelising A and B together saves roughly
-$29 on the assembly line and costs
+$32 on the assembly line and costs
 nothing in the design. It works only because of the decision made at the very
 start — *one electrical platform, two physical implementations*. Two genuinely
 different boards could not share a feeder setup.
@@ -55,7 +55,7 @@ the board. See `62-fabrication-3-boards.md`.
 ## About building fewer prototypes
 
 Cutting 5 + 5 to 3 + 3 saves roughly
-$36–60 of components — real money,
+$37–62 of components — real money,
 but the smallest lever on this page, and it is the only one that costs
 *information* rather than features.
 

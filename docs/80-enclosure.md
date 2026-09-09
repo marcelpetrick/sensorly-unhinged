@@ -27,8 +27,8 @@ still requires a physical fit check with the intended cable.
 
 | Ref | Height | Source |
 |---|---:|---|
-| J2 | 7.50 mm | JST PH series, S2B-PH-SM4-TB overall profile height |
 | SW1 | 3.50 mm | Panasonic EVQ-PU tactile - TBC against the datasheet |
+| J2 | 3.40 mm | Molex PicoBlade 53261-0371 drawing, mated height |
 | J1 | 3.16 mm | HRO TYPE-C-31-M-12, 8.94 x 7.35 x 3.16 |
 | U1 | 2.40 mm | ESP32-C6-MINI-1 datasheet v1.5 S10.1, 13.2 x 16.6 x 2.4 |
 | C1 | 1.45 mm | 0805 MLCC, typical maximum |
@@ -43,59 +43,41 @@ still requires a physical fit check with the intended cable.
 
 | | Variant A | Variant B |
 |---|---:|---:|
-| Outer size (mm) | 41.0 × 39.2 × 19.7 | 41.0 × 56.2 × 19.7 |
-| Internal cavity height | 15.7 mm | 15.7 mm |
-| Battery bay below board | 5.0 mm | 5.0 mm |
-| Clearance above board | 8.1 mm | 8.1 mm |
-| Tallest part | J2 at 7.50 mm | J2 at 7.50 mm |
-| Largest cell the bay holds | 35 × 21 × 5 mm | 35 × 26 × 5 mm |
-| Volume proxy, NOT rated pack capacity | 337 mAh equivalent | 403 mAh equivalent |
-| Planning cell fits with clearance | NO | NO |
+| Outer size (mm) | 47.0 × 39.2 × 18.8 | 47.0 × 56.2 × 18.8 |
+| Internal cavity height | 14.8 mm | 14.8 mm |
+| Battery bay below board | 7.3 mm | 7.3 mm |
+| Clearance above board | 4.1 mm | 4.1 mm |
+| Tallest part | SW1 at 3.50 mm | SW1 at 3.50 mm |
+| Modeled maximum pack envelope | 42.0 × 20.5 × 7.3 mm | 42.0 × 20.5 × 7.3 mm |
+| Selected pack | LP702040, 550 mAh | LP702040, 550 mAh |
+| Selected pack fits modeled bay | yes | yes |
 | Vent slots over the sensor | 1 in the lid + 4 in the wall | 2 in the lid + 4 in the wall |
-| Lid hold-down pillars | 3 | 1 |
+| Lid hold-down pillars | 2 | 0 |
 | Chambers | 1 | 2, divided at the neck |
 | Solid material beyond the antenna | 2.6 mm | 2.6 mm |
 
-## The battery connector sets the case height
+## Selected battery and connector
 
-| Battery connector | Height above PCB | Variant A case | Variant B case |
-|---|---:|---:|---:|
-| JST PH 2.0 mm, S2B-PH-SM4-TB - as designed | 7.50 mm | 19.7 mm | 19.7 mm |
-| JST SH 1.0 mm, SM02B-SRSS-TB - Rev 2 candidate | 3.40 mm | 15.7 mm | 15.7 mm |
+Both cases are sized for the selected **LP702040 550 mAh** protected pack. Drawing FD_3245_20 specifies 550 mAh minimum, maximum assembled dimensions 42 × 20.5 × 7.3 mm, a Semitec 103AT-2 NTC and a 45 ± 3 mm three-wire Molex 51021-0300 PicoBlade harness. J2 is the mating 53261-0371 right-angle header at 3.40 mm mated height.
 
-Requirement M-01 asks for a case 13-18 mm thick. As designed it is **19.7 mm** - the JST PH battery header alone is 7.5 mm, three times the height of the radio module, and it sets the whole cavity. Moving to a 1.0 mm-pitch JST SH brings the case to **15.7 mm**, inside the requirement, at the cost of a fiddlier connector to mate by hand.
+The generated case is **18.8 mm** thick. The model reserves 0.5 mm around every pack edge and 1.0 mm above the drawing's maximum pouch thickness for manufacturing tolerance and swelling. The support shelves begin above that allowance; nothing rigid may occupy it.
 
-That is the honest shape of the trade: *user-replaceable battery* is not free, and on a device this small the connector, not the cell, is what you pay in. Recorded as a Rev 2 item; Rev 1 keeps the PH because a connector you can actually plug in at the bench is worth 4 mm while we are still bringing boards up.
+Incoming inspection must confirm the drawing and cavity order `1=black/-`, `2=yellow/NTC`, `3=red/+` before mating. An assembled lead-bend/retention test remains part of the battery qualification gate.
 
 ## Board retention, and a decision coming back around
 
-The board rests on four ribs and is meant to be pinned by short pillars from the lid onto bare copper-free board. The generator searches the placement for room rather than assuming a corner is empty, and finds **3 on Variant A** but only **1 on Variant B** - B's electronics chamber carries all 41 parts in a narrower body, and there is no bare board left.
+The board rests on four ribs and is meant to be pinned by short pillars from the lid onto bare copper-free board. The generator searches the placement for room rather than assuming a corner is empty, and finds **2 on Variant A** but only **0 on Variant B** - B's electronics chamber carries all 43 populated parts in a narrower body, and there is no bare board left.
 
 The first attempt put two of B's pillars *on the sensor island*: plastic bridging the lid straight into the thermally isolated part, which would have quietly wrecked the experiment the island exists for. That is now a hard check.
 
 The real fix is two M2 nylon screws through the lid into bosses - and the board has no holes for them, because `40-floorplans.md` decided against mounting holes on the grounds that M-04 forbids metal near the antenna and a nylon boss costs 19 mm² of a 1000 mm² board. That was a reasonable call in the PCB phase and it is now a retention problem in the mechanical phase. Nylon screws are not metal; the antenna objection does not actually apply to them. **Rev 2 should carry two nylon M2 holes in the electronics chamber**, which costs a little copper and solves this cleanly.
 
-## The battery does not fit, and that is a finding
+## Battery qualification still requires hardware
 
-Requirement E-02 asks for 500-1000 mAh. The bay in Variant A holds about **337 mAh** and Variant B about **403 mAh**, because the cell may sit neither under the antenna keep-out nor under the sensor, and what is left is a strip.
+The selected pack passes the parametric plan-view and height checks in both variants. That is a design check, not evidence that a pouch, its protection board and leads tolerate the printed retention scheme. Before enclosed charging, inspect supplier samples, print and assemble both cases, then run the EDS §5.2 temperature, timer and fault tests.
 
-These mAh figures are only a volume-density proxy. No compatible
-protected pack of that capacity has been selected or demonstrated to
-fit. They must not enter a runtime claim or purchasing BOM.
-
-EDS-3 remains open: select one actual protected pack for both variants,
-including connector, lead bend radius, swelling allowance and insulation.
-The current planning cell fails the dimension check. Validate support
-ribs and retention against the actual cell, then print and assemble both
-cases before closing the mechanical release gate. Case dimensions alone
-do not prove battery fit or safe retention.
-
-**Variant A checks:** 
-- ⚠️ the actual 35 x 30 x 5 mm planning cell does not fit the battery bay
-- ⚠️ battery bay 35 x 21 x 5 mm holds about 337 mAh, below requirement E-02's 500 mAh minimum
+**Variant A checks:** all pass
 
 **Variant B checks:** 
-- ⚠️ only 1 lid hold-down pillar(s) fit - the electronics chamber has no bare board left. The board needs a different retention scheme; see the note below
-- ⚠️ the actual 35 x 30 x 5 mm planning cell does not fit the battery bay
-- ⚠️ battery bay 35 x 26 x 5 mm holds about 403 mAh, below requirement E-02's 500 mAh minimum
+- ⚠️ only 0 lid hold-down pillar(s) fit - the electronics chamber has no bare board left. The board needs a different retention scheme; see the note below
 

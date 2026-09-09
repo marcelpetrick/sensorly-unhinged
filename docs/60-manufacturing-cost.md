@@ -8,19 +8,19 @@ real board model — joints, components and areas are counted from the generated
 files — but every *rate* is a researched input that goes stale. A real quote
 from the vendor's own uploader replaces this file, it does not agree with it.
 
-Rates researched 2026-08-25. USD→EUR at 0.92. German import VAT
+Rates researched 2026-09-09. USD→EUR at 0.92. German import VAT
 19% applied to goods + freight.
 
 ## What is actually being built
 
 | | |
 |---|---:|
-| Components per board (excl. test pads) | 41 |
-| SMT solder joints | 190 |
+| Components per board (excl. test pads) | 43 |
+| SMT solder joints | 196 |
 | Through-hole joints (USB-C shield lugs) | 4 |
-| Distinct BOM lines | 26 |
-| Passives (0402/0603/0805) | 31 |
-| Likely extended-library parts | 8 |
+| Distinct BOM lines | 28 |
+| Passives (0402/0603/0805) | 32 |
+| Likely extended-library parts | 9 |
 | Variant A area | 10.2 cm² |
 | Variant B area | 14.3 cm² |
 
@@ -33,13 +33,13 @@ fabrication is cheapest — that is not an accident of the floorplan.
 | Line | | Cost |
 |---|---|---:|
 | PCB fabrication | USD, pre-VAT | $4–18 |
-| Assembly — setup, stencil, feeders, 190 joints × 10 | USD, pre-VAT | $78–110 |
-| Components — 10 × board BOM | USD, pre-VAT | $89–150 |
+| Assembly — setup, stencil, feeders, 196 joints × 10 | USD, pre-VAT | $84–118 |
+| Components — 10 × board BOM | USD, pre-VAT | $93–154 |
 | Freight to Germany | USD | $14–28 |
-| **Landed PCBA, incl. 19% import VAT** | EUR | **€203–334** |
+| **Landed PCBA, incl. 19% import VAT** | EUR | **€214–349** |
 | Batteries, printed cases, labels — bought in the EU | EUR | €49–127 |
-| **Total programme** | EUR | **€252–461** |
-| **Per finished unit** | EUR | **€25.17–46.12** |
+| **Total programme** | EUR | **€263–476** |
+| **Per finished unit** | EUR | **€26.28–47.58** |
 
 
 ## Rev 2 series — 20 × the chosen variant
@@ -47,13 +47,13 @@ fabrication is cheapest — that is not an accident of the floorplan.
 | Line | | Cost |
 |---|---|---:|
 | PCB fabrication | USD, pre-VAT | $11–32 |
-| Assembly — setup, stencil, feeders, 190 joints × 20 | USD, pre-VAT | $45–63 |
-| Components — 20 × board BOM | USD, pre-VAT | $178–299 |
+| Assembly — setup, stencil, feeders, 196 joints × 20 | USD, pre-VAT | $48–67 |
+| Components — 20 × board BOM | USD, pre-VAT | $186–309 |
 | Freight to Germany | USD | $14–28 |
-| **Landed PCBA, incl. 19% import VAT** | EUR | **€271–462** |
+| **Landed PCBA, incl. 19% import VAT** | EUR | **€283–477** |
 | Batteries, printed cases, labels — bought in the EU | EUR | €98–254 |
-| **Total programme** | EUR | **€369–716** |
-| **Per finished unit** | EUR | **€18.44–35.80** |
+| **Total programme** | EUR | **€381–731** |
+| **Per finished unit** | EUR | **€19.07–36.57** |
 
 
 ## Where the money goes
@@ -62,7 +62,7 @@ At these quantities the **components dominate**, and inside the components two
 parts dominate: the ESP32-C6 module ($3.03–3.92)
 and the SHT45-AD1F ($4.00–6.13).
 Together they are roughly two thirds of the bill of materials. Everything else —
-charger, regulator, connectors, 31 passives — is about a dollar and a half.
+charger, regulator, connectors, 32 passives — is about a dollar and a half.
 
 That has a direct consequence for the A/B decision: **variant B's extra 28 % of
 board area is nearly free.** Fabrication is a small fraction of the total and
@@ -113,12 +113,13 @@ module and stays a personal project.
 | U3 | TPS62840DLCR, LCSC C2071859 from $0.48 |
 | U4 | BQ24074RGTR, LCSC C54313 from $0.47 |
 | U5 | USBLC6-2SC6, commodity ESD array |
+| Q1 | onsemi 2N7002LT1G; DigiKey/Mouser planning range, checked 2026-09-09 |
 | J1 | HRO TYPE-C-31-M-12, commodity 16P receptacle |
-| J2 | JST S2B-PH-SM4-TB |
+| J2 | Molex 53261-0371; Mouser Germany EUR 0.542@1 / 0.464@10 on 2026-09-09, converted with the report planning rate |
 | L1 | Murata DFE201612E-2R2M shielded inductor |
 | SW1 | SMD tactile switch |
 | D1 | 0603 green LED |
-| battery | protected 1S LiPo 500-1000 mAh, EU retail (EUR) |
+| battery | provisional generic-pack allowance only; LP702040 FD_3245_20 supplier quote is TBC (EUR) |
 | enclosure_self | 3D printed in-house, material + failures |
 | enclosure_service | printed by a service, two parts |
 | labels_screws | QR label, insulator, fasteners |

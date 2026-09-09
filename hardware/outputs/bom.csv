@@ -15,21 +15,23 @@ Qty,Populate,Refs,Value,Footprint,MPN,Manufacturer,Second source,Sourcing status
 1,yes,C13,100nF/16V X7R,C_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ADC filter
 1,yes,D1,LED_GREEN,LED_0603_1608Metric,KP-1608SGC,Kingbright,"any 0603 green LED, Vf < 2.4 V at 0.5 mA","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","status LED, active low"
 1,yes,J1,USB-C 16P,USB_C_Receptacle_HRO_TYPE-C-31-M-12,TYPE-C-31-M-12,HRO,GCT USB4085 (different land pattern - do not swap without relayout),"single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","USB-C receptacle, sink only, TH mounting lugs"
-1,yes,J2,JST-PH 2P,JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal,S2B-PH-SM4-TB(LF)(SN),JST,"B2B-PH-SM4-TB (top entry, same land pattern family)","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","1S LiPo, pin 1 = VBAT(+), pin 2 = GND(-) - PROTECTED cell only"
+1,yes,J2,Molex PicoBlade 3P,Molex_PicoBlade_53261-0371_1x03-1MP_P1.25mm_Horizontal,53261-0371,Molex,single-sourced connector family; accepted for prototypes pending pack qualification,"single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","LP702040 pack: pin 1 GND(-), pin 2 PACK_TS/103AT-2, pin 3 VBAT(+)"
 1,yes,L1,2.2uH,L_Murata_DFE201610P,DFE201612E-2R2M,Murata,"DFE201210S-2R2M (thinner, same land pattern family)","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute","2.2 uH, DCR 116 mOhm - datasheet SLVSEC6D Table 4"
+1,yes,Q1,2N7002,SOT-23,2N7002LT1G,onsemi,"2N7002,215 (Nexperia; same G-S-D pinout and SOT-23 land pattern)","single-sourced, accepted risk for design exploration only; alternate is unqualified, do not substitute",low-side /CE driver; VBUS pull-up keeps charging disabled at power-up
 1,yes,R1,10k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,EN pull-up
 1,yes,R2,3k3 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"LED series, ~0.5 mA"
 1,yes,R3,10k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"SDA pull-up - main board, never on the island"
 1,yes,R4,10k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"SCL pull-up - main board, never on the island"
 1,yes,R5,0R,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,EN tie - a resistor so EN can be lifted to measure Iq
 1,yes,R6,267k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,VSET -> 3.30 V. Characterization only: 52k3 -> 3.00 V
-1,yes,R7,10k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"TS - fixed resistor, NTC not used in Rev 1"
-1,yes,R8,100k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,EN2 pull-up from VBUS -> ILIM resistor mode
+1,yes,R7,100k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,Q1 gate pull-down: charge enable defaults low/off
+1,yes,R8,100k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,EN1 pull-down: USB100 is the fail-safe reset/unconfigured state
 1,yes,R9,100k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,/PGOOD pull-up
 1,yes,R10,100k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,/CHG pull-up
-1,yes,R11,3k09 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ILIM: 1550/3090 = 502 mA input limit
-1,yes,R12,3k01 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ITERM: 0.03*3010/3570 = 25 mA
-1,yes,R13,3k57 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ISET: 890/3570 = 249 mA. Slow build option: 8k87 -> 100 mA
+1,yes,R11,8k00 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ILIM fallback: <=217 mA incl. KILIM and resistor tolerance; mode not selected
+1,yes,R12,3k01 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ITERM: 0.03*3010/4420 = 20.4 mA nominal
+1,yes,R13,4k42 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,ISET: 890/4420 = 201 mA nominal; <=223 mA worst case
+1,yes,R18,47k 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,/CE pull-up to VBUS: charger disabled before MCU power-up
 1,yes,R16,5k1 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,CC1 pull-down - UFP advertisement
 1,yes,R17,5k1 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,"CC2 pull-down - separate resistor, never shared"
 1,yes,R14,2M2 1%,R_0402_1005Metric,,,,generic specification; purchasing must qualify exact MPN,VBAT divider top
