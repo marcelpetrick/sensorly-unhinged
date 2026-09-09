@@ -1,5 +1,12 @@
 # sensorly-unhinged
 
+[![Hardware Quality](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml/badge.svg?branch=master)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml)
+[![Hardware Release](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml)
+[![Latest Hardware Release](https://img.shields.io/github/v/release/marcelpetrick/sensorly-unhinged?sort=date)](https://github.com/marcelpetrick/sensorly-unhinged/releases/latest)
+[![License: GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
+[![KiCad 10](https://img.shields.io/badge/KiCad-10-314cb0.svg)](https://www.kicad.org/)
+[![Status: engineering prototype](https://img.shields.io/badge/status-engineering%20prototype-orange.svg)](#status)
+
 A battery-powered indoor temperature and humidity node, developed as **one
 electrical platform in two physical implementations** so that the cost of
 compactness can be measured instead of guessed.
@@ -19,7 +26,7 @@ compactness can be measured instead of guessed.
          Variant A - Compact                        Variant B - Thermally isolated
          30 × 34 mm, one rectangle                  28 × 51 mm, milled sensor island
          sensor 11.3 mm from the                    on a 3.5 x 8 mm FR-4 neck,
-         nearest heat source                        sensor 23.1 mm away;
+         nearest heat source                        sensor 16.5 mm away;
                                                     thermal benefit unmeasured
 ```
 
@@ -28,7 +35,7 @@ compactness can be measured instead of guessed.
 | ![Variant A](docs/img/render-a.png) | ![Variant B](docs/img/render-b.png) |
 | **A — Compact** (HW A1) | **B — Thermally isolated** (HW B1) |
 | ![Case A](docs/img/case-a-base.png) | ![Case B](docs/img/case-b-base.png) |
-| 41 × 39 × 20 mm, one chamber | 41 × 56 × 20 mm, two chambers, wall at the neck |
+| 47.0 × 39.2 × 18.8 mm, one chamber | 47.0 × 56.2 × 18.8 mm, two chambers, wall at the neck |
 
 Build 5 of each, put them next to a reference instrument, and let the data pick
 the design. The decision gate is written down in
@@ -44,7 +51,7 @@ review files. `make release-check` requires complete routing, clean DRC/parity
 and the evidence listed in `hardware/release-readiness.json`. A development
 pipeline pass does not imply a working sensor or safe battery charging.
 
-**Partially routed:** 54 unconnected items on A and 58 on B. The sensor routes
+**Partially routed:** 59 unconnected items on A and 60 on B. The sensor routes
 and some power/ground fan-out are generated; the fine-pitch escapes and other
 main-board connections remain incomplete. Development DRC has zero errors,
 with explicitly limited warnings; it is not a clean manufacturing DRC.
@@ -52,9 +59,9 @@ Phase 6 of 14 — see [`docs/00-plan.md`](docs/00-plan.md).
 
 ```
 KiCad ERC      0 violations
-KiCad DRC      0 errors, 6 / 10 development warnings on A / B (KiCad 10.0.6)
+KiCad DRC      0 errors, 7 / 17 development warnings on A / B (KiCad 10.0.6)
 Sch/PCB parity 0 differences  (both are generated from one model)
-Ratsnest       A: 54 remaining; B: 58 remaining (see hardware/drc-budget.json)
+Ratsnest       A: 59 remaining; B: 60 remaining (see hardware/drc-budget.json)
 Outputs        4-layer gerbers, drill, CPL, assembly PDF, STEP, schematic PDF, BOM
 ```
 
@@ -86,12 +93,21 @@ make render    # KiCad 3D renders
 make mech-render # optional enclosure PNG previews (requires a graphics display)
 make power     # illustrative battery-side charge budget; replace inputs with measurements
 make release-check # fails until routing and qualification are complete
+make release-package RELEASE_TAG=hw-a1 # gated ZIP + SHA-256 for one printed revision
 make all
 ```
 
 Python-only checks include `check`, `test`, `bom`, `thermal`, `cost`, and `power`.
 ERC/DRC, board renders and exports require KiCad 10 (`kicad-cli`); mesh checks
 require OpenSCAD. Offline checks alone cannot establish hardware readiness.
+
+GitHub's **Hardware Quality** workflow runs the same `localPipeline.sh` gate and
+retains draft Gerbers, reports and enclosure meshes for 14 days. The separate,
+manual **Hardware Release** workflow accepts only a tag matching the revision
+printed on the selected PCB (`hw-a1` or `hw-b1` today). It cannot package or
+publish until `make release-check` proves clean routing, clean DRC/parity and
+all seven qualification-evidence categories. Publishing is opt-in and draft by
+default; a successful package contains a SHA-256 checksum and source provenance.
 
 ## How the two boards stay one design
 

@@ -100,10 +100,10 @@ Five findings are only partially addressed:
 
 | Finding | Completed here | Required to close |
 |---|---|---|
-| 1 — Battery safety | Default safety timers restored; unsupported charging acceptance removed. | Select the protected pack, implement pack-temperature inhibition, and test charging and faults. |
-| 2 — Manufacturing readiness | Draft outputs clearly separated from gated release. | Finish A's 54 and B's 58 unconnected items, resolve release warnings, and review the finished layouts. |
-| 6 — USB current | Documented the limited bench-source scope and current assumptions. | Decide supported source types and implement/qualify the corresponding current-control policy. |
-| 9 — Battery fit | Actual dimension checks reject the planning cell in both bays; misleading capacity claims removed. | Select a purchasable pack, revise the enclosure as needed, and verify retention, tolerances and connector access physically. |
+| 1 — Battery safety | Selected LP702040 drawing FD_3245_20; J2 is three-wire; the 103AT-2 drives TS and an ADC; CE now defaults disabled until firmware validates the pack's tighter 0–45 °C range; charge current is bounded; default timers remain enabled. | Confirm the production lot, implement the firmware gate and pass `51-power-safety-qualification.md`; no enclosed charging before then. |
+| 2 — Manufacturing readiness | Draft outputs clearly separated from gated release. | Finish A's 59 and B's 60 unconnected items, resolve release warnings, and review the finished layouts. |
+| 6 — USB current | EN2 is hard-low; EN1 has a 100 kΩ pull-down and IO21 control. The locked policy is USB100 by default and USB500 only while configured by a data host. Firmware behavior and tests are specified. | Implement the ESP-IDF state machine and pass representative-host/fault measurements in `51-power-safety-qualification.md`. |
+| 9 — Battery fit | Both generated enclosures now fit FD_3245_20's 42 × 20.5 × 7.3 mm maximum envelope, reserve XY and swelling allowance, use the shorter PicoBlade header, and meet the target case thickness. | Physically inspect all five packs in both printed cases, including insulation, retention and the 45 ± 3 mm lead path. |
 | 13 — Firmware/product behavior | Added the [firmware and acceptance contract](71-firmware-contract.md). | Implement the ESP-IDF application and pass the contract's device tests. |
 
 The [release evidence inventory](../hardware/release-readiness.json) additionally
@@ -112,14 +112,15 @@ qualification. None of those evidence slots has been filled with assumptions.
 The [charge budget](35-power-budget.md) and thermal calculations are planning
 models, not measured battery life or accuracy.
 
-Recommended order of remaining engineering work: select the pack and supported
-USB sources first, close the resulting circuit/enclosure changes, finish routing
-and assembly review, then build controlled prototypes for firmware bring-up and
-the revised A/B experiment. Pack selection can change both geometry and charging
-requirements, so the current generated boards should not be ordered as a final
-design.
+The pack/charger architecture and supported USB policy were implemented on 2026-09-09
+in response to findings 1, 6 and 9. Their release evidence remains deliberately
+empty: selecting and modeling parts is not physical qualification. Remaining
+engineering order is to obtain the controlled pack drawing and source samples,
+finish routing and J2 assembly review, implement the minimal USB state machine,
+then run `51-power-safety-qualification.md` before any enclosed charging and the
+revised A/B experiment. The current generated boards remain non-release drafts.
 
-### Verification record — 2026-09-08
+### Verification record — 2026-09-09
 
 `./localPipeline.sh` completed with exit status 0 against committed design
 sources at `eafb7d3`, using Python 3.14.7 and KiCad 10.0.6. All 14 pipeline
@@ -127,13 +128,13 @@ stages passed; none was skipped.
 
 | Check | Observed result |
 |---|---|
-| Offline regression tests | 35 passed, including injected electrical, report and export failures. |
+| Offline regression tests | 44 passed, including injected electrical, report, packaging and export failures. |
 | KiCad negative-rule tests | 2 passed: forbidden VBAT and widened GND in B's island region are rejected. |
 | Generator and reproducibility | Zero model-rule errors; schematic, both boards and generated reports regenerate identically. |
 | Electrical rules | Zero ERC violations. |
-| PCB rules and parity | A: 0 errors, 6 reviewed warnings, 0 parity differences, 54 unconnected items. B: 0 errors, 10 reviewed warnings, 0 parity differences, 58 unconnected items. |
-| Mechanical geometry | Four STL parts match XYZ bounds; seated lid/base intersections are empty for both variants. Five documented mechanical issues remain open. |
-| Documentation and BOM | 19/19 checked figures match the model; BOM generated with 41 lines/41 populated placements. This is not sourcing qualification. |
+| PCB rules and parity | A: 0 errors, 7 reviewed warnings, 0 parity differences, 59 unconnected items. B: 0 errors, 17 reviewed warnings, 0 parity differences, 60 unconnected items. |
+| Mechanical geometry | Four STL parts match XYZ bounds; seated lid/base intersections are empty for both variants. One generated board-retention warning plus the recorded physical fit checks remain open. |
+| Documentation and BOM | 19/19 checked figures match the model; BOM generated with 43 lines/43 populated placements. This is not sourcing qualification. |
 | Draft export | Four-layer Gerbers, drill files, CPL and STEP produced for both variants. Board and enclosure previews refreshed. |
 | Release rejection | `make release-check` exited 2 as expected: A/B warnings and routing gaps plus all seven missing qualification evidence categories blocked release. |
 

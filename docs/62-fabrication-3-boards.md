@@ -128,7 +128,7 @@ If the boards do come back with 0.5 oz inner layers, re-run `make thermal` with
 
 ## 4. What to send them
 
-Everything a bare-board order needs is already generated:
+The development pipeline generates these review outputs:
 
 ```
 hardware/outputs/rev-a/gerber/     11 layers, RS-274X
@@ -137,8 +137,17 @@ hardware/outputs/rev-b/gerber/
 hardware/outputs/rev-b/drill/
 ```
 
-Both variants are 4-layer FR-4, 1.6 mm, and both fit inside 50 × 50 mm. Run
-`make outputs` first — the fab package is built by CI, not committed.
+Both variants are 4-layer FR-4, 1.6 mm, and both fit inside 50 × 50 mm. `make
+outputs` and the Hardware Quality workflow deliberately mark these files as
+**draft, not for fabrication**. Timestamp-bearing outputs are built by CI and
+are not committed.
+
+Only the manual Hardware Release workflow creates a distributable ZIP and its
+SHA-256 checksum. Its requested tag must match the board revision printed on
+the selected layout (`hw-a1` or `hw-b1` today), and it runs
+`make release-package RELEASE_TAG=<tag>`. That target refuses to continue until
+the release gate sees zero routing gaps, zero DRC/parity findings and real files
+for every qualification category in `hardware/release-readiness.json`.
 
 For assembled boards rather than bare ones, add:
 

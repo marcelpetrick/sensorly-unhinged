@@ -1,75 +1,59 @@
-name: hardware
+name: Hardware Quality
 
 on:
   push:
+    branches: [master]
   pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hardware-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  generate:
-    name: generator rules + reproducibility
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      # The offline checks need nothing but Python: courtyard overlaps, parts
-      # off the outline, copper in the antenna keep-out, heat sources too near
-      # the sensor, and anything at all on Variant B's thermal neck.
-      - name: Licence headers
-        run: python -m tools.check_license
-
-      - name: Generator rule checks
-        run: make check
-
-      - name: Regression tests
-        run: make test
-
-      - name: Documented figures match the model
-        run: python -m tools.check_docs
-
-      # AGENTS.md: generated files are committed AND reproducible.
-      - name: Regenerate and fail on drift
-        run: |
-          make gen thermal bom cost mech
-          git diff HEAD --exit-code -- hardware/schematic hardware/variant-a \
-              hardware/variant-b hardware/lib hardware/outputs/bom.csv \
-              hardware/outputs/netlist.txt docs/img/floorplan-a.svg \
-              docs/img/floorplan-b.svg docs/45-thermal-model.md \
-              docs/60-manufacturing-cost.md docs/61-cost-reduction.md \
-              docs/80-enclosure.md mechanical/*.scad \
-            || { echo "::error::generated files differ from the committed ones - run 'make gen thermal bom' and commit"; exit 1; }
-
-  kicad:
-    name: KiCad DRC + manufacturing outputs
-    runs-on: ubuntu-latest
+  local-pipeline:
+    name: Local pipeline (KiCad 10)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     container:
-      image: ghcr.io/kicad/kicad:10.0
+      image: ghcr.io/kicad/kicad@sha256:fdcfa0e8d41f640d16edfb28e027fe8862ab31af9e45dcacbc662cec5c916e4c
       options: --user root
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
 
-      - name: KiCad version
-        run: kicad-cli version
-
-      # Zero DRC errors, only the reviewed warnings, and a ratsnest budget that
-      # may go down but never up. Policy lives in tools/drc_gate.py.
-      - name: ERC + DRC + schematic parity gate
-        run: make erc drc test-kicad
-
-      - name: Manufacturing outputs
-        run: make outputs
-
-      - name: Enclosure meshes
+      - name: Install mechanical tooling
         run: |
-          apt-get update -qq && apt-get install -y -qq openscad
-          make mech
+          apt-get update -qq
+          apt-get install --no-install-recommends --yes openscad
 
-      - uses: actions/upload-artifact@v4
+      - name: Report pinned toolchain
+        run: |
+          python3 --version
+          kicad-cli version
+          openscad --version
+
+      - name: Run complete development-quality gate
+        run: ./localPipeline.sh
+
+      - name: Upload draft review outputs and reports
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: draft-design-review-not-for-fabrication
+          if-no-files-found: warn
+          retention-days: 14
           path: |
+            _build/erc.json
+            _build/*/drc.json
             hardware/outputs/
             mechanical/*.stl
-          if-no-files-found: error
