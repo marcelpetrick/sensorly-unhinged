@@ -50,13 +50,46 @@ and unsigned images, wrong hardware, and a crashing image. Key lifecycle and
 irreversible eFuse choices need a reviewed production procedure and hardware
 tests; no key-burning operation is part of this review.
 
+## USB input-current state machine
+
+Charging is separately fail-safe. `CHARGE_ENABLE` is IO18 and drives Q1's gate;
+external R7 holds the gate low at reset. Separate R18 pulls BQ24074 `/CE` to
+VBUS, so charging is disabled before the MCU rail exists. After `PG_N` asserts,
+sample `PACK_TS` on IO3/ADC1_CH3 repeatedly,
+convert using the Semitec 103AT-2 curve and the measured BQ24074 TS bias, and
+drive `CHARGE_ENABLE` high only when the entire uncertainty interval lies inside the pack
+drawing's 0–45 °C charge range. Release CE immediately on out-of-range,
+implausible/open/short readings, ADC error, stale sample, watchdog warning,
+suspend or loss of VBUS; clearing the GPIO turns Q1 off and releases CE high.
+Thresholds and hysteresis are generated from reviewed
+calibration constants, not raw ADC magic numbers. Until this code and its tests
+exist, the board must remain in its default charging-disabled state.
+
+`USB_ISEL` is IO21 and drives BQ24074 EN1. Configure it as an input/high-Z or
+drive it low from the first startup instruction; the external 100 kΩ pull-down
+then guarantees USB100. Drive it high only from the native USB stack's
+**configured** callback. Clear it before acknowledging suspend,
+deconfiguration or detach, and on every USB-stack error path. A charge-only
+adapter never configures the USB device and therefore remains at 100 mA.
+
+Do not infer source current from `PG_N`, VBUS voltage or the Type-C Rd resistors.
+They establish presence/attachment, not host configuration. Do not start Wi-Fi
+from USB100 with a missing or deeply depleted pack; report a power-policy fault
+and remain in bounded low-power/debug operation. Persist no “500 mA allowed”
+state across reset. Telemetry and factory output must expose the selected
+USB100/USB500 state alongside USB-present and charging state.
+
 ## Required executable acceptance cases
 
 Measure-before-radio ordering; sensor timeout/CRC failure; flash write power
 loss; 501 queued records; duplicate/missing MQTT acknowledgement; AP and broker
 outages; bad broker certificate/hostname; expired provisioning; unauthorized OTA;
 brownout during OTA; rollback; button factory reset; USB-present cooldown; deep
-sleep timing and energy; battery ADC calibration; fixture PASS/FAIL records.
+sleep timing and energy; battery ADC calibration; fixture PASS/FAIL records;
+USB100 at reset/charge-only attach; USB500 only after configuration; USB100
+before suspend/deconfigure/detach; firmware-crash fallback; low-battery TX while
+recording source current; CE disabled at reset; valid-temperature charge enable;
+hot/cold/open/short/stale-NTC disable and watchdog recovery.
 
 The divider's Thevenin resistance is 1.1 MΩ with 100 nF: RC = 110 ms. A 20 ms
 delay is not startup settling. Wait at least 5 RC (550 ms, an engineering settling

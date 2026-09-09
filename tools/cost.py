@@ -24,7 +24,7 @@ from .boardgen.design import PARTS, PART_BY_REF
 from .boardgen.variants import VARIANTS
 
 ROOT = Path(__file__).resolve().parents[1]
-RESEARCHED = "2026-08-25"
+RESEARCHED = "2026-09-09"
 USD_EUR = 0.92           # planning rate only
 VAT_DE = 0.19            # German import VAT on goods + freight
 
@@ -55,8 +55,11 @@ BOM_PRICES = {
     "U3": ((0.48, 1.10), "TPS62840DLCR, LCSC C2071859 from $0.48"),
     "U4": ((0.47, 1.20), "BQ24074RGTR, LCSC C54313 from $0.47"),
     "U5": ((0.08, 0.20), "USBLC6-2SC6, commodity ESD array"),
+    "Q1": ((0.02, 0.20), "onsemi 2N7002LT1G; DigiKey/Mouser planning range, "
+           "checked 2026-09-09"),
     "J1": ((0.08, 0.20), "HRO TYPE-C-31-M-12, commodity 16P receptacle"),
-    "J2": ((0.12, 0.35), "JST S2B-PH-SM4-TB"),
+    "J2": ((0.50, 0.60), "Molex 53261-0371; Mouser Germany EUR 0.542@1 / "
+           "0.464@10 on 2026-09-09, converted with the report planning rate"),
     "L1": ((0.25, 0.55), "Murata DFE201612E-2R2M shielded inductor"),
     "SW1": ((0.12, 0.35), "SMD tactile switch"),
     "D1": ((0.01, 0.04), "0603 green LED"),
@@ -83,14 +86,15 @@ SWAPS = {
 # Everything else in the finished unit. These are bought in Europe, so they are
 # already in EUR and carry no import VAT line of their own.
 EXTRAS_EUR = {
-    "battery": ((4.00, 9.00), "protected 1S LiPo 500-1000 mAh, EU retail (EUR)"),
+    "battery": ((4.00, 9.00), "provisional generic-pack allowance only; "
+                "LP702040 FD_3245_20 supplier quote is TBC (EUR)"),
     "enclosure_self": ((0.60, 2.50), "3D printed in-house, material + failures"),
     "enclosure_service": ((8.00, 18.00), "printed by a service, two parts"),
     "labels_screws": ((0.30, 1.20), "QR label, insulator, fasteners"),
 }
 
 # Parts likely to be JLCPCB "extended" (feeder loading fee applies once each)
-EXTENDED_REFS = {"U1", "U2", "U3", "U4", "J1", "J2", "L1", "SW1"}
+EXTENDED_REFS = {"U1", "U2", "U3", "U4", "Q1", "J1", "J2", "L1", "SW1"}
 
 
 @dataclass

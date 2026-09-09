@@ -36,24 +36,24 @@ LID = 2.0
 CLEAR_XY = 0.6            # board edge to inner wall
 BOARD_T = 1.6
 RIB_W = 1.6               # board support ribs
+SUPPORT_H = 0.8           # shelf below PCB, above reserved pack clearance
 HOLDDOWN_D = 2.2          # lid hold-down pillar diameter
 VENT_W = 1.2              # vent slot width
 VENT_GAP = 1.4            # material between slots
 FILLET = 1.5
 TOL = 0.35                # printing tolerance on cut-outs
 
-# Battery: a protected 1S LiPo pouch. 503035 (~500 mAh) is the planning cell
-# (EDS-3). The case is allowed to be larger in plan than the PCB to hold it -
-# M-01 already expects a 40-45 mm case around a 30 mm board.
-BATT_X, BATT_Y, BATT_Z = 35.0, 30.0, 5.0
-BATT_CLEAR = 1.0
+# Selected protected 1S pack: LiPol FD_3245_20 / LP702040, 550 mAh, PCM +
+# Semitec 103AT-2 NTC and three-wire harness. These are the drawing's maximum
+# assembled dimensions (41+1, 20+0.5, 7+0.3 mm), not the cell-code nominal.
+# Clearance is per side in XY; Z_ALLOW is reserved for additional swelling.
+BATT_X, BATT_Y, BATT_Z = 42.0, 20.5, 7.3
+BATT_XY_CLEAR = 0.5
+BATT_Z_ALLOW = 1.0
+SELECTED_PACK_MAH = 550
 
-# The battery connector is the tallest thing on the board by a factor of three,
-# so it alone sets the case height. Both options are modelled so the trade is a
-# number rather than an opinion.
 CONNECTORS = {
-    "PH": (7.50, "JST PH 2.0 mm, S2B-PH-SM4-TB - as designed"),
-    "SH": (3.40, "JST SH 1.0 mm, SM02B-SRSS-TB - Rev 2 candidate"),
+    "PicoBlade": (3.40, "Molex PicoBlade 53261-0371, right-angle SMT"),
 }
 
 # --- component heights above the PCB --------------------------------------
@@ -61,7 +61,7 @@ CONNECTORS = {
 HEIGHTS = {
     "U1": (2.40, "ESP32-C6-MINI-1 datasheet v1.5 S10.1, 13.2 x 16.6 x 2.4"),
     "J1": (3.16, "HRO TYPE-C-31-M-12, 8.94 x 7.35 x 3.16"),
-    "J2": (7.50, "JST PH series, S2B-PH-SM4-TB overall profile height"),
+    "J2": (3.40, "Molex PicoBlade 53261-0371 drawing, mated height"),
     # J2 is overridden by the `connector` argument to build()
     "L1": (1.20, "Murata DFE201612E, 2.0 x 1.6 x 1.2"),
     "SW1": (3.50, "Panasonic EVQ-PU tactile - TBC against the datasheet"),
@@ -107,7 +107,7 @@ class Case:
     neck_slot: tuple[float, float] | None = None
     batt_bay: tuple[float, float, float, float] | None = None
     antenna_free: float = 0.0
-    connector: str = "PH"
+    connector: str = "PicoBlade"
     vent_wall: str = "bottom"
 
 
@@ -137,7 +137,7 @@ def _free_spot(v: Variant, boxes, target, d: float, y_max: float | None = None):
     return None
 
 
-def build(v: Variant, connector: str = "PH") -> Case:
+def build(v: Variant, connector: str = "PicoBlade") -> Case:
     placed = {p.ref: p for p in place(v)}
     h_conn = CONNECTORS[connector][0]
 
@@ -149,14 +149,16 @@ def build(v: Variant, connector: str = "PH") -> Case:
     tall_h = height(tall_ref)
 
     top_clear = tall_h + 0.6
-    board_z = BATT_Z + BATT_CLEAR          # battery bay under the board
+    # The support shelf occupies its own layer above the swelling allowance;
+    # it must never descend alongside or onto the pouch.
+    board_z = BATT_Z + BATT_Z_ALLOW + SUPPORT_H
     inner_z = board_z + BOARD_T + top_clear
 
     # The cavity holds the board *and* the cell, so it is the larger of the two
     # in plan. Sizing it to the PCB alone was the mistake that made the planning
     # cell not fit.
-    inner_w = max(v.width + 2 * CLEAR_XY, BATT_X + 2 * BATT_CLEAR)
-    inner_h = max(v.height + 2 * CLEAR_XY, BATT_Y + 2 * BATT_CLEAR)
+    inner_w = max(v.width + 2 * CLEAR_XY, BATT_X + 2 * BATT_XY_CLEAR)
+    inner_h = max(v.height + 2 * CLEAR_XY, BATT_Y + 2 * BATT_XY_CLEAR)
 
     case = Case(
         variant=v.key,
@@ -171,8 +173,6 @@ def build(v: Variant, connector: str = "PH") -> Case:
     j1, j2 = placed["J1"], placed["J2"]
     case.cutouts.append(Cutout("USB-C", "left", j1.x, j1.y,
                                9.2 + TOL, height("J1") + TOL, height("J1") / 2, "J1"))
-    case.cutouts.append(Cutout("battery wire", "right", j2.x, j2.y,
-                               6.0 + TOL, 4.0, 1.0, "J2"))
     sw, d1 = placed["SW1"], placed["D1"]
     case.cutouts.append(Cutout("button", "lid", sw.x, sw.y, 4.0, 4.0, 0.0, "SW1"))
     case.cutouts.append(Cutout("status LED", "lid", d1.x, d1.y,
@@ -253,17 +253,20 @@ def build(v: Variant, connector: str = "PH") -> Case:
     # --- battery bay -------------------------------------------------------
     ax0, ax1, ay0, ay1 = antenna_keepout(v)
     sx0, sx1, sy0, sy1 = sensor_keepout(v)
-    bay_y0 = ay1 + 1.0                       # never under the antenna
+    allowed_y0 = ay1 + BATT_XY_CLEAR         # never under the antenna
     if v.key == "b":
         # Stop the cell at the chamber wall: nothing warm belongs on the
         # sensor side of it, least of all a battery (M-07).
-        bay_y1 = B_NECK_RECT[1] - 1.0
+        allowed_y1 = B_NECK_RECT[1] - BATT_XY_CLEAR
     else:
-        bay_y1 = sy0 - 1.0                   # never under the sensor
-    # The bay may use the full cavity, which is wider than the board.
-    bay_x0 = (v.width - inner_w) / 2 + 1.0
-    bay_x1 = bay_x0 + inner_w - 2.0
-    case.batt_bay = (bay_x0, bay_y0, bay_x1, bay_y1)
+        allowed_y1 = sy0 - BATT_XY_CLEAR     # never under the sensor
+    if allowed_y1 - allowed_y0 < BATT_Y:
+        # Keep the impossible geometry visible to check(); never silently crop.
+        pack_y0 = allowed_y0
+    else:
+        pack_y0 = (allowed_y0 + allowed_y1 - BATT_Y) / 2
+    pack_x0 = (v.width - BATT_X) / 2
+    case.batt_bay = (pack_x0, pack_y0, pack_x0 + BATT_X, pack_y0 + BATT_Y)
     case.connector = connector
 
     # --- antenna clearance the finished case actually provides -------------
@@ -334,31 +337,16 @@ def check(v: Variant, c: Case) -> list[str]:
                 c.divider_y + WALL / 2 > B_ISLAND_RECT[1] - TOL + 1e-9):
             out.append("chamber divider intersects the PCB body or island")
 
-    # E-02 asks for 500-1000 mAh. Report what the bay can actually hold.
+    # E-02 asks for 500-1000 mAh. Check the selected 550 mAh pack geometry.
     if not planning_cell_fits(c):
-        out.append("the actual 35 x 30 x 5 mm planning cell does not fit the battery bay")
-    if fitted_mah(c) < 500:
-        out.append(f"battery bay {bx1 - bx0:.0f} x {by1 - by0:.0f} x "
-                   f"{BATT_Z:.0f} mm holds about {fitted_mah(c):.0f} mAh, "
-                   f"below requirement E-02's 500 mAh minimum")
+        out.append("the selected LP702040 maximum envelope does not fit the battery bay")
     return out
-
-
-# 1S LiPo pouch cells run about 90 mAh per cm3 of overall volume - calibrated
-# against the 503035 (5.25 cm3, 500 mAh) used as the planning cell.
-MAH_PER_CM3 = 90.0
-
-
-def fitted_mah(c: Case) -> float:
-    """Volume proxy only: neither an available pack nor a rated capacity."""
-    bx0, by0, bx1, by1 = c.batt_bay
-    return (bx1 - bx0) * (by1 - by0) * BATT_Z / 1000.0 * MAH_PER_CM3
 
 
 def planning_cell_fits(c: Case) -> bool:
     x0, y0, x1, y1 = c.batt_bay
     width, length = x1 - x0, y1 - y0
-    return any(x + 2 * BATT_CLEAR <= width and y + 2 * BATT_CLEAR <= length
+    return any(x <= width + 1e-9 and y <= length + 1e-9
                for x, y in ((BATT_X, BATT_Y), (BATT_Y, BATT_X)))
 
 
@@ -374,7 +362,7 @@ def scad_params(v: Variant, c: Case) -> str:
              f"board_w = {v.width}; board_h = {v.height}; board_t = {BOARD_T};",
              f"wall = {WALL}; floor_t = {FLOOR}; lid_t = {LID};",
              f"clear_xy = {CLEAR_XY}; fillet = {FILLET}; tol = {TOL};",
-             f"rib_w = {RIB_W};",
+             f"rib_w = {RIB_W}; support_h = {SUPPORT_H};",
              f"inner_w = {c.inner_w}; inner_h = {c.inner_h}; inner_z = {c.inner_z};",
              f"board_z = {c.board_z}; top_clear = {c.top_clear};",
              f"outer_w = {c.outer_w}; outer_h = {c.outer_h}; outer_z = {c.outer_z};",
@@ -433,18 +421,17 @@ def report() -> str:
     o += ["", "## Result", "",
           "| | Variant A | Variant B |", "|---|---:|---:|"]
     cases = {k: build(v) for k, v in VARIANTS.items()}
-    alt = {k: build(v, "SH") for k, v in VARIANTS.items()}
     rows = [
         ("Outer size (mm)", lambda c: f"{c.outer_w:.1f} × {c.outer_h:.1f} × {c.outer_z:.1f}"),
         ("Internal cavity height", lambda c: f"{c.inner_z:.1f} mm"),
         ("Battery bay below board", lambda c: f"{BATT_Z:.1f} mm"),
         ("Clearance above board", lambda c: f"{c.top_clear:.1f} mm"),
         ("Tallest part", lambda c: f"{c.tallest[0]} at {c.tallest[1]:.2f} mm"),
-        ("Largest cell the bay holds", lambda c:
-         f"{c.batt_bay[2] - c.batt_bay[0]:.0f} × "
-         f"{c.batt_bay[3] - c.batt_bay[1]:.0f} × {BATT_Z:.0f} mm"),
-        ("Volume proxy, NOT rated pack capacity", lambda c: f"{fitted_mah(c):.0f} mAh equivalent"),
-        ("Planning cell fits with clearance", lambda c: "yes" if planning_cell_fits(c) else "NO"),
+        ("Modeled maximum pack envelope", lambda c:
+         f"{c.batt_bay[2] - c.batt_bay[0]:.1f} × "
+         f"{c.batt_bay[3] - c.batt_bay[1]:.1f} × {BATT_Z:.1f} mm"),
+        ("Selected pack", lambda c: f"LP702040, {SELECTED_PACK_MAH} mAh"),
+        ("Selected pack fits modeled bay", lambda c: "yes" if planning_cell_fits(c) else "NO"),
         ("Vent slots over the sensor", lambda c:
          f"{len(c.vents)} in the lid + {len(c.side_vents)} in the wall"),
         ("Lid hold-down pillars", lambda c: f"{len(c.holddowns)}"),
@@ -453,33 +440,29 @@ def report() -> str:
     ]
     for label, f in rows:
         o.append(f"| {label} | {f(cases['a'])} | {f(cases['b'])} |")
-    o += ["",
-          "## The battery connector sets the case height", "",
-          "| Battery connector | Height above PCB | Variant A case | Variant B case |",
-          "|---|---:|---:|---:|"]
-    for key, (h, desc) in CONNECTORS.items():
-        ca, cb = build(VARIANTS["a"], key), build(VARIANTS["b"], key)
-        o.append(f"| {desc} | {h:.2f} mm | {ca.outer_z:.1f} mm | {cb.outer_z:.1f} mm |")
-    o += ["",
-          f"Requirement M-01 asks for a case 13-18 mm thick. As designed it is "
-          f"**{cases['a'].outer_z:.1f} mm** - the JST PH battery header alone is "
-          f"{CONNECTORS['PH'][0]:.1f} mm, three times the height of the radio "
-          f"module, and it sets the whole cavity. Moving to a 1.0 mm-pitch JST SH "
-          f"brings the case to **{alt['a'].outer_z:.1f} mm**, inside the "
-          f"requirement, at the cost of a fiddlier connector to mate by hand.",
-          "",
-          "That is the honest shape of the trade: *user-replaceable battery* is "
-          "not free, and on a device this small the connector, not the cell, is "
-          "what you pay in. Recorded as a Rev 2 item; Rev 1 keeps the PH because "
-          "a connector you can actually plug in at the bench is worth 4 mm while "
-          "we are still bringing boards up.", ""]
+    o += ["", "## Selected battery and connector", "",
+          "Both cases are sized for the selected **LP702040 550 mAh** protected "
+          "pack. Drawing FD_3245_20 specifies 550 mAh minimum, maximum assembled "
+          "dimensions 42 × 20.5 × 7.3 mm, a Semitec 103AT-2 NTC and a "
+          "45 ± 3 mm three-wire "
+          "Molex 51021-0300 PicoBlade harness. J2 is the mating 53261-0371 "
+          "right-angle header at 3.40 mm mated height.", "",
+          f"The generated case is **{cases['a'].outer_z:.1f} mm** thick. The "
+          "model reserves 0.5 mm around every pack edge and 1.0 mm above the "
+          "drawing's maximum pouch thickness for manufacturing tolerance and "
+          "swelling. The support shelves begin above that allowance; nothing "
+          "rigid may occupy it.", "",
+          "Incoming inspection must confirm the drawing and cavity order "
+          "`1=black/-`, `2=yellow/NTC`, `3=red/+` before mating. An assembled "
+          "lead-bend/retention "
+          "test remains part of the battery qualification gate.", ""]
     o += ["## Board retention, and a decision coming back around", "",
           f"The board rests on four ribs and is meant to be pinned by short "
           f"pillars from the lid onto bare copper-free board. The generator "
           f"searches the placement for room rather than assuming a corner is "
           f"empty, and finds **{len(cases['a'].holddowns)} on Variant A** but "
           f"only **{len(cases['b'].holddowns)} on Variant B** - B's electronics "
-          f"chamber carries all 41 parts in a narrower body, and there is no "
+          f"chamber carries all 43 populated parts in a narrower body, and there is no "
           f"bare board left.", "",
           "The first attempt put two of B's pillars *on the sensor island*: "
           "plastic bridging the lid straight into the thermally isolated part, "
@@ -494,21 +477,12 @@ def report() -> str:
           "metal; the antenna objection does not actually apply to them. **Rev 2 "
           "should carry two nylon M2 holes in the electronics chamber**, which "
           "costs a little copper and solves this cleanly.", "",
-          "## The battery does not fit, and that is a finding", "",
-          f"Requirement E-02 asks for 500-1000 mAh. The bay in Variant A holds "
-          f"about **{fitted_mah(cases['a']):.0f} mAh** and Variant B about "
-          f"**{fitted_mah(cases['b']):.0f} mAh**, because the cell may sit "
-          f"neither under the antenna keep-out nor under the sensor, and what "
-          f"is left is a strip.", "",
-          "These mAh figures are only a volume-density proxy. No compatible",
-          "protected pack of that capacity has been selected or demonstrated to",
-          "fit. They must not enter a runtime claim or purchasing BOM.", "",
-          "EDS-3 remains open: select one actual protected pack for both variants,",
-          "including connector, lead bend radius, swelling allowance and insulation.",
-          "The current planning cell fails the dimension check. Validate support",
-          "ribs and retention against the actual cell, then print and assemble both",
-          "cases before closing the mechanical release gate. Case dimensions alone",
-          "do not prove battery fit or safe retention.", ""]
+          "## Battery qualification still requires hardware", "",
+          "The selected pack passes the parametric plan-view and height checks in "
+          "both variants. That is a design check, not evidence that a pouch, its "
+          "protection board and leads tolerate the printed retention scheme. "
+          "Before enclosed charging, inspect supplier samples, print and assemble "
+          "both cases, then run the EDS §5.2 temperature, timer and fault tests.", ""]
     for k, v in VARIANTS.items():
         probs = check(v, cases[k])
         o.append(f"**Variant {k.upper()} checks:** "

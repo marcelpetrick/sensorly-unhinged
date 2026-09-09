@@ -30,7 +30,7 @@ ANCHORED = {
     #    where the thermal neck leaves the board, and the two variants share
     #    this table.
     "J1":  (5.5, 24.5, 90),      # USB-C, mouth at the left edge
-    "J2":  (22.85, 24.5, 90),     # JST-PH 1S LiPo, mouth at the right edge
+    "J2":  (24.8, 24.5, 90),      # PicoBlade 3P, mouth at the right edge
     # 3. heat sources, as far from the sensor end as the outline allows
     "U4":  (24.4, 10.5, 0),      # charger - 0.40 W worst case, the hot part
     "U3":  (3.4, 10.0, 0),       # buck regulator
@@ -52,9 +52,13 @@ NEAR = {
     "C1": ("U1", 90), "C2": ("U1", 0), "C3": ("U1", 0),
     "R1": ("U1", 90), "C4": ("U1", 90), "C5": ("SW1", 0), "R2": ("D1", 0),
     "C7": ("U3", 90), "C8": ("U3", 90), "R5": ("U3", 90), "R6": ("U3", 90),
-    "R7": ("U4", 90), "R8": ("U4", 90), "R9": ("U4", 90), "R10": ("U4", 90),
+    # Place the larger charger bypass capacitors before the small control
+    # parts; on B's narrow body, leaving an 0805 until last can strand it.
+    "Q1": ("U4", 90), "C9": ("U4", 90), "C10": ("U4", 90),
+    "C11": ("U4", 90), "C12": ("U4", 90), "R7": ("U4", 90),
+    "R8": ("U4", 90), "R9": ("U4", 90), "R10": ("U4", 90),
     "R11": ("U4", 90), "R12": ("U4", 90), "R13": ("U4", 90),
-    "C9": ("U4", 90), "C10": ("U4", 90), "C11": ("U4", 90), "C12": ("U4", 90),
+    "R18": ("U4", 90),
     "R16": ("J1", 0), "R17": ("J1", 0), "C14": ("J1", 0),
     "R14": ("J2", 90), "R15": ("J2", 90), "C13": ("J2", 90),
 }
@@ -94,7 +98,7 @@ def _rect(x0, y0, x1, y1):
 A_W, A_H = 30.0, 34.0
 # The electronics block is NOT centred in the wider A outline: the USB-C mouth
 # has to stay flush with the left edge in both variants, so A's extra 2 mm of
-# width is added on the right, where only the wire-entry JST sits.
+# width is added on the right, where only the wire-entry PicoBlade sits.
 A_DX = 0.0
 
 VARIANT_A = Variant(

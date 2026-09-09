@@ -32,8 +32,8 @@ GRID = 1.27
 # ref -> symbol in hardware/lib/sensorly.kicad_sym
 SYMBOL = {
     "U1": "ESP32-C6-MINI-1", "U2": "SHT4x", "U3": "TPS62840DLC",
-    "U4": "BQ24074RGT", "U5": "USBLC6-2SC6",
-    "J1": "USB_C_Receptacle_USB2.0_16P", "J2": "Conn_01x02_MountingPin",
+    "U4": "BQ24074RGT", "U5": "USBLC6-2SC6", "Q1": "Q_NMOS_GSD",
+    "J1": "USB_C_Receptacle_USB2.0_16P", "J2": "Conn_01x03_MountingPin",
     "L1": "L", "D1": "LED", "SW1": "SW_Push",
 }
 
@@ -47,8 +47,8 @@ BLOCK_DEFS = [
     ("08  Test / programming pads", 0, [f"TP{i}" for i in range(1, 18)], 6),
     ("02  Environmental sensor", 1, ["U2", "C6", "R3", "R4"], 4),
     ("04  Battery charger + power path", 1,
-     ["U4", "R7", "R8", "R9", "R10", "R11", "R12", "R13",
-      "C9", "C10", "C11", "C12"], 6),
+     ["U4", "Q1", "R7", "R8", "R9", "R10", "R11", "R12", "R13",
+      "R18", "C9", "C10", "C11", "C12"], 6),
     ("06  Battery + measurement", 1, ["J2", "R14", "R15", "C13"], 4),
     ("03  System regulator  3.30 V baseline", 2,
      ["U3", "L1", "C7", "C8", "R5", "R6"], 3),

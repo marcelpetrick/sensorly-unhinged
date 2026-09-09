@@ -49,9 +49,12 @@ def main() -> int:
     checked = 0
     for k, v in VARIANTS.items():
         c = build(v)
+        # The lid's 1.2 mm locating lip is always present. Hold-down pillars
+        # extend farther only when the placement search found a legal one.
+        lid_reach = max(1.2, c.top_clear if c.holddowns else 0.0)
         want = {
             "base": (c.outer_w, c.outer_h, FLOOR + c.inner_z),
-            "lid": (c.outer_w, c.outer_h, LID + c.top_clear),
+            "lid": (c.outer_w, c.outer_h, LID + lid_reach),
         }
         for part, w in want.items():
             f = ROOT / "mechanical" / f"case-{k}-{part}.stl"

@@ -47,26 +47,49 @@ class Via:
 def center_track_ends(tracks: list[Track], vias: list[Via]) -> list[Track]:
     """Trim collinear terminal stubs contained inside a same-net via annulus.
 
-    Never move a via or introduce a diagonal: that could change clearance away
-    from the already occupied via copper. Non-collinear cases remain for DRC.
+    Never move a via: that could change clearance away from the already
+    occupied via copper. An endpoint already inside that copper is snapped to
+    its centre; KiCad otherwise warns even when a separate short leg connects
+    the endpoint to the same-net via.
     """
     result = []
     for track in tracks:
         pts = list(track.pts)
-        for end, adjacent in ((0, 1), (-1, -2)):
+        for end in (0, -1):
             if len(pts) < 2:
                 break
             x, y = pts[end]
-            ax, ay = pts[adjacent]
             for via in vias:
                 if via.net != track.net:
                     continue
                 if math.hypot(x - via.x, y - via.y) > (via.size - track.width)/2 + 1e-9:
                     continue
-                cross = (x-ax)*(via.y-ay) - (y-ay)*(via.x-ax)
-                if abs(cross) < 1e-9:
-                    pts[end] = (via.x, via.y)
+                pts[end] = (via.x, via.y)
+                break
+        # KiCad evaluates every emitted segment endpoint, including an
+        # interior polyline corner. If a same-net via sits just inside such a
+        # corner's annulus, add its centre on the collinear approach/departure
+        # instead of leaving an off-centre same-net overlap warning.
+        i = 1
+        while i < len(pts) - 1:
+            x, y = pts[i]
+            before, after = pts[i - 1], pts[i + 1]
+            inserted = False
+            for via in vias:
+                if via.net != track.net or (x, y) == (via.x, via.y):
+                    continue
+                if math.hypot(x - via.x, y - via.y) > (via.size - track.width) / 2 + 1e-9:
+                    continue
+                if before[0] == x == via.x or before[1] == y == via.y:
+                    pts.insert(i, (via.x, via.y))
+                    inserted = True
+                elif after[0] == x == via.x or after[1] == y == via.y:
+                    pts.insert(i + 1, (via.x, via.y))
+                    inserted = True
+                if inserted:
                     break
+            i += 2 if inserted else 1
+        pts = [p for j, p in enumerate(pts) if j == 0 or p != pts[j - 1]]
         if any(a != b for a, b in zip(pts, pts[1:])):
             result.append(Track(track.net, track.width, track.layer, pts))
     return result

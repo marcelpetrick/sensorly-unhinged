@@ -9,6 +9,10 @@ Datasheet sources used:
 - TPS62840 **SLVSEC6D** (TI) — §6 Pin Functions, Table 1 RSET, §9.2.2 externals
 - BQ24072/73/74/75/79 **SLUS810N** (TI) — Table 7-2 EN1/EN2, §7.5 K-factors, §10.2.2
 - SHT4x Datasheet v7.x (Sensirion), SHT45-AD1F product page
+- [LP702040 drawing FD_3245_20](https://www.li-polymer-battery.com/wp-content/uploads/2021/09/LP702040-550mAh-1032AT-2Molex-51021-0300.pdf) and [configured-pack page](https://li-polymer-battery.com/3-7v-rechargeable-li-polymer-battery-lp702040-550mah-with-ntc-and-molex-connector/) — selected pack and purchasability
+- [Semitec 103AT thermistor data](https://www.semitec-global.com/products/thermistor_at/) — pack NTC family/R-T data
+- [Molex 53261 series](https://www.molex.com/en-us/products/series-chart/53261) and drawing 532610271-SD — J2 land pattern and ratings
+- [Nexperia 2N7002](https://assets.nexperia.com/documents/data-sheet/2N7002.pdf) and [onsemi 2N7002L](https://www.onsemi.com/pdf/datasheet/2n7002l-d.pdf) — Q1 primary/alternate G-S-D pinout and limits
 
 ---
 
@@ -20,7 +24,7 @@ USB-C VBUS ─┬─ ESD ─ IN ┐
             └─ CC1/CC2  │  ┌──────────────┐
                         └──┤ IN       OUT ├──► VSYS ──► TPS62840 ──► +3V0 ──► ESP32-C6
                            │              │                 (buck)      │
-              JST-PH ──────┤ BAT      TS  ├── 10k                       ├──► SHT45  (island in B)
+ LP702040 + PCM + NTC ─────┤ BAT      TS  ├── pack 10k NTC              ├──► SHT45  (island in B)
               1S LiPo      │ ISET ILIM    │                             └──► LED / pull-ups
                            └──────────────┘
 ```
@@ -57,8 +61,11 @@ Espressif's RED/CE type examination. 13.20 × 16.60 × 2.40 mm, 53 pads
 | `UART_TX` | TXD0/IO16 | **31** | test pad only (fallback console) |
 | `UART_RX` | RXD0/IO17 | **30** | test pad only |
 | `TEST_MODE` | IO20 | **26** | test pad; fixture pulls low to enter factory test |
+| `USB_ISEL` | IO21 | **27** | charger EN1; 100 kΩ pull-down makes USB100 the reset/fault default; firmware may assert only after USB configuration |
+| `CHARGE_ENABLE` | IO18 | **24** | drives Q1 gate; external pull-down defaults low, and Q1 can pull charger `/CE` low only after firmware validates pack temperature |
+| `PACK_TS` | IO3 / ADC1_CH3 | **6** | reads the pack's 103AT-2 NTC/charger TS voltage; not a spare GPIO |
 | *(reserved)* | IO0, IO1 | 12, 13 | `XTAL_32K_P/N` — **left free** for an optional 32.768 kHz crystal if deep-sleep timing accuracy proves insufficient |
-| *(spare)* | IO3, IO4, IO5, IO14, IO18, IO21 | 6, 9, 10, 19, 24, 27 | brought to spare test pads where board area allows |
+| *(spare)* | IO4, IO5, IO14 | 9, 10, 19 | available for later use |
 | **NC** | IO8, IO15 | 22, 20 | strapping pins (boot-mode / JTAG-select) — deliberately unconnected |
 | `+3V0` | 3V3 | 3 | |
 | `EN` | EN | 8 | see §2.2 |
@@ -207,11 +214,11 @@ VQFN-16 3 × 3 mm with exposed pad (EP → `GND`).
 
 | Pin | Name | Net / value |
 |---|---|---|
-| 1 | TS | R7 = **10 kΩ 0402 to GND** — NTC unused in Rev 1 (see §5.2) |
+| 1 | TS | `PACK_TS`: J2.2 → selected pack's **103AT-2 NTC** → J2.1/GND; also U1 ADC1_CH3 (see §5.2) |
 | 2, 3 | BAT | `VBAT` |
-| 4 | /CE | `GND` (charging enabled) |
-| 5 | EN2 | `VBUS` via R8 = 100 kΩ → with the internal 285 kΩ pull-down gives ≈ 3.7 V = logic high |
-| 6 | EN1 | `GND` |
+| 4 | /CE | `CHARGE_EN_N`: R18 = 47 kΩ to `VBUS`, Q1 drain; VBUS disables charging before MCU power-up |
+| 5 | EN2 | `GND` — resistor-programmed ILIM mode cannot be selected in normal operation |
+| 6 | EN1 | `USB_ISEL` (IO21) + R8 = 100 kΩ to GND |
 | 7 | /PGOOD | `PG_N` (open drain) + R9 = 100 kΩ pull-up to `+3V0` |
 | 8, 17(EP) | VSS | `GND` |
 | 9 | /CHG | `CHG_N` (open drain) + R10 = 100 kΩ pull-up to `+3V0` |
@@ -222,9 +229,10 @@ VQFN-16 3 × 3 mm with exposed pad (EP → `GND`).
 | 15 | ITERM | R12 (see below) |
 | 16 | ISET | R13 (see below) |
 
-EN2 = 1, EN1 = 0 selects "input current set by external resistor from ILIM to
-VSS" (datasheet Table 7-2). When USB is absent, `VBUS` = 0, EN2 falls to 0 and
-the part sits in USB100 mode — harmless, since it is not charging.
+EN2 is hard-low. EN1 low selects USB100; EN1 high selects USB500 (datasheet
+Table 7-2). R8 keeps EN1 low while the ESP32 is off, reset or high-impedance.
+The 500 mA state therefore requires an explicit firmware action after USB
+enumeration/configuration; no boot transient can select it.
 
 ### 5.1 Charge current — the most thermally consequential resistor on the board
 
@@ -233,45 +241,66 @@ K<sub>ITERM</sub> = 0.0300 (ISET mode).
 
 | Ref | Function | Equation | Value | Result |
 |---|---|---|---|---|
-| R13 | fast charge | R = K<sub>ISET</sub>/I<sub>CHG</sub> = 890/0.25 | **3.57 kΩ 1 %** | I<sub>CHG</sub> = 249 mA |
-| R11 | input limit | R = K<sub>ILIM</sub>/I<sub>IN</sub> = 1550/0.5 | **3.09 kΩ 1 %** | I<sub>IN,max</sub> = 502 mA |
-| R12 | termination | R = I<sub>TERM</sub>·R13/K<sub>ITERM</sub> = 0.025 × 3570 / 0.03 | **3.01 kΩ 1 %** | I<sub>TERM</sub> ≈ 25 mA; C-rate depends on the selected cell |
+| R13 | fast charge | nominal 890/4420; worst case 975/(4420 × 0.99) | **4.42 kΩ 1 %** | 201 mA nominal, **≤223 mA** worst case |
+| R11 | ILIM fallback | nominal 1550/8000; worst case 1720/(8000 × 0.99) | **8.00 kΩ 1 %** | **194 mA nominal, ≤217 mA** if EN2 is reworked high; mode is unreachable as built |
+| R12 | termination | nominal 0.0300 × 3010/4420 | **3.01 kΩ 1 %** | ≈20.4 mA nominal, ≤26.1 mA worst case |
 
-*BOM option for the slow build:* R13 = 8.87 kΩ → I<sub>CHG</sub> = 100 mA.
+The 4.42 kΩ value is selected against E-03's 250 mA ceiling, using the BQ24074
+maximum K<sub>ISET</sub> and the resistor's negative tolerance. It is also below
+both public pack figures: the product page says 225 mA and drawing FD_3245_20
+says 275 mA. The stricter figure governs until the supplier resolves that
+conflict in writing. Nominal arithmetic alone is not the safety limit. The
+optional 8.87 kΩ slow build remains available for thermal tests.
 
 **Dissipation check.** The BQ24074 is a linear charger, so
-P = (V<sub>IN</sub> − V<sub>BAT</sub>) × I<sub>CHG</sub>. An illustrative
-point is (5.0 − 3.4) × 0.25 = **0.40 W** in a 3 × 3 mm QFN. This is not a
+P = (V<sub>IN</sub> − V<sub>BAT</sub>) × I<sub>CHG</sub>. Using the bounded
+223 mA charge current, (5.0 − 3.4) × 0.223 = **0.357 W** in a 3 × 3 mm QFN.
+This is not a
 worst-case bound: input/current tolerances, lower cell voltage and power-path
-load require separate evaluation. Another illustrative point:
-(5.0 − 3.8) × 0.25 = 0.30 W. **This is the largest heat source in the product —
+load require separate evaluation. Another point is
+(5.0 − 3.8) × 0.223 = 0.268 W. **This is the largest heat source in the product —
 larger than the radio, and unlike the radio it runs for hours.** It is the
 reason Variant B exists and the reason `PG_N` is wired to a GPIO: firmware must
 flag or suspend environmental reporting while charging (E-08).
 
 At 100 mA the same example is 0.16 W. The prototype run will tell us whether
-250 mA is acceptable inside the enclosure or whether the series build drops to
+the bounded 223 mA is acceptable inside the enclosure or whether the series build drops to
 100 mA and a longer charge time.
 
-### 5.2 TS pin
+### 5.2 Pack temperature and charge qualification
 
-Rev 1 uses a bare cell plus a separate protection PCM, so there is no NTC in the
-pack. Datasheet: "for applications that do not use the TS function, connect a
-10 kΩ fixed resistor from TS" — R7 does exactly that, holding TS mid-range so
-charging is always permitted. **This is a Rev-1 simplification with a real
-consequence: we lose pack-temperature-based charge inhibit.** Low current and
-indoor use do not establish safe pack temperature. This is an unresolved release
-blocker, not an accepted safety justification. A two-pin pack connector has no
-NTC contact: adding pack sensing requires a connector/wiring design and verified
-thermistor network, not simply changing R7 into a pull-up.
+J2.2 connects the selected pack's Semitec 103AT-2 NTC directly to TS and to
+U1 ADC1_CH3. The BQ24074 direct-NTC window is approximately 0–50 °C for that
+thermistor, while pack drawing FD_3245_20 permits charging only from 0–45 °C.
+The charger TS input alone therefore cannot enforce the pack's upper limit.
 
-[TI SLUS810N](https://www.ti.com/lit/gpn/BQ24074), Pin Functions and Battery Pack
-Temperature Monitoring, defines TMR and TS separately. TMR is now left open to
-enable the default timers; they do not replace pack-temperature monitoring.
-EDS-9 owner: hardware maintainer; close before charging prototypes in an enclosure
-by selecting the protected pack, implementing temperature inhibit, and testing
-hot/cold, missing-sensor, charge termination and timer behavior. No unattended
-charging qualification is claimed.
+R18 = 47 kΩ pulls `/CE` directly to VBUS. This reaches a valid high before the
+BQ24074's 4.35 V minimum operating input, rather than depending on the later
+3 V MCU rail. Q1 (onsemi 2N7002LT1G; G-S-D pins 1-2-3) isolates IO18 from
+VBUS. R7 = 100 kΩ holds Q1's gate low at reset or with missing firmware, so Q1
+is off and charging is disabled. Firmware may drive `CHARGE_ENABLE` high only
+after `PG_N` indicates VBUS and repeated calibrated
+`PACK_TS` readings prove the NTC is inside the pack's 0–45 °C charge range with
+an uncertainty guard band. It must release CE on out-of-range, implausible,
+open/short, ADC, watchdog or timing fault. The BQ24074's own TS hot/cold window
+and floating-TMR safety timers remain independent backups.
+
+R18 is checked against TI's approximately 285 kΩ internal CE pull-down:
+at the 4.35 V minimum operating input, 4.35 × 285/(285 + 47) = **3.73 V**, above
+the 1.4 V high threshold; nominally CE crosses 1.4 V at 1.63 V VBUS, below
+charger UVLO. When Q1 is on, R18 asks it to sink only about 5/47 kΩ = **106 µA**.
+The onsemi part's maximum 2.5 V gate threshold is specified at 250 µA, so a
+3.0 V GPIO drive has margin at this lower drain load. The slow-ramp/startup
+waveform is nevertheless part of EDS-9Q because the internal pull-down is only
+specified as approximate.
+
+Obtain written confirmation that the shipped pack matches FD_3245_20, then
+calculate the firmware thresholds from the Semitec 103AT-2 R/T curve and the
+BQ24074 worst-case 72–78 µA TS current. Test cold, hot, sensor-open,
+sensor-short, charge termination, safety-timer expiry and recovery on five
+packs. Charging in a closed enclosure remains prohibited until that evidence
+is linked from `hardware/release-readiness.json`; the circuit implementation
+alone is not qualification.
 
 | Ref | Value | Purpose |
 |---|---|---|
@@ -328,33 +357,62 @@ here so the reviewer sees it was a decision, not an oversight.
 D+/D− route to IO13/IO12 as a differential pair, 90 Ω target, kept short and
 away from the antenna and the inductor.
 
-### 7.1 Source-current limitation — open, not automatic USB negotiation
+### 7.1 Source-current policy — fail-safe USB100, enumerated USB500
 
-EN2/EN1 select a fixed ILIM mode; the two Rd resistors do not tell firmware how
-much current a source permits. R11's 502 mA is nominal, not a guaranteed 500 mA
-ceiling including tolerance. The circuit has no implemented attach/configuration
-policy for an arbitrary USB host. See [TI SLUS810N, Input Current Limit](https://www.ti.com/lit/gpn/BQ24074).
+The supported policy is explicit:
 
-Until EDS-10 closes, bench power uses a regulated 5 V supply whose documented
-current capability exceeds the measured worst-case input limit; a 1 A-capable
-bench source is the planning fixture assumption. That does not qualify generic
-host-powered charging/debug operation. Test attach, source removal, low-battery
-TX, current limiting and VBUS transients. A release design must select a supported
-source policy and implement appropriate current control/negotiation, with source
-and cable compatibility evidence. Owner: hardware/firmware maintainer; closing
-gate: before unrestricted USB use. Do not close this by changing documentation
-alone.
+1. On attach, reset, firmware crash or unconfigured operation, R8 holds EN1 low
+   while EN2 is hard-low. The BQ24074 USB100 state limits total input current to
+   100 mA maximum (system load plus battery charge).
+2. A USB 2.0/3.x data host may be used for charging/debugging. Firmware may set
+   `USB_ISEL` high only after the device reaches the USB configured state and
+   must clear it on suspend, deconfiguration, detach or USB-stack failure. This
+   selects USB500, whose datasheet maximum is 500 mA.
+3. USB-C power adapters and charge-only/unknown sources are supported only at
+   the 100 mA default because this design does not decode Rp current or charging
+   port signatures. They never justify `USB_ISEL=1`.
+4. Radio operation from USB with a missing or deeply depleted pack is not
+   supported: ESP32 transmit peaks can exceed the 100 mA default. The protected
+   battery supplies the transient through the BQ24074 power path. Factory
+   battery-less testing uses the declared regulated fixture supply and disables
+   radio until USB configuration.
+
+R11 is retained because TI requires ILIM to be terminated, but EN2 low makes its
+mode unreachable as assembled. Its 8.00 kΩ value also bounds a deliberate EN2
+rework to 217 mA worst case. Qualify with a USB current analyzer: attach/reset,
+configuration, suspend/resume, detach, firmware crash, low-battery TX and VBUS
+transients on representative USB 2.0 and USB 3.x hosts plus a charge-only source.
+The policy and circuit are locked; measured evidence is still required before
+the USB release gate closes.
 
 ---
 
-## 8. Battery connector (J2)
+## 8. Selected battery and connector (locked architecture)
 
-JST-PH 2.0 mm, 2-pin, SMD, right-angle or top-entry per mechanical fit.
-**Polarity: pin 1 = `VBAT` (+), pin 2 = `GND` (−).** Silkscreen must print `+`
-and `−` next to the pins; a reversed 1S LiPo destroys the charger and can vent
-the cell. Cell is a *protected* pack (over-charge, over-discharge, over-current);
-the PCB does not provide cell protection and must not be built with an
-unprotected cell.
+The shared A/B pack is **LiPol drawing FD_3245_20**, an LP702040 1S1P assembly:
+550 mAh minimum / 560 mAh typical, 3.7 V / 2.04 Wh, PCM protected, Semitec
+103AT-2 NTC, 45 ± 3 mm AWG-28 UL1571 leads and Molex 51021-0300 connector.
+The drawing's maximum assembled envelope is 42 × 20.5 × 7.3 mm. Cavity order is:
+
+| J2 / housing cavity | Wire | Net |
+|---:|---|---|
+| 1 | black | `GND` (−) |
+| 2 | yellow | `TS` / NTC |
+| 3 | red | `VBAT` (+) |
+
+J2 is Molex **53261-0371**, the 1.25 mm PicoBlade right-angle SMT header mating
+with 51021-0300. The board silk prints `− T +` in cavity order. Its footprint is verified against
+Molex drawing 532610271-SD; incoming inspection must continuity-check every pack
+before mating because reverse polarity can destroy the charger and vent a cell.
+
+The supplier webpage establishes that this configuration can be purchased in
+five-piece prototype quantity and the dated drawing defines the assembly.
+Procurement must obtain written lot confirmation, reconcile the page's 225 mA
+with the drawing's 275 mA maximum charge current, and supply the applicable
+transport test record. No visually similar
+two-wire or unprotected LP702040 is an approved substitute. This configured
+pack is a single-source prototype risk; a second pack source must be qualified
+or explicitly accepted before the 20-unit series.
 
 ---
 
@@ -389,15 +447,13 @@ side, all within one rectangular region so the fixture is a simple plate.
 | # | Item | Closing gate |
 |---|---|---|
 | EDS-1 | Exact USB-C receptacle MPN (JLCPCB basic-part availability drives this) | before prototype order |
-| EDS-2 | Exact JST-PH SMD MPN and orientation | after enclosure concept |
-| EDS-3 | Exact protected LiPo pack (dimensions, capacity, connector, NTC or not) | after measured energy per upload |
-| EDS-4 | Whether 250 mA charging is thermally acceptable in the enclosure | thermal Test 3 |
+| EDS-4 | Whether the bounded 223 mA charging design is thermally acceptable in the enclosure, or the 100 mA option is required | thermal Test 3 |
 | EDS-5 | 3.0 V vs 3.3 V — R6 value for the series build | prototype power + RF measurement |
 | EDS-6 | Whether the 32.768 kHz crystal on IO0/IO1 is needed | deep-sleep timing drift measurement |
 | EDS-7 | Antenna: flush with board edge (Rev 1) vs overhanging the outline | RF test in the finished enclosure |
 | EDS-8 | Neck width 3.0 / 3.5 / 5.0 mm for Variant B | first bare-PCB mechanical inspection + Test 1 |
-| EDS-9 | Pack-temperature charge inhibit, selected protected pack and timer tests; owner: hardware maintainer | before enclosed battery charging |
-| EDS-10 | USB source-current policy/control and worst-case input draw; owner: hardware/firmware maintainer | before unrestricted USB use |
+| EDS-9Q | Qualify LP702040 supplier drawing, pack NTC thresholds, protection, timer/fault behavior and assembled retention; owner: hardware maintainer | before enclosed battery charging |
+| EDS-10Q | Measure the locked USB100/USB500 policy on representative hosts and fault transitions; owner: hardware/firmware maintainer | before unrestricted USB use |
 
 ## 11. Review checklist for this spec
 

@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import unittest
 
-from tools.boardgen.enclosure import build, check, planning_cell_fits, HEIGHTS, TOL, WALL
+from tools.boardgen.enclosure import (
+    BATT_Z, BATT_Z_ALLOW, SUPPORT_H, build, check, planning_cell_fits,
+    HEIGHTS, TOL, WALL,
+)
 from tools.boardgen.variants import B_BODY_H, B_ISLAND_RECT, VARIANTS
 
 
@@ -13,9 +16,11 @@ class EnclosureTests(unittest.TestCase):
             self.assertLessEqual(cut.z - cut.height/2, 0)
             self.assertGreaterEqual(cut.z + cut.height/2, HEIGHTS["J1"][0])
 
-    def test_oversize_planning_cell_is_rejected(self):
+    def test_selected_pack_fits_both_variants(self):
         for v in VARIANTS.values():
-            self.assertFalse(planning_cell_fits(build(v)))
+            c = build(v)
+            self.assertTrue(planning_cell_fits(c))
+            self.assertGreaterEqual(c.board_z - SUPPORT_H - BATT_Z, BATT_Z_ALLOW)
 
     def test_divider_fits_only_over_narrow_neck(self):
         c = build(VARIANTS["b"])

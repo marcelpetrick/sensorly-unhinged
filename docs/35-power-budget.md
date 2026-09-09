@@ -8,11 +8,14 @@ the battery includes regulator/power-path loss. Do not mix rail-side and
 battery-side charge without conversion.
 
 For the default 5/15-minute schedule there are 288 samples and 96 uploads/day.
-25 µA continuous sleep consumes 0.6 mAh/day. A hypothetical 500 mAh pack with
-80% usable capacity permits 4.44 mAh/day for 90 days. The default illustrative
+25 µA continuous sleep consumes 0.6 mAh/day. The selected LP702040 pack is rated
+550 mAh; an illustrative 80% usable-capacity assumption permits 4.89 mAh/day
+for 90 days. The default illustrative
 upload charge is 160,000 µA·s (80 mA for two seconds); with 2,000 µA·s per sample
 the scenario exceeds that allowance. These are chosen scenarios, not datasheet
-claims or measured performance. The exact cell has not been selected.
+claims or measured performance. Rated capacity does not close E-04: usable
+capacity, cutoff loss, aging and event charge must still be measured on the
+selected protected pack.
 
 Run `python3 -m tools.power_budget --help` for measured-input overrides. A
 negative max_upload_uas means sleep and sampling alone exceed the target.

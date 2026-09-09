@@ -303,8 +303,8 @@ def _silk(v: Variant, placed=()) -> str:
     txt("SENSOR", 0.6, 2.9, 0.7, seed="name2")
     txt(v.revision, 0.6, 4.1, 0.7, seed="rev")
     txt("2026", 0.6, 5.3, 0.6, seed="year")
-    txt("+", 22.4, 26.1, 0.9, seed="batplus")      # J2 pin 1 = VBAT
-    txt("-", 22.4, 24.1, 0.9, seed="batminus")     # J2 pin 2 = GND
+    txt("- T +", 22.0, 27.7, 0.7, layer="B.SilkS", mirror=True,
+        seed="batpinout")  # J2 pins 1/2/3
     txt("USB-C 5V", *_free_label(v, placed, 5.0, 0.6, prefer=(1.2, 31.8)),
         size=0.6, seed="usb")
     txt(f"VARIANT {v.key.upper()}", 1.2, 32.6, 0.6, layer="B.SilkS",

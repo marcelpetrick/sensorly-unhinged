@@ -20,7 +20,7 @@ KiCad renders of the same two files: `img/render-a.png`, `img/render-b.png`.
 | Parts | 41 placements | identical |
 | Sensor position | bottom edge, board centre | on a 18 × 9 mm island |
 | Neck | — | 3.5 × 8.0 mm FR-4, 4 × 0.15 mm traces |
-| Nearest heat source to the sensor | **11.3 mm** (D1) | **23.1 mm** (J1) |
+| Nearest heat source to the sensor | **11.3 mm** (D1) | **16.5 mm** (R13) |
 | Idealized slab / neck conductance (not actual A/B coupling) | **70 mW/K** | **1.2 mW/K** |
 | Hypothetical slab / neck ratio | — | **57×**, not a performance claim |
 | Assembly difficulty | identical (single-sided SMT, same stencil apertures) | identical |
@@ -32,7 +32,7 @@ KiCad renders of the same two files: `img/render-a.png`, `img/render-b.png`.
 
 **The connectors moved to the side edges.** In B the bottom edge is where the
 thermal neck leaves the board, and both variants share one placement table — so
-the USB-C receptacle sits on the left edge and the JST on the right in *both*.
+the USB-C receptacle sits on the left edge and the PicoBlade pack header on the right in *both*.
 This is a good example of the shared-model discipline paying off: a decision
 forced by B automatically applies to A, and the two boards stay comparable.
 
@@ -45,7 +45,7 @@ board with room for a silkscreen title block, which is where it now lives.
 
 **There are no mounting holes.** M-04 forbids metal fasteners near the antenna;
 a nylon M2 boss costs ~19 mm² on a board this size; and the printed enclosure can
-register the board on ribs against the USB-C and JST cut-outs. Revisit at Rev 2
+register the board on ribs against the USB-C and pack-header cut-outs. Revisit at Rev 2
 if that retention proves unreliable.
 
 **Reference designators are not on the silkscreen.** Forty 0402s on 30 × 34 mm

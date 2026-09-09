@@ -25,7 +25,7 @@ Every row is a **target** until a prototype measurement promotes it. Rows marked
 | ID | Requirement | Target |
 |---|---|---|
 | E-01 | Battery 🔒 | 1S LiPo, protected cell, replaceable |
-| E-02 | Capacity | 500–1000 mAh |
+| E-02 | Capacity 🔒 | 550 mAh LP702040 configured pack; PCM + 10 kΩ NTC, three-wire PicoBlade harness |
 | E-03 | Charging 🔒 | USB-C, 5 V, **100–250 mA** (deliberately slow — the charger is the largest heat source in the product) |
 | E-04 | Runtime | > 3 months per charge at F-03/F-04 defaults |
 | E-05 | Deep-sleep system current | < 25 µA total (MCU + regulator Iq + leakage) |
@@ -37,13 +37,13 @@ Every row is a **target** until a prototype measurement promotes it. Rows marked
 
 | ID | Requirement | Target |
 |---|---|---|
-| M-01 | Variant A envelope | PCB ~30 × 34 mm; case ≈ 40–45 mm square × 13–18 mm |
+| M-01 | Variant A envelope | PCB ~30 × 34 mm; selected-pack case about 47 × 39 × 19 mm |
 | M-02 | Variant B envelope | PCB ~28 × 48 mm incl. 12–20 mm sensor tongue |
 | M-03 | Sensor air access 🔒 | vents directly at the sensor, small dead volume |
 | M-04 | Antenna clearance 🔒 | ≥ 15 mm free space around the module antenna; no battery, metal or copper behind it |
 | M-05 | Thermal isolation (B) 🔒 | two routed slots, narrow FR-4 neck, four thin traces, **no inner-layer copper across the neck**, no thermal vias |
 | M-06 | Chamber separation (B) 🔒 | enclosure wall between sensor chamber and electronics chamber |
-| M-07 | Battery position | not behind the antenna, not under the sensor |
+| M-07 | Battery position 🔒 | not behind the antenna, not under the sensor; 0.5 mm XY clearance and 1.0 mm thickness/swelling allowance |
 | M-08 | Enclosure | 3D printed for Rev 1 and Rev 2; battery user-replaceable |
 
 ## Manufacturing
@@ -80,10 +80,8 @@ more than 20 units.
 | # | Question | Closes at |
 |---|---|---|
 | R-1 | 3.0 V vs 3.3 V rail | prototype power measurement |
-| R-2 | Exact battery capacity and physical cell | after measured energy per upload |
 | R-3 | Exact vent geometry / open area | thermal Test 5 response-time data |
 | R-4 | TWT available on deployment APs? | firmware bring-up |
 | R-5 | Sensor tongue neck width vs mechanical strength | first bare-PCB inspection |
-| R-6 | **Case is 19.7 mm, not 13–18 mm (M-01).** The JST PH battery header is 7.5 mm on its own. A 1.0 mm-pitch JST SH brings it to 15.7 mm. | Rev 2, see `80-enclosure.md` |
 | R-8 | **Board retention.** Only 2 lid hold-down pillars fit on A and 1 on B — no bare board is left. Rev 2 should carry two **nylon** M2 holes; the M-04 objection to fasteners near the antenna is about metal, and nylon is not metal. | Rev 2 |
-| R-7 | **Battery bay holds ~340 mAh (A) / ~400 mAh (B), not 500–1000 mAh (E-02).** The cell may sit neither under the antenna nor under the sensor. E-04 is runtime, not capacity — decide from the measured energy per upload. | prototype power measurement |
+| R-9 | Qualify the selected pack's controlled drawing, NTC curve, protection behavior, lead routing, swelling space and assembled retention | before enclosed charging |

@@ -11,7 +11,8 @@ copper stackup, firmware binary and printing settings. The primary experiment
 uses 3.3 V on all ten boards (EDS §4.1). Use F-11 serials ENV-0001…0005 for A,
 ENV-0006…0010 for B, paired by offset five, and record
 serial, component lot, R6, pack serial/capacity, PCB revision and firmware hash.
-The physical pack must fit both cases before this protocol starts.
+The selected LP702040 pack must pass the physical checks in
+`51-power-safety-qualification.md` in both cases before this protocol starts.
 
 Run any 3.0 V characterization separately after the primary experiment. Record
 rework and analyze matched units before/after; never pool different rails as
@@ -65,9 +66,9 @@ reset events and retransmitted batches remain visible.
 | 5 | Temperature step, nominal 18 → 26 °C, 1/15-minute cadence | Pre-step equilibrium then 2 hours; do not discard the transient |
 | 6 | Humidity step, nominal 40 → 70 %RH, 1/15-minute cadence | Pre-step equilibrium then 2 hours; reference measures actual step |
 
-Test 3 starts only after EDS-9 battery-temperature/charge qualification.
+Test 3 starts only after EDS-9Q battery-temperature/charge qualification.
 Match charger current, source and pack between variants. Log actual current;
-charger power is not a fixed 0.40 W across the run. Continue until the
+charger power is not a fixed value across the run. Continue until the
 temperature returns to the predeclared equilibrium band, recording cooldown.
 
 ## Immutable records and metrics

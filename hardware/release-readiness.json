@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "checks": [
-    {"id": "battery", "owner": "hardware maintainer", "evidence": null, "requirement": "EDS-9: selected protected pack, temperature inhibit, charge and timer tests"},
-    {"id": "usb", "owner": "hardware maintainer", "evidence": null, "requirement": "EDS-10: source capability and current limits, including attach and debug"},
+    {"id": "battery", "owner": "hardware/firmware maintainer", "evidence": null, "requirement": "EDS-9Q/docs 51: LP702040 lot confirmation, VBUS/Q1 fail-safe CE plus NTC inhibit, charge/timer/fault and retention tests"},
+    {"id": "usb", "owner": "hardware/firmware maintainer", "evidence": null, "requirement": "EDS-10Q/docs 51: USB100 reset default, enumerated USB500 state machine and representative-source measurements"},
     {"id": "power", "owner": "hardware maintainer", "evidence": null, "requirement": "Module rail transients, cutoff, sleep current and measured runtime budget"},
     {"id": "mechanical", "owner": "mechanical maintainer", "evidence": null, "requirement": "Actual pack fits; PCB retention, connector access, antenna clearance and neck tested"},
     {"id": "assembly", "owner": "hardware maintainer", "evidence": null, "requirement": "Exact MPNs, land patterns, approved CPL orientation and fab stackup"},

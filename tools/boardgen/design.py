@@ -76,13 +76,23 @@ PARTS = [
     Part("U4", "BQ24074RGTR", f"{FP}:VQFN-16-1EP_3x3mm_P0.5mm_EP1.6x1.6mm", "BQ24074RGTR",
          "Texas Instruments", "1S Li-ion charger with power path, NTC, status outputs",
          alt="BQ24075RGTR (same pinout, different DPPM/timer defaults)"),
-    Part("R7", "10k 1%", R0402, desc="TS - fixed resistor, NTC not used in Rev 1"),
-    Part("R8", "100k 1%", R0402, desc="EN2 pull-up from VBUS -> ILIM resistor mode"),
+    Part("Q1", "2N7002", f"{FP}:SOT-23", "2N7002LT1G", "onsemi",
+         "low-side /CE driver; VBUS pull-up keeps charging disabled at power-up",
+         alt="2N7002,215 (Nexperia; same G-S-D pinout and SOT-23 land pattern)"),
+    Part("R7", "100k 1%", R0402,
+         desc="Q1 gate pull-down: charge enable defaults low/off"),
+    Part("R8", "100k 1%", R0402,
+         desc="EN1 pull-down: USB100 is the fail-safe reset/unconfigured state"),
     Part("R9", "100k 1%", R0402, desc="/PGOOD pull-up"),
     Part("R10", "100k 1%", R0402, desc="/CHG pull-up"),
-    Part("R11", "3k09 1%", R0402, desc="ILIM: 1550/3090 = 502 mA input limit"),
-    Part("R12", "3k01 1%", R0402, desc="ITERM: 0.03*3010/3570 = 25 mA"),
-    Part("R13", "3k57 1%", R0402, desc="ISET: 890/3570 = 249 mA. Slow build option: 8k87 -> 100 mA"),
+    Part("R11", "8k00 1%", R0402,
+         desc="ILIM fallback: <=217 mA incl. KILIM and resistor tolerance; mode not selected"),
+    Part("R12", "3k01 1%", R0402,
+         desc="ITERM: 0.03*3010/4420 = 20.4 mA nominal"),
+    Part("R13", "4k42 1%", R0402,
+         desc="ISET: 890/4420 = 201 mA nominal; <=223 mA worst case"),
+    Part("R18", "47k 1%", R0402,
+         desc="/CE pull-up to VBUS: charger disabled before MCU power-up"),
     Part("C9", "10uF/16V X5R", C0805, desc="charger IN bypass"),
     Part("C10", "10uF/6.3V X5R", C0805, desc="charger OUT bypass"),
     Part("C11", "10uF/6.3V X5R", C0805, desc="charger BAT bypass"),
@@ -99,10 +109,11 @@ PARTS = [
     Part("C14", "100nF/16V X7R", C0402, desc="VBUS local"),
 
     # --- 06 Battery ---------------------------------------------------------
-    Part("J2", "JST-PH 2P", f"{FP}:JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal",
-         "S2B-PH-SM4-TB(LF)(SN)", "JST",
-         "1S LiPo, pin 1 = VBAT(+), pin 2 = GND(-) - PROTECTED cell only",
-         alt="B2B-PH-SM4-TB (top entry, same land pattern family)"),
+    Part("J2", "Molex PicoBlade 3P",
+         f"{FP}:Molex_PicoBlade_53261-0371_1x03-1MP_P1.25mm_Horizontal",
+         "53261-0371", "Molex",
+         "LP702040 pack: pin 1 GND(-), pin 2 PACK_TS/103AT-2, pin 3 VBAT(+)",
+         alt="single-sourced connector family; accepted for prototypes pending pack qualification"),
     Part("R14", "2M2 1%", R0402, desc="VBAT divider top"),
     Part("R15", "2M2 1%", R0402, desc="VBAT divider bottom - 0.95 uA continuous, see EDS S6"),
     Part("C13", "100nF/16V X7R", C0402, desc="ADC filter"),
@@ -111,7 +122,7 @@ PARTS = [
     # No mounting holes in Rev 1, deliberately: M-04 forbids metal fasteners
     # near the antenna, a nylon M2 boss costs ~19 mm2 of a 1020 mm2 board, and
     # the printed enclosure registers the board on ribs against the USB-C and
-    # JST cut-outs.  Revisit at Rev 2 if that retention proves unreliable.
+    # connector cut-outs. Revisit at Rev 2 if that retention proves unreliable.
 ]
 
 # Test pads (bottom side, 2.54 mm grid) - EDS section 9
@@ -138,14 +149,15 @@ NETS = {
     "GND": (
         [("U1", p) for p in ESP_GND_PADS]
         + [("U2", "4"), ("U3", "1"), ("U3", "3"), ("U3", "6"),
-           ("U4", "8"), ("U4", "17"), ("U4", "4"), ("U4", "6"),
+           ("U4", "8"), ("U4", "17"), ("U4", "5"), ("Q1", "2"),
            ("U5", "2"),
            ("J1", "A1"), ("J1", "A12"), ("J1", "B1"), ("J1", "B12"), ("J1", "SH"),
-           ("J2", "2"), ("J2", "MP"),
+           ("J2", "1"),
            ("C1", "2"), ("C2", "2"), ("C3", "2"), ("C4", "2"), ("C5", "2"),
            ("C6", "2"), ("C7", "2"), ("C8", "2"), ("C9", "2"), ("C10", "2"),
            ("C11", "2"), ("C12", "2"), ("C13", "2"), ("C14", "2"),
-           ("R7", "2"), ("R11", "2"), ("R12", "2"), ("R13", "2"),
+           ("R7", "2"), ("R8", "2"), ("R11", "2"), ("R12", "2"),
+           ("R13", "2"),
            ("R15", "2"), ("R16", "2"), ("R17", "2"),
            ("SW1", "2"),
            ("TP1", "1"), ("TP17", "1")]
@@ -156,11 +168,11 @@ NETS = {
              ("R2", "1"), ("TP4", "1")],
     "VSYS": [("U3", "2"), ("U4", "10"), ("U4", "11"), ("C7", "1"), ("C10", "1"),
              ("R5", "1"), ("TP3", "1")],
-    "VBAT": [("U4", "2"), ("U4", "3"), ("J2", "1"), ("C11", "1"), ("R14", "1"),
+    "VBAT": [("U4", "2"), ("U4", "3"), ("J2", "3"), ("C11", "1"), ("R14", "1"),
              ("TP5", "1")],
     "VBUS": [("U4", "13"), ("U5", "5"), ("J1", "A4"), ("J1", "A9"),
              ("J1", "B4"), ("J1", "B9"), ("C9", "1"), ("C12", "1"), ("C14", "1"),
-             ("R8", "1"), ("TP2", "1")],
+             ("R18", "2"), ("TP2", "1")],
     "SW_L": [("U3", "7"), ("L1", "1")],
     "L_OUT": [("L1", "2")],            # merged into +3V0 below
     "EN": [("U1", "8"), ("R1", "2"), ("C4", "1"), ("TP6", "1")],
@@ -183,10 +195,18 @@ NETS = {
     "UART_TX": [("U1", "31"), ("TP8", "1")],
     "UART_RX": [("U1", "30"), ("TP9", "1")],
     "TEST_MODE": [("U1", "26"), ("TP16", "1")],
+    # VBUS pulls /CE high before the charger reaches its operating threshold.
+    # Q1 isolates the 5 V domain; firmware may enable only after NTC validation.
+    "CHARGE_EN_N": [("U4", "4"), ("Q1", "3"), ("R18", "1")],
+    "CHARGE_ENABLE": [("U1", "24"), ("Q1", "1"), ("R7", "1")],
+    # IO21 may assert this only after USB enumeration/configuration. R8 keeps
+    # the charger in its hardware USB100 state during reset, boot and faults.
+    "USB_ISEL": [("U1", "27"), ("U4", "6"), ("R8", "1")],
     "CC1": [("J1", "A5"), ("R16", "1")],
     "CC2": [("J1", "B5"), ("R17", "1")],
-    "TS": [("U4", "1"), ("R7", "1")],
-    "EN2": [("U4", "5"), ("R8", "2")],
+    # U1.IO3 is ADC1_CH3. Firmware measures the same 103AT-2 that feeds the
+    # charger's independent TS window before it may assert CHARGE_ENABLE.
+    "PACK_TS": [("U1", "6"), ("U4", "1"), ("J2", "2")],
     "ILIM": [("U4", "12"), ("R11", "1")],
     "ITERM": [("U4", "15"), ("R12", "1")],
     "ISET": [("U4", "16"), ("R13", "1")],

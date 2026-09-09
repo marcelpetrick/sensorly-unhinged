@@ -96,13 +96,20 @@ module holddown_pillars() {
 
 // ---- support --------------------------------------------------------------
 module ribs() {
-    // Four short ribs under the board corners, kept out of the antenna
-    // keep-out so nothing dense sits behind the antenna (M-04).
+    // Four side-wall ledges support the board from above the pack. They begin
+    // only after the full pack envelope plus swelling allowance; floor-to-PCB
+    // pillars would pass straight through the selected pouch cell. Each ledge
+    // reaches a side wall, so it is printable rather than a floating cube.
     ay1 = antenna_keepout[3];
-    for (p = [[3, ay1 + 3], [board_w - 3, ay1 + 3],
-              [3, board_h - 3], [board_w - 3, board_h - 3]])
-        translate([bx + p[0] - rib_w / 2, by + p[1] - rib_w / 2, floor_t])
-            cube([rib_w, rib_w, board_z]);
+    for (y = [ay1 + 3, board_h - 3]) {
+        translate([wall, by + y - rib_w / 2,
+                   floor_t + board_z - support_h])
+            cube([bx - wall + rib_w, rib_w, support_h]);
+        translate([bx + board_w - rib_w, by + y - rib_w / 2,
+                   floor_t + board_z - support_h])
+            cube([outer_w - wall - (bx + board_w - rib_w),
+                  rib_w, support_h]);
+    }
 }
 
 module divider() {
@@ -172,7 +179,9 @@ else if (part == "lid") lid();
 else if (part == "interference") {
     intersection() {
         base();
-        translate([0, 0, floor_t + inner_z + lid_t]) mirror([0, 0, 1]) lid();
+        // Ignore the intended zero-volume seating-face contact. The epsilon
+        // remains far smaller than any printable interference we need to catch.
+        translate([0, 0, floor_t + inner_z + lid_t + eps]) mirror([0, 0, 1]) lid();
     }
 }
 else if (part == "both") { base(); translate([0, outer_h + 5, 0]) lid(); }

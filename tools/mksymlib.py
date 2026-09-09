@@ -31,8 +31,9 @@ VENDORED = [
     ("Sensor_Humidity", "SHT4x"),
     ("Battery_Management", "BQ24074RGT"),
     ("Connector", "USB_C_Receptacle_USB2.0_16P"),
-    ("Connector_Generic_MountingPin", "Conn_01x02_MountingPin"),
+    ("Connector_Generic_MountingPin", "Conn_01x03_MountingPin"),
     ("Connector", "TestPoint"),
+    ("Transistor_FET", "Q_NMOS_GSD"),
     ("Device", "R"), ("Device", "C"), ("Device", "L"), ("Device", "LED"),
     ("Switch", "SW_Push"),
     ("power", "GND"), ("power", "+3V0"), ("power", "VBUS"), ("power", "PWR_FLAG"),
@@ -139,9 +140,9 @@ def main(argv):
            '\t(generator "sensorly-boardgen")', '\t(generator_version "10.0")']
     for lib, name in VENDORED:
         body = read(src, lib, name)
-        if name == "Conn_01x02_MountingPin":
+        if name == "Conn_01x03_MountingPin":
             body = body.replace("Connector*:*_1x??-1MP*",
-                                "sensorly:JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal")
+                                "sensorly:Molex_PicoBlade_53261-0371_1x03-1MP_P1.25mm_Horizontal")
         out.append("\t" + body.replace("\n\t", "\n\t\t"))
     for lib, child, parent in FLATTEN:
         out.append("\t" + flatten(src, lib, child, parent).replace("\n\t", "\n\t\t"))

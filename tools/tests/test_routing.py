@@ -20,7 +20,18 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(result[0].pts, [(11.5, 23.3), (11.5, 24.5)])
         self.assertEqual(track.pts[-1], (11.5, 24.6))
 
-    def test_other_net_and_noncollinear_paths_are_unchanged(self):
+    def test_other_net_is_unchanged(self):
         track = Track("X", .2, "F.Cu", [(0, 0), (1, 0)])
-        for via in (Via("Y", .9, 0), Via("X", 1, .1)):
-            self.assertEqual(center_track_ends([track], [via])[0].pts, track.pts)
+        self.assertEqual(
+            center_track_ends([track], [Via("Y", .9, 0)])[0].pts, track.pts)
+
+    def test_noncollinear_endpoint_is_centered(self):
+        track = Track("X", .2, "F.Cu", [(0, 0), (1, 0)])
+        result = center_track_ends([track], [Via("X", 1, .1)])
+        self.assertEqual(result[0].pts, [(0, 0), (1, .1)])
+
+    def test_interior_corner_connects_at_via_centre(self):
+        track = Track("X", .2, "F.Cu", [(0, 0), (1, 0), (1, 1), (2, 1)])
+        result = center_track_ends([track], [Via("X", 1, .9)])
+        self.assertEqual(
+            result[0].pts, [(0, 0), (1, 0), (1, .9), (1, 1), (2, 1)])
