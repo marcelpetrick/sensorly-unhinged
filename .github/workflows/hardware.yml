@@ -31,10 +31,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7.0.1
 
-      - name: Install mechanical tooling
+      - name: Install build and mechanical tooling
         run: |
           apt-get update -qq
-          apt-get install --no-install-recommends --yes openscad
+          apt-get install --no-install-recommends --yes make openscad
 
       - name: Report pinned toolchain
         run: |
