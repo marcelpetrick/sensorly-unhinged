@@ -457,6 +457,15 @@ side, all within one rectangular region so the fixture is a simple plate.
 
 ---
 
+### Main-board sensor routing clarification (2026-09-18)
+
+The no-via requirement applies spatially to the sensor island/neck on B and the
+sensor quiet area on A. SDA/SCL may change layers on the main board to reach
+bottom-side TP12/TP13. The former global net-class via ban made those test pads
+unroutable. Both generators now allow those main-board branches at 0.15 mm while
+retaining the existing island routes and spatial via prohibition. KiCad negative
+controls exercise an illegal neck via and a legal main-board sensor via.
+
 ### Implementation findings before routing freeze (2026-09-18)
 
 BQ24074 EN2 is currently hard-wired to GND. TI's

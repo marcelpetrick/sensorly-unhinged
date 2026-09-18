@@ -380,11 +380,15 @@ def route_rest(v: Variant, placed: list[Placement],
         return (-fine, _spread(ts))
 
     todo = [(net, ts) for net, ts in terms.items()
-            if net not in PLANE_NETS and net not in ISLAND_NETS and len(ts) > 1]
+            if net not in PLANE_NETS and len(ts) > 1]
     todo.sort(key=difficulty)
 
     for net, ts in todo:
-        width = POWER_W if net in POWER_NETS else SIGNAL_W
+        # Island routes already join U2 to the pull-ups. Finish only the
+        # main-board MCU/test-pad branches; never re-enter the thermal area.
+        if net in ISLAND_NETS:
+            ts = [t for t in ts if t.ref != "U2"]
+        width = .15 if net in ISLAND_NETS else POWER_W if net in POWER_NETS else SIGNAL_W
         board = Board(v, placed)
         board.add_pads(net, padnet, width)
         for t in island_tracks + tracks:
