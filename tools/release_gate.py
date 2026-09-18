@@ -34,7 +34,8 @@ def qualification_paths(root=ROOT):
     return [evidence_path(root, c) for c in qualification_checks(root)]
 
 
-def blockers(root=ROOT):
+def design_blockers(root=ROOT):
+    """Neither prototype nor product packages may waive incomplete layout."""
     problems = []
     for variant in ("a", "b"):
         try:
@@ -45,6 +46,11 @@ def blockers(root=ROOT):
                     problems.append(f"{variant}: {len(d[key])} {key}")
         except (OSError, ValueError, TypeError, KeyError) as exc:
             problems.append(f"{variant}: no valid DRC evidence: {exc}")
+    return problems
+
+
+def blockers(root=ROOT):
+    problems = design_blockers(root)
     try:
         for c in qualification_checks(root):
             try:

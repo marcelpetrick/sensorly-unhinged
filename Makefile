@@ -230,3 +230,12 @@ firmware-flash: firmware
 
 production-capture:
 	$(PY) -m production.capture $(CAPTURE_ARGS)
+
+.PHONY: prototype-check prototype-package
+prototype-check: erc drc
+	$(PY) -m tools.prototype_gate
+	$(MAKE) firmware-test firmware
+
+prototype-package:
+	@test -n "$(PROTOTYPE_VARIANT)" || { echo "PROTOTYPE_VARIANT=a or b required" >&2; exit 1; }
+	$(PY) -m tools.package_prototype --variant "$(PROTOTYPE_VARIANT)"
