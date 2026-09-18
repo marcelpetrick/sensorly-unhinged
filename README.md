@@ -57,6 +57,11 @@ main-board connections remain incomplete. Development DRC has zero errors,
 with explicitly limited warnings; it is not a clean manufacturing DRC.
 Phase 6 of 14 — see [`docs/00-plan.md`](docs/00-plan.md).
 
+A compiled, radio-disabled [bring-up application and fixture capture](docs/72-firmware-bringup.md)
+are now available. Full telemetry firmware and device qualification remain open.
+The [prototype-to-production handoff](docs/65-prototype-to-production.md) separates
+public engineering sources, controlled prototype orders and qualified products.
+
 The current audit and ordered work through the prototype experiment and 20-unit
 series are in [`docs/01-execution-plan.md`](docs/01-execution-plan.md).
 
@@ -97,6 +102,10 @@ make mech-render # optional enclosure PNG previews (requires a graphics display)
 make power     # illustrative battery-side charge budget; replace inputs with measurements
 make release-check # fails until routing and qualification are complete
 make release-package RELEASE_TAG=hw-a1 # gated ZIP + SHA-256 for one printed revision
+make firmware-test # host CRC/decoder fault tests
+make firmware   # source pinned ESP-IDF v5.5.4 export.sh first
+make prototype-check # separate prototype reviews; currently fails on layout/reviews
+make prototype-package PROTOTYPE_VARIANT=a # gated 5-unit engineering order package
 make all
 ```
 
@@ -164,7 +173,7 @@ hardware/
 hardware/schematic/  one generated schematic, shared by both variants
 tools/boardgen/  the shared model: design, schematic, geometry, placer, router, checks
 mechanical/      OpenSCAD enclosures, generated parameters from the board
-firmware/        ESP-IDF application (not started)
+firmware/        pinned ESP-IDF engineering bring-up application
 ```
 
 ## Licence

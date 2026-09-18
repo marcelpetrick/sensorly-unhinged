@@ -3,8 +3,10 @@
 Development exports are draft review artifacts. Product release requires
 `make release-check`: clean ERC, clean DRC/parity with complete routing on both
 variants, and all seven qualification-evidence records. The current design
-does not meet that gate. Prototype-order review is tracked separately in
-[the execution plan](01-execution-plan.md).
+does not meet that gate. Prototype-order review and packaging are implemented separately in
+[the production handoff](65-prototype-to-production.md) and
+`hardware/prototype-readiness.json`. Public engineering source prereleases do not
+carry a manufacturing-readiness claim or a product release marker.
 
 ## One release path
 

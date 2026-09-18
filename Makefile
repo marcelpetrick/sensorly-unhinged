@@ -42,6 +42,8 @@ help:
 	@echo "make thermal  - regenerate docs/45-thermal-model.md from the geometry"
 	@echo "make cost     - regenerate docs/60-manufacturing-cost.md from the design"
 	@echo "make mech     - enclosure model, checks, OpenSCAD params (+ STL if openscad)"
+	@echo "make prototype-check - require clean layouts and controlled prototype reviews"
+	@echo "make prototype-package PROTOTYPE_VARIANT=a - reviewed prototype ZIP + SHA-256"
 	@echo "make release-check - reject unfinished routing or missing qualification evidence"
 	@echo "make release-package RELEASE_TAG=hw-a1 - gated, checksummed release asset"
 	@echo "make firmware - build bring-up image (source pinned ESP-IDF export.sh first)"

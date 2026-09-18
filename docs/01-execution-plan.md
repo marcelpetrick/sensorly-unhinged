@@ -21,7 +21,30 @@ unconnected items); all seven qualification evidence fields were null.
 `firmware/`, `production/` and `measurements/` did not exist. Thus “phase 6” is
 a description of active layout work, not proof that every earlier phase gate
 has closed: the EDS/library review checklist and exact purchasing BOM remain
-open. Physical artifacts outside this repository have not been verified.
+open. The maintainer has confirmed that no physical boards, pack samples or measurements
+exist outside the repository either.
+
+## Current implementation checkpoint — 2026-09-18
+
+The original audit below is retained as history. Since it, the repository gained:
+
+- a compiled ESP32-C6 bring-up application, pinned ESP-IDF build and CI;
+- host-tested SHT45 CRC/error handling, ADC reporting, default-low charge/current
+  control, watchdog and timer sleep, with radio/charging/USB500 disabled;
+- immutable serial-linked fixture-log capture with chip/image checks and failure
+  retention; no records are presented as real device measurements;
+- corrected spatial sensor-via rules, tested in KiCad for both allowed main-board
+  routing and forbidden neck copper;
+- an independent, fail-closed prototype gate/package implementation and a concrete
+  [prototype-to-production handoff](65-prototype-to-production.md).
+
+No electrical architecture hold has been silently closed. EDS-13 now records
+that hard-low charger EN2 prevents standby/suspend mode, and EDS-14 records that
+IO9 cannot wake a C6 from deep sleep. Both need resolution before routing freeze.
+The firmware is **bring-up only**: persistent journal, provisioning, MQTT/TLS and
+signed OTA are still unimplemented. Boards remain at 59/60 unrouted connections.
+All five prototype review slots and all seven product qualification slots remain
+open. A public engineering source prerelease does not authorize fabrication.
 
 ## Ordered work and completion gates
 
@@ -33,13 +56,13 @@ Owners below are engineering roles; the project maintainer assigns people.
 | Order | Priority / owner | Work | Completion and review gate | State |
 |---|---|---|---|---|
 | 1 | P0 / build maintainer | Close release-export and packaging bypasses; require the complete manufacturing set and carry qualification evidence in the archive. | Fault injection proves missing qualification, files or failed exports cannot produce a release; full development pipeline still passes. | Done and reviewed; see verification below |
-| 2 | P0 / hardware + firmware | Resolve EDS-11 USB configuration/current-allocation and suspend implementation; resolve EDS-12 watchdog/sleep output release. Keep USB500 and charging disabled until their prerequisites hold. | Review a C6-specific implementation and actual descriptor; define and measure fault latency and total suspend current. Use an ADR if architecture/policy changes. | Open; source-level contract gap recorded |
+| 2 | P0 / hardware + firmware | Resolve EDS-11 USB configuration/current-allocation and suspend implementation; resolve EDS-12 watchdog/sleep output release. Keep USB500 and charging disabled until their prerequisites hold. | Review a C6-specific implementation and actual descriptor; define and measure fault latency and total suspend current. Use an ADR if architecture/policy changes. | Open; C6 configuration, hard-wired EN2 suspend and IO9 wake conflicts recorded (EDS-11–14) |
 | 3 | P0 / hardware | Obtain the controlled pack drawing/lot confirmation; confirm harness polarity, NTC curve, protection and current-limit discrepancy. Review PACK_TS electrical limits under open/short/unpowered faults. | Supplier evidence and a reviewed worst-case calculation; five incoming-inspection records before mating/charging. | Supplier records and samples required |
 | 4 | P1 / hardware | Recheck U1–U5, Q1, J1/J2 and D1 pin numbers, pin-1 and rotations against primary drawings; select exact passive and connector MPNs. | EDS §11 checklist and assembly review signed; BOM ratings/DC bias/inductor saturation and second-source risks recorded. | Open |
 | 5 | P1 / PCB maintainer | Finish routing on A and B from the shared model: power/ground and regulator loops, fine-pitch escapes, charger controls, USB pair, remaining signals and test pads. | Zero unconnected items, errors, warnings and parity differences on both; review return paths, USB geometry/stackup, thermal neck and antenna keepouts. Reduce budgets only after inspecting the new DRC results. | Open |
 | 6 | P1 / mechanical | Verify PCB/pack retention, connector access and lead routing, sensor vents/chambers and antenna clearance in both cases. | Mesh gates plus physical fit/handling records for all five packs; address weak B board retention before deployment. | Model exists; physical tests pending |
-| 7 | P1 / firmware | Add a pinned ESP-IDF build and minimal safe bring-up: default-low charge/current controls, calibrated NTC supervision, acquisition before radio, bounded failures and sleep. | Reproducible build, executable policy/fault tests, and scope traces on hardware. EDS-11/12 block enabling higher current/charging. | Not started; SDK absent from PATH |
-| 8 | P1 / production | Prepare fixture/flashing/self-test and serialized result capture; get assembler DFM/CPL approval, quotes and controlled prototype-order files. | Exact as-built BOM, stackup, pin-1 preview, reviewed order package and incoming inspection plan. Prototype order remains a separate engineering decision from product release. | Not started |
+| 7 | P1 / firmware | Add a pinned ESP-IDF build and minimal safe bring-up: default-low charge/current controls, calibrated NTC supervision, acquisition before radio, bounded failures and sleep. | Reproducible build, executable policy/fault tests, and scope traces on hardware. EDS-11/12 block enabling higher current/charging. | Bring-up image compiles with pinned ESP-IDF v5.5.4; decoder/failure tests pass. NTC supervision and device traces remain open |
+| 8 | P1 / production | Prepare fixture/flashing/self-test and serialized result capture; get assembler DFM/CPL approval, quotes and controlled prototype-order files. | Exact as-built BOM, stackup, pin-1 preview, reviewed order package and incoming inspection plan. Prototype order remains a separate engineering decision from product release. | Fixture capture/flashing and controlled prototype packager implemented/tested; exact BOM, assembler reviews and quotes remain open |
 | 9 | P1 / hardware + test | Build 5 A + 5 B and perform staged bench bring-up and docs 51 power-safety qualification. | Rail transients, power modes, pack faults, watchdog, host/suspend and charge tests pass before enclosed charging. | Requires steps 2–8 and physical boards |
 | 10 | P2 / firmware | Complete F-03…F-12: 500-record recoverable journal, provisioning/credentials, MQTT/TLS, signed OTA/rollback, quality flags, factory mode and measured energy limits. | Every acceptance case in docs 71 passes, including interrupted writes/OTA, outages, invalid certificates and stale/charging readings. | Not started |
 | 11 | P2 / test | Measure sleep/runtime, RF and finished-case thermal/RH performance; execute the predeclared A/B experiment. | Raw data, calibration/uncertainty and run metadata retained; guarded decision gate chooses A, B or inconclusive without pooling incompatible builds. | Requires prototypes and firmware |
@@ -51,7 +74,7 @@ only exist after prototypes. Do not fabricate evidence to get a prototype order
 through that gate or rename a draft export a product release. Step 8 needs a
 reviewed prototype-order disposition with explicit remaining qualification risks.
 
-## Verification record
+## Original audit verification record (`b5a06c6`)
 
 Both development runs passed all 14 stages with Python 3.14.7 and KiCad 10.0.6;
 the final run completed at `b5a06c6` with no skipped stages. No physical
@@ -73,10 +96,10 @@ qualification or manufacturing release is inferred from either run.
 Local reproduction logs are `_build/readiness-review-pipeline.log`,
 `_build/readiness-review-release-check.log`, `_build/readiness-release-outputs.log`
 and `_build/readiness-release-package.log`. They are ignored build diagnostics,
-not qualification evidence. No boards/packs were ordered or tested, no firmware
-was implemented, and all seven physical/product qualification slots remain null.
-Steps 2–13 remain open; no outside hardware or measurement records were supplied
-during this audit. The next engineering action is the EDS-11/12 architecture
+not qualification evidence. At that checkpoint no boards/packs were ordered or tested and no firmware
+was implemented. All seven physical/product qualification slots still remain null.
+Steps 2–13 were open at that checkpoint; the current implementation status is
+listed above. No outside hardware or measurement records were supplied. The next engineering action is the EDS-11/12 architecture
 review, followed by library/purchasing verification and deliberate routing of
 both variants. Supplier and bench work require actual records and hardware.
 
@@ -97,3 +120,15 @@ are explicit fine-pitch fan-out with pad geometry preserved, placement/loop
 review of the regulator and charger, and intentional USB pair routing; merely
 reducing the router's padding does not finish this design. Complete EDS-11/12's
 architecture review before freezing those routes.
+
+### External-router experiment disposition
+
+Freerouting 2.4.1 was evaluated only in `_build/`, using the official checksum-
+verified Linux bundle and analytics disabled. Routing the existing partial A
+board did not resolve its blockers. A clean-island-only routing experiment,
+imported back into KiCad with the real project/rules and fresh zone fill, yielded
+23 unconnected items, 36 DRC errors (33 width and 3 clearance), 74 warnings and
+zero parity differences. Fewer airwires alone do not make acceptable copper.
+Neither experiment was adopted or added to the release inputs; the committed
+boards retain their zero-error baseline. Main-board fine-pitch escape, power-loop
+and USB routing need deliberate layout work after the architecture decisions.
