@@ -32,7 +32,7 @@ Owners below are engineering roles; the project maintainer assigns people.
 
 | Order | Priority / owner | Work | Completion and review gate | State |
 |---|---|---|---|---|
-| 1 | P0 / build maintainer | Close release-export and packaging bypasses; require the complete manufacturing set and carry qualification evidence in the archive. | Fault injection proves missing qualification, files or failed exports cannot produce a release; full development pipeline still passes. | Implemented; final verification pending |
+| 1 | P0 / build maintainer | Close release-export and packaging bypasses; require the complete manufacturing set and carry qualification evidence in the archive. | Fault injection proves missing qualification, files or failed exports cannot produce a release; full development pipeline still passes. | Done and reviewed; see verification below |
 | 2 | P0 / hardware + firmware | Resolve EDS-11 USB configuration/current-allocation and suspend implementation; resolve EDS-12 watchdog/sleep output release. Keep USB500 and charging disabled until their prerequisites hold. | Review a C6-specific implementation and actual descriptor; define and measure fault latency and total suspend current. Use an ADR if architecture/policy changes. | Open; source-level contract gap recorded |
 | 3 | P0 / hardware | Obtain the controlled pack drawing/lot confirmation; confirm harness polarity, NTC curve, protection and current-limit discrepancy. Review PACK_TS electrical limits under open/short/unpowered faults. | Supplier evidence and a reviewed worst-case calculation; five incoming-inspection records before mating/charging. | Supplier records and samples required |
 | 4 | P1 / hardware | Recheck U1–U5, Q1, J1/J2 and D1 pin numbers, pin-1 and rotations against primary drawings; select exact passive and connector MPNs. | EDS §11 checklist and assembly review signed; BOM ratings/DC bias/inductor saturation and second-source risks recorded. | Open |
@@ -53,10 +53,32 @@ reviewed prototype-order disposition with explicit remaining qualification risks
 
 ## Verification record
 
-The initial development run passed all 14 stages with Python 3.14.7 and KiCad
-10.0.6. The final run includes the added release regressions; results will be
-entered below when it completes. No physical qualification or manufacturing
-release is inferred from either development run.
+Both development runs passed all 14 stages with Python 3.14.7 and KiCad 10.0.6;
+the final run completed at `b5a06c6` with no skipped stages. No physical
+qualification or manufacturing release is inferred from either run.
+
+| Verification | Final result |
+|---|---|
+| Regression tests | 50 passed, including release export, archive completeness, evidence inclusion, checksum and clean-source provenance cases. |
+| KiCad negative tests | 2 passed: forbidden neck net and widened neck trace rejected. |
+| Generated sources | Schematic, both boards and generated reports regenerate byte-identically. No routing experiment entered the source tree. |
+| ERC | Zero violations. |
+| DRC/parity | A: 0 errors, 7 reviewed warnings, 0 parity differences, 59 unconnected. B: 0 errors, 17 reviewed warnings, 0 parity differences, 60 unconnected. |
+| Mechanical | Four meshes pass bounds checks; both seated lid/base intersections are empty. One model retention warning and physical qualification remain open. |
+| Docs/BOM/exports | 19/19 checked figures match; 43 BOM lines/43 populated placements; draft fabrication outputs exist for both variants. Required archive filenames were checked against actual KiCad exports. |
+| Release rejection | `make release-check`, `make outputs OUTPUT_CLASS=release`, and `make release-package RELEASE_TAG=hw-a1` each reject unfinished routing and missing evidence. No release archive was created. |
+| Additional fault checks | Mandatory mesh generation rejects absent OpenSCAD; evidence resolution rejects external absolute paths, parent traversal and escaping symlinks. |
+| Branch review | Reviewed against `master` at `d50053b`; no remaining confirmed Code/Architecture findings in the corrective diff. See [review report](91-readiness-branch-review.md). |
+
+Local reproduction logs are `_build/readiness-review-pipeline.log`,
+`_build/readiness-review-release-check.log`, `_build/readiness-release-outputs.log`
+and `_build/readiness-release-package.log`. They are ignored build diagnostics,
+not qualification evidence. No boards/packs were ordered or tested, no firmware
+was implemented, and all seven physical/product qualification slots remain null.
+Steps 2–13 remain open; no outside hardware or measurement records were supplied
+during this audit. The next engineering action is the EDS-11/12 architecture
+review, followed by library/purchasing verification and deliberate routing of
+both variants. Supplier and bench work require actual records and hardware.
 
 ### Routing experiment disposition
 
