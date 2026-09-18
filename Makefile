@@ -10,6 +10,11 @@ ROOT      := $(CURDIR)
 BUILD     := $(ROOT)/_build
 RELEASE_DIR ?= $(BUILD)/release
 RELEASE_COMMIT ?= $(shell git rev-parse HEAD 2>/dev/null || printf unknown)
+OUTPUT_CLASS ?= draft
+
+ifeq ($(filter $(OUTPUT_CLASS),draft release),)
+$(error OUTPUT_CLASS must be draft or release)
+endif
 
 # A successful final echo must never conceal a failed exporter in a loop.
 .SHELLFLAGS := -eu -c
@@ -83,6 +88,9 @@ mech:
 	  $(PY) -m tools.check_stl; \
 	  $(PY) -m tools.check_case_interference; \
 	else \
+	  if [ "$(REQUIRE_OPENSCAD)" = "1" ]; then \
+	    echo "openscad is required for release meshes" >&2; exit 1; \
+	  fi; \
 	  echo "openscad not installed - STL export skipped"; \
 	fi
 
@@ -137,30 +145,24 @@ release-check: erc drc
 	$(PY) -m tools.release_gate
 
 # Qualification runs before any release export. Development exports stay draft.
-release: release-check
+release:
 	$(MAKE) outputs OUTPUT_CLASS=release RELEASE_TAG="$(RELEASE_TAG)"
 	@echo "Qualification gate passed; outputs are available for final manufacturing review"
 
 release-package:
 	@test -n "$(RELEASE_TAG)" || { echo "RELEASE_TAG is required (for example hw-a1)"; exit 1; }
-	$(MAKE) release RELEASE_TAG="$(RELEASE_TAG)"
-	$(MAKE) mech
 	$(PY) -m tools.package_release --tag "$(RELEASE_TAG)" \
 	  --commit "$(RELEASE_COMMIT)" --output-dir "$(RELEASE_DIR)"
 
-outputs: drc bom
+outputs: drc bom $(if $(filter release,$(OUTPUT_CLASS)),release-check)
+	@for v in $(VARIANTS); do \
+	  rm -f hardware/outputs/rev-$$v/RELEASE.txt; \
+	done
 	@for v in $(VARIANTS); do \
 	  o=hardware/outputs/rev-$$v; \
 	  mkdir -p $$o/gerber $$o/drill $$o/assembly $$o/step; \
-	  if [ "$(OUTPUT_CLASS)" = "release" ]; then \
-	    rm -f $$o/DRAFT.txt; \
-	    printf '%s\n' 'RELEASE OUTPUT - qualification gate passed' \
-	      'Source tag: $(if $(RELEASE_TAG),$(RELEASE_TAG),unversioned)' > $$o/RELEASE.txt; \
-	  else \
-	    rm -f $$o/RELEASE.txt; \
-	    printf '%s\n' 'DRAFT DESIGN REVIEW ONLY - NOT FOR FABRICATION' \
-	      'Unfinished routing and qualification are tracked in hardware/release-readiness.json.' > $$o/DRAFT.txt; \
-	  fi; \
+	  printf '%s\n' 'DRAFT DESIGN REVIEW ONLY - NOT FOR FABRICATION' \
+	    'Export incomplete or unqualified; see hardware/release-readiness.json.' > $$o/DRAFT.txt; \
 	  $(KICAD_CLI) pcb export gerbers --no-protel-ext \
 	    --layers "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Mask,B.Mask,F.Paste,B.Paste,F.SilkS,B.SilkS,Edge.Cuts" \
 	    -o $$o/gerber/ $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \
@@ -183,6 +185,14 @@ outputs: drc bom
 	  -o hardware/outputs/schematic/env-sensor.net \
 	  hardware/schematic/env-sensor.kicad_sch >/dev/null
 	@echo "wrote hardware/outputs/schematic"
+	@if [ "$(OUTPUT_CLASS)" = "release" ]; then \
+	  for v in $(VARIANTS); do \
+	    o=hardware/outputs/rev-$$v; \
+	    printf '%s\n' 'RELEASE OUTPUT - qualification gate passed' \
+	      'Source tag: $(if $(RELEASE_TAG),$(RELEASE_TAG),unversioned)' > $$o/RELEASE.txt; \
+	    rm -f $$o/DRAFT.txt; \
+	  done; \
+	fi
 
 render: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	@mkdir -p docs/img

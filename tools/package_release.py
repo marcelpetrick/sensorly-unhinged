@@ -6,13 +6,38 @@ from __future__ import annotations
 import argparse
 import hashlib
 import re
+import subprocess
 import zipfile
 from pathlib import Path
 
 from .boardgen.variants import VARIANTS
+from .boardgen.design import PARTS
+from .release_gate import blockers, qualification_paths
 
 ROOT = Path(__file__).resolve().parents[1]
 TAG_RE = re.compile(r"^hw-([ab])([1-9][0-9]*)$")
+
+
+def manufacturing_paths(variant: str) -> list[str]:
+    """Files required even if an export tree or old release marker exists."""
+    board = f"env-sensor-{variant}"
+    prefix = f"hardware/outputs/rev-{variant}"
+    layers = ("F_Cu", "In1_Cu", "In2_Cu", "B_Cu", "F_Mask", "B_Mask",
+              "F_Paste", "B_Paste", "F_Silkscreen", "B_Silkscreen", "Edge_Cuts")
+    return [f"{prefix}/gerber/{board}-{layer}.gbr" for layer in layers] + [
+        f"{prefix}/drill/{board}.drl",
+        f"{prefix}/assembly/cpl-{variant}.csv",
+        f"{prefix}/assembly/assembly-top-{variant}.pdf",
+        f"{prefix}/step/{board}.step",
+        "hardware/outputs/schematic/env-sensor.pdf",
+        "hardware/outputs/schematic/env-sensor.net",
+        "hardware/schematic/env-sensor.kicad_sch",
+        f"hardware/variant-{variant}/{board}.kicad_pcb",
+        f"hardware/variant-{variant}/{board}.kicad_pro",
+        f"hardware/variant-{variant}/{board}.kicad_dru",
+        "hardware/lib/sensorly.kicad_sym",
+    ] + sorted({f"hardware/lib/sensorly.pretty/{part.footprint.split(':')[-1]}.kicad_mod"
+                for part in PARTS})
 
 
 def variant_for_tag(tag: str) -> str:
@@ -25,6 +50,20 @@ def variant_for_tag(tag: str) -> str:
         raise ValueError(
             f"tag {tag} does not match the generated {VARIANTS[variant].revision} revision")
     return variant
+
+
+def source_commit(root: Path, requested: str | None) -> str:
+    """Do not label uncommitted inputs with an unrelated source commit."""
+    head = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    if requested is not None and requested != head:
+        raise ValueError("source commit does not match HEAD")
+    dirty = subprocess.check_output(
+        ["git", "status", "--porcelain", "--untracked-files=all"],
+        cwd=root, text=True)
+    if dirty:
+        raise ValueError("release requires a clean committed source tree")
+    return head
 
 
 def release_inputs(root: Path, variant: str) -> list[Path]:
@@ -40,6 +79,8 @@ def release_inputs(root: Path, variant: str) -> list[Path]:
         root / f"mechanical/case-{variant}-base.stl",
         root / f"mechanical/case-{variant}-lid.stl",
     ]
+    fixed.extend(root / path for path in manufacturing_paths(variant))
+    fixed.extend(qualification_paths(root))
     trees = [
         root / "hardware/schematic",
         root / f"hardware/variant-{variant}",
@@ -51,8 +92,8 @@ def release_inputs(root: Path, variant: str) -> list[Path]:
     for tree in trees:
         if tree.is_dir():
             files.extend(path for path in tree.rglob("*") if path.is_file())
-    # A release archive must never inherit the development marker.
-    files = [path for path in files if path.name != "DRAFT.txt"]
+    if (root / f"hardware/outputs/rev-{variant}/DRAFT.txt").exists():
+        raise ValueError("draft outputs cannot be packaged as a release")
     missing = [path for path in fixed if not path.is_file() or not path.stat().st_size]
     marker = root / f"hardware/outputs/rev-{variant}/RELEASE.txt"
     if not marker.is_file() or not marker.stat().st_size:
@@ -66,6 +107,9 @@ def release_inputs(root: Path, variant: str) -> list[Path]:
 def build_archive(tag: str, commit: str, output_dir: Path,
                   root: Path = ROOT) -> tuple[Path, Path]:
     variant = variant_for_tag(tag)
+    problems = blockers(root)
+    if problems:
+        raise ValueError("release qualification failed: " + "; ".join(problems))
     files = release_inputs(root, variant)
     output_dir.mkdir(parents=True, exist_ok=True)
     archive = output_dir / f"sensorly-unhinged-{tag}.zip"
@@ -91,7 +135,7 @@ def build_archive(tag: str, commit: str, output_dir: Path,
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--tag", required=True)
-    parser.add_argument("--commit", default="unknown")
+    parser.add_argument("--commit", help="full source commit; must equal clean HEAD")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "_build/release")
     parser.add_argument("--validate-only", action="store_true")
     args = parser.parse_args()
@@ -100,8 +144,15 @@ def main() -> int:
         if args.validate_only:
             print(f"{args.tag} matches {VARIANTS[variant].revision}")
             return 0
-        archive, checksum = build_archive(args.tag, args.commit, args.output_dir)
-    except (OSError, ValueError) as exc:
+        commit = source_commit(ROOT, args.commit)
+        # The module is also a public entry point: re-run live rules and exports
+        # instead of trusting reports/markers from an earlier successful build.
+        subprocess.run(["make", "release", "mech", "REQUIRE_OPENSCAD=1",
+                        f"RELEASE_TAG={args.tag}"],
+                       cwd=ROOT, check=True)
+        source_commit(ROOT, commit)
+        archive, checksum = build_archive(args.tag, commit, args.output_dir)
+    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
         parser.error(str(exc))
     print(f"wrote {archive}")
     print(f"wrote {checksum}")
