@@ -18,14 +18,16 @@ LICENSE_ID = "GPL-3.0-or-later"
 
 # Authored source. Everything else is vendored, generated with its own header,
 # or content rather than code.
-PATTERNS = ["tools/**/*.py", "*.sh", "mechanical/env-sensor-case.scad"]
+PATTERNS = ["tools/**/*.py", "*.sh", "mechanical/env-sensor-case.scad",
+            "firmware/**/*.c", "firmware/**/*.h", "firmware/**/CMakeLists.txt",
+            "firmware/sdkconfig.defaults", "production/**/*.py"]
 EXPLICIT = ["Makefile"]
 
 # Vendored: keeps its own terms, listed in hardware/lib/README.md and the
 # README licence table. Never given our header.
 VENDORED = ["hardware/lib/sensorly.pretty/", "hardware/lib/sensorly.kicad_sym"]
 
-COMMENT = {".py": "#", ".sh": "#", ".scad": "//", "": "#"}
+COMMENT = {".py": "#", ".sh": "#", ".scad": "//", ".c": "//", ".h": "//", "": "#"}
 
 
 def header(comment: str) -> str:

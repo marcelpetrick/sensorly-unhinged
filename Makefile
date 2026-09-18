@@ -44,6 +44,9 @@ help:
 	@echo "make mech     - enclosure model, checks, OpenSCAD params (+ STL if openscad)"
 	@echo "make release-check - reject unfinished routing or missing qualification evidence"
 	@echo "make release-package RELEASE_TAG=hw-a1 - gated, checksummed release asset"
+	@echo "make firmware - build bring-up image (source pinned ESP-IDF export.sh first)"
+	@echo "make firmware-test - host sensor-decoder fault tests"
+	@echo "make production-capture CAPTURE_ARGS=... - validate/preserve a fixture console log"
 	@echo "make all      - gen + check + drc + bom + outputs"
 
 all: license gen check erc drc bom thermal cost mech outputs
@@ -209,3 +212,21 @@ render: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 
 clean:
 	rm -rf $(BUILD)
+
+.PHONY: firmware firmware-test
+firmware:
+	$(PY) -m tools.firmware_build
+
+firmware-test:
+	@mkdir -p $(BUILD)/firmware-host
+	$(CC) -std=c11 -Wall -Wextra -Werror -pedantic -Ifirmware/main \
+	  firmware/main/sample.c firmware/tests/test_sample.c -lm -o $(BUILD)/firmware-host/test-sample
+	$(BUILD)/firmware-host/test-sample
+
+.PHONY: firmware-flash production-capture
+firmware-flash: firmware
+	@test -n "$(PORT)" || { echo "PORT is required" >&2; exit 1; }
+	idf.py -C firmware -B $(BUILD)/firmware -D SDKCONFIG=$(BUILD)/firmware/sdkconfig -p "$(PORT)" flash
+
+production-capture:
+	$(PY) -m production.capture $(CAPTURE_ARGS)

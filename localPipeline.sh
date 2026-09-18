@@ -82,7 +82,7 @@ toolchain() {
 syntax() {
   bash -n localPipeline.sh || return 1
   local log="$tmp_dir/compile.log"
-  if ! "$PYTHON" -m compileall -q tools 2>&1 | tee "$log"; then
+  if ! "$PYTHON" -m compileall -q tools production 2>&1 | tee "$log"; then
     STEP_DETAIL="$(last_line "$log")"
     return 1
   fi
@@ -265,6 +265,7 @@ fab_outputs() {
 run_step "Toolchain" toolchain
 run_step "Syntax" syntax
 run_step "Regression Tests" make test
+run_step "Firmware Host" make firmware-test
 run_step "Licensing" licensing
 run_step "Libraries" libraries
 run_step "Generator Rules" generator_rules

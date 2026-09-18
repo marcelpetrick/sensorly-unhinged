@@ -1,7 +1,8 @@
 # 71 — Firmware implementation and acceptance contract
 
-**Not implemented.** There is no ESP-IDF application in this repository yet.
-The hardware build must not report F-03…F-12 as passing. This contract defines
+**Partially implemented.** A compiled, radio-disabled engineering application is
+described in [bring-up instructions](72-firmware-bringup.md). The hardware build
+must not report F-03…F-12 as passing. This contract defines
 the work needed to turn the boards into instruments; a contract is not firmware.
 Owner: firmware maintainer. Record device-test evidence before the firmware
 entry in `hardware/release-readiness.json` can close.
