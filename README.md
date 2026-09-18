@@ -57,6 +57,9 @@ main-board connections remain incomplete. Development DRC has zero errors,
 with explicitly limited warnings; it is not a clean manufacturing DRC.
 Phase 6 of 14 — see [`docs/00-plan.md`](docs/00-plan.md).
 
+The current audit and ordered work through the prototype experiment and 20-unit
+series are in [`docs/01-execution-plan.md`](docs/01-execution-plan.md).
+
 ```
 KiCad ERC      0 violations
 KiCad DRC      0 errors, 7 / 17 development warnings on A / B (KiCad 10.0.6)
@@ -108,6 +111,13 @@ printed on the selected PCB (`hw-a1` or `hw-b1` today). It cannot package or
 publish until `make release-check` proves clean routing, clean DRC/parity and
 all seven qualification-evidence categories. Publishing is opt-in and draft by
 default; a successful package contains a SHA-256 checksum and source provenance.
+Requesting `make outputs OUTPUT_CLASS=release` also runs qualification. Release
+markers are written only after every export succeeds. Packaging rejects draft
+markers and missing manufacturing files, repeats the live release gate and
+exports when invoked directly, and includes the evidence files referenced by
+the manifest.
+Packaging requires a clean committed source tree and verifies the recorded
+commit against HEAD before and after export.
 
 ## How the two boards stay one design
 

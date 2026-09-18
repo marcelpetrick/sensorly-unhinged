@@ -144,3 +144,22 @@ reproduce). The committed record here preserves the results without treating
 temporary logs as release evidence. No hardware was fabricated, powered,
 charged, radio-tested or measured during this review. No firmware implementation
 or physical qualification is claimed.
+
+### Follow-up audit — 2026-09-18
+
+The [ordered completion plan](01-execution-plan.md) reconstructs the task history
+at `d50053b` and carries the work through the revised 20-unit series. The
+previous finding dispositions remain historical records; the audit identified
+additional gaps:
+
+| Priority | Finding | Disposition |
+|---|---|---|
+| P0 | The USB500 contract assumes a configured callback on the C6 fixed-function USB Serial/JTAG device. The reviewed public driver provides SOF-based connection detection, not that callback. | Added EDS-11 with primary sources; keep USB500 disabled pending a C6-specific implementation, descriptor/current-allocation proof and suspend tests. |
+| P0 | External pull-downs establish reset defaults but do not override actively driven charge/current GPIOs during a CPU hang or retained sleep state. | Added EDS-12; require explicit sleep shutdown and a measured, bounded watchdog/reset path. The previous “firmware-crash fallback” claim is unqualified. |
+| P0 | `outputs OUTPUT_CLASS=release` bypassed qualification; release markers were written before export completion; the standalone packager trusted markers, omitted evidence and did not require the actual Gerber/drill/CPL/STEP set. | Gated every release export path; invalidate old markers before exporting; check all required files and include referenced evidence. Direct CLI packaging now regenerates gated outputs and meshes and checks clean-HEAD provenance. See [release controls](64-release-packaging.md). |
+
+No circuit, footprint, placement, routing or electrical requirement was silently
+changed. EDS-11/12 are open engineering gates, not a claim that USB or charging
+is now qualified. Any architecture change must be recorded before routing freeze.
+Final verification and the rejected routing experiment are recorded in the
+execution plan.
