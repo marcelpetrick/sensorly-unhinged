@@ -2,7 +2,7 @@
 
 [![Hardware Quality](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml/badge.svg?branch=master)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml)
 [![Hardware Release](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml)
-[![Latest Hardware Release](https://img.shields.io/github/v/release/marcelpetrick/sensorly-unhinged?sort=date)](https://github.com/marcelpetrick/sensorly-unhinged/releases/latest)
+[![Engineering prereleases](https://img.shields.io/badge/releases-engineering-orange)](https://github.com/marcelpetrick/sensorly-unhinged/releases)
 [![License: GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![KiCad 10](https://img.shields.io/badge/KiCad-10-314cb0.svg)](https://www.kicad.org/)
 [![Status: engineering prototype](https://img.shields.io/badge/status-engineering%20prototype-orange.svg)](#status)
@@ -80,7 +80,7 @@ Outputs        4-layer gerbers, drill, CPL, assembly PDF, STEP, schematic PDF, B
 Everything runs from `make`. If a step cannot, it is not part of the build.
 
 ```bash
-./localPipeline.sh   # everything below, with a PASS/FAIL summary
+./localPipeline.sh   # hardware and host tests, with a PASS/FAIL summary
 ```
 
 Or step by step:
