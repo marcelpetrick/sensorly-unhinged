@@ -457,6 +457,22 @@ side, all within one rectangular region so the fixture is a simple plate.
 
 ---
 
+### Implementation findings before routing freeze (2026-09-18)
+
+BQ24074 EN2 is currently hard-wired to GND. TI's
+[BQ2407x datasheet](https://www.ti.com/lit/ds/symlink/bq24074.pdf), Table 7-2,
+requires EN2=EN1=1 for standby/USB suspend. Clearing `/CE` only disables charging;
+it cannot select that power-path state. EDS-13 must resolve the hardware/source
+policy before claiming host suspend compliance. The bring-up image keeps charge
+and USB500 disabled; this does not close EDS-11, EDS-12 or EDS-13.
+
+The current IO9 provisioning/boot button is not a C6 EXT1 deep-sleep wake source:
+only GPIO0–7 support that function in the
+[ESP-IDF C6 sleep API](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/system/sleep_modes.html).
+EDS-14 must decide between moving the runtime button to an RTC pin (and retaining
+an independent download strap) or explicitly changing the user interaction.
+No pin reassignment is silently locked by the firmware implementation.
+
 ## 10. Open items (this document does **not** close them)
 
 | # | Item | Owner | Closing gate |
@@ -470,6 +486,8 @@ side, all within one rectangular region so the fixture is a simple plate.
 | EDS-9Q | Qualify LP702040 supplier drawing, pack NTC thresholds, protection, timer/fault behavior and assembled retention | hardware maintainer | before enclosed battery charging |
 | EDS-10Q | Measure the locked USB100/USB500 policy on representative hosts and fault transitions | hardware/firmware maintainer | before unrestricted USB use |
 | EDS-11 | Prove C6 USB configuration/current-allocation observability, descriptor power request and suspend handling; USB500 remains disabled | firmware/hardware maintainer | architecture review before routing freeze and USB500 implementation |
+| EDS-13 | EN2 fixed low prevents BQ24074 standby/USB suspend; decide supported power-path/source architecture | hardware/firmware maintainer | ADR and schematic review before routing freeze, then measured suspend current |
+| EDS-14 | IO9 cannot wake C6 from deep sleep; choose runtime wake pin or revised interaction | hardware/firmware maintainer | pin/strap ADR before routing freeze and button/wake bench test |
 | EDS-12 | Prove the maximum CE/USB_ISEL deassertion latency on a hung CPU and before sleep; a pull-down cannot override an actively driven GPIO | firmware/hardware maintainer | watchdog/reset design review, then fault-injection qualification before charging |
 
 ## 11. Review checklist for this spec
