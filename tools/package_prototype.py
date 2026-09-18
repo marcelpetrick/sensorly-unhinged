@@ -21,6 +21,8 @@ def build_archive(variant, commit, output_dir, root=ROOT):
     paths = [root / p for p in manufacturing_paths(variant)] + review_paths(root)
     paths += [root / p for p in (
         "LICENSE", "README.md", "hardware/lib/README.md",
+        "hardware/schematic/sym-lib-table",
+        f"hardware/variant-{variant}/fp-lib-table",
         "hardware/prototype-readiness.json", "hardware/release-readiness.json",
         "hardware/outputs/bom.csv", "hardware/outputs/netlist.txt",
         "docs/30-electrical-design-spec.md", "docs/51-power-safety-qualification.md",

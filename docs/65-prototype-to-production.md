@@ -74,7 +74,9 @@ The prototype packager requires a clean committed tree, runs fresh ERC/DRC,
 prototype reviews, host tests and firmware build, then regenerates draft outputs
 and mandatory enclosure meshes. It rechecks the tree and evidence, requires all
 manufacturing inputs, and emits a variant/revision/commit-named ZIP plus SHA-256.
-Only its reviewed, explicit input list enters the archive; the archive carries
+Project symbol/footprint library tables are included so the archived KiCad
+sources resolve their vendored libraries. Only its reviewed, explicit input list
+enters the archive; the archive carries
 `PROTOTYPE.txt`, both readiness manifests and the applicable review records.
 The working output directories retain their draft classification. Prototype
 packaging does not create a `RELEASE.txt` marker or bypass `make release-check`.

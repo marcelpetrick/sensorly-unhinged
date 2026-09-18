@@ -85,6 +85,8 @@ class PrototypeTests(unittest.TestCase):
                 self.assertTrue(any(n.endswith("/PROTOTYPE.txt") for n in names))
                 self.assertFalse(any(n.endswith("/RELEASE.txt") or n.endswith("/DRAFT.txt") for n in names))
                 self.assertTrue(any(n.endswith("review-electrical.md") for n in names))
+                self.assertTrue(any(n.endswith("/sym-lib-table") for n in names))
+                self.assertTrue(any(n.endswith("/fp-lib-table") for n in names))
             (root / "hardware/outputs/rev-a/drill/env-sensor-a.drl").unlink()
             with self.assertRaisesRegex(ValueError, "missing/empty"):
                 package_prototype.build_archive("a", "a" * 40, root / "out", root)
