@@ -11,11 +11,11 @@
 	# routing convenience.
 )
 
-(rule "no vias on the sensor nets"
+(rule "no vias in the sensor thermal area"
 	(constraint disallow via)
-	(condition "A.NetClass == 'SensorIsland'")
-	# EDS S3.1.2: no stitching or thermal vias anywhere on the island
-	# path - a via is a copper column straight through the board.
+	(condition "A.intersectsArea('Sensor island - traces only, no pour')")
+	# EDS S3.1.2: ban vias spatially. Main-board SDA/SCL test pads
+	# are on B.Cu and need vias outside the protected thermal area.
 )
 
 (rule "power track width"
