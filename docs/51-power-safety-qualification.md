@@ -47,6 +47,13 @@ Use at least five production-intent LP702040 assemblies from the intended lot.
 
 ## USB source-policy qualification
 
+Before this protocol can pass, close EDS-11 with the C6-specific configuration
+mechanism and a captured USB descriptor/current request. SOF traffic or opening
+the serial port is not configuration evidence. Measure total VBUS current on
+suspend, including system load. For EDS-12, inject a CPU hang while both control
+outputs are asserted and measure their disable latency; also verify that sleep
+entry clears both outputs. Record the reviewed latency limit before testing.
+
 Use a calibrated USB current/voltage analyzer and at least two USB 2.0 hosts,
 two USB 3.x hosts (including USB-C where available), and one charge-only USB-C
 source. Test with a normally charged pack, the lowest permitted operating pack

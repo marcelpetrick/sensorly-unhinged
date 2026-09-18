@@ -52,6 +52,15 @@ tests; no key-burning operation is part of this review.
 
 ## USB input-current state machine
 
+**Implementation prerequisite:** close EDS-11 before enabling USB500. The C6
+uses fixed-function USB Serial/JTAG, not a programmable USB OTG device. The
+reviewed ESP-IDF v5.5.1 public driver offers SOF-based connection detection,
+not the configuration callback assumed below. The required transitions are
+acceptance criteria, not evidence that an API exists. Identify a supported
+C6-specific mechanism and validate the descriptor's current request first;
+otherwise keep IO21 low and record an ADR for the source-policy change. Sources
+and the architecture hold are in EDS §7.1.
+
 Charging is separately fail-safe. `CHARGE_ENABLE` is IO18 and drives Q1's gate;
 external R7 holds the gate low at reset. Separate R18 pulls BQ24074 `/CE` to
 VBUS, so charging is disabled before the MCU rail exists. After `PG_N` asserts,
@@ -78,6 +87,15 @@ from USB100 with a missing or deeply depleted pack; report a power-policy fault
 and remain in bounded low-power/debug operation. Persist no “500 mA allowed”
 state across reset. Telemetry and factory output must expose the selected
 USB100/USB500 state alongside USB-present and charging state.
+
+Before every light/deep-sleep entry, clear both `CHARGE_ENABLE` and `USB_ISEL`;
+do not retain asserted outputs through GPIO hold. Charging requires active
+temperature supervision. A pull-down provides the reset default but cannot
+force an actively driven GPIO low during a CPU hang. EDS-12 must establish the
+watchdog/reset path and a reviewed maximum fault-to-disable interval, then test
+that interval on hardware. Until then crash fallback is unqualified. USB suspend
+testing must measure total input current; disabling charge alone does not prove
+that the system power path meets the source's suspend requirement.
 
 ## Required executable acceptance cases
 

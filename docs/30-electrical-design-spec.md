@@ -61,7 +61,7 @@ Espressif's RED/CE type examination. 13.20 × 16.60 × 2.40 mm, 53 pads
 | `UART_TX` | TXD0/IO16 | **31** | test pad only (fallback console) |
 | `UART_RX` | RXD0/IO17 | **30** | test pad only |
 | `TEST_MODE` | IO20 | **26** | test pad; fixture pulls low to enter factory test |
-| `USB_ISEL` | IO21 | **27** | charger EN1; 100 kΩ pull-down makes USB100 the reset/fault default; firmware may assert only after USB configuration |
+| `USB_ISEL` | IO21 | **27** | charger EN1; 100 kΩ pull-down makes USB100 the reset default; USB500 implementation held by EDS-11/12 |
 | `CHARGE_ENABLE` | IO18 | **24** | drives Q1 gate; external pull-down defaults low, and Q1 can pull charger `/CE` low only after firmware validates pack temperature |
 | `PACK_TS` | IO3 / ADC1_CH3 | **6** | reads the pack's 103AT-2 NTC/charger TS voltage; not a spare GPIO |
 | *(reserved)* | IO0, IO1 | 12, 13 | `XTAL_32K_P/N` — **left free** for an optional 32.768 kHz crystal if deep-sleep timing accuracy proves insufficient |
@@ -359,11 +359,26 @@ away from the antenna and the inductor.
 
 ### 7.1 Source-current policy — fail-safe USB100, enumerated USB500
 
+**Implementation hold, 2026-09-18 (EDS-11).** USB500 is a requirement, not an
+implemented capability. Espressif documents the C6 USB Serial/JTAG block as a
+[fixed-function hardware device](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-guides/usb-serial-jtag-console.html).
+The inspected [ESP-IDF v5.5.1 public driver API](https://github.com/espressif/esp-idf/blob/v5.5.1/components/esp_driver_usb_serial_jtag/include/driver/usb_serial_jtag.h)
+has no configured/deconfigured callback; its connection predicate observes SOF
+traffic, which does not establish host configuration or an authorized current
+allocation. Do not substitute that predicate, an open serial port, or TinyUSB
+callbacks for proof. Keep `USB_ISEL` low until a C6-specific implementation,
+the actual descriptor's power request, and all fault transitions are reviewed
+and measured. If the policy cannot be implemented, revise it through an ADR
+before changing either board. USB100 alone is not proof of suspend compliance:
+measure total VBUS current, including the power path, during suspend.
+
 The supported policy is explicit:
 
-1. On attach, reset, firmware crash or unconfigured operation, R8 holds EN1 low
-   while EN2 is hard-low. The BQ24074 USB100 state limits total input current to
-   100 mA maximum (system load plus battery charge).
+1. At reset R8 holds the released EN1 GPIO low while EN2 is hard-low. Firmware
+   must keep EN1 low on attach and while unconfigured. The BQ24074 USB100 state
+   limits total input current to 100 mA maximum (system load plus battery charge).
+   A CPU hang with EN1 driven high does not release it automatically; EDS-12
+   requires a verified watchdog/reset path.
 2. A USB 2.0/3.x data host may be used for charging/debugging. Firmware may set
    `USB_ISEL` high only after the device reaches the USB configured state and
    must clear it on suspend, deconfiguration, detach or USB-stack failure. This
@@ -444,16 +459,18 @@ side, all within one rectangular region so the fixture is a simple plate.
 
 ## 10. Open items (this document does **not** close them)
 
-| # | Item | Closing gate |
-|---|---|---|
-| EDS-1 | Exact USB-C receptacle MPN (JLCPCB basic-part availability drives this) | before prototype order |
-| EDS-4 | Whether the bounded 223 mA charging design is thermally acceptable in the enclosure, or the 100 mA option is required | thermal Test 3 |
-| EDS-5 | 3.0 V vs 3.3 V — R6 value for the series build | prototype power + RF measurement |
-| EDS-6 | Whether the 32.768 kHz crystal on IO0/IO1 is needed | deep-sleep timing drift measurement |
-| EDS-7 | Antenna: flush with board edge (Rev 1) vs overhanging the outline | RF test in the finished enclosure |
-| EDS-8 | Neck width 3.0 / 3.5 / 5.0 mm for Variant B | first bare-PCB mechanical inspection + Test 1 |
-| EDS-9Q | Qualify LP702040 supplier drawing, pack NTC thresholds, protection, timer/fault behavior and assembled retention; owner: hardware maintainer | before enclosed battery charging |
-| EDS-10Q | Measure the locked USB100/USB500 policy on representative hosts and fault transitions; owner: hardware/firmware maintainer | before unrestricted USB use |
+| # | Item | Owner | Closing gate |
+|---|---|---|---|
+| EDS-1 | Exact USB-C receptacle MPN (JLCPCB basic-part availability drives this) | hardware maintainer | before prototype order |
+| EDS-4 | Whether the bounded 223 mA charging design is thermally acceptable in the enclosure, or the 100 mA option is required | hardware/test maintainer | thermal Test 3 |
+| EDS-5 | 3.0 V vs 3.3 V — R6 value for the series build | hardware maintainer | prototype power + RF measurement |
+| EDS-6 | Whether the 32.768 kHz crystal on IO0/IO1 is needed | firmware maintainer | deep-sleep timing drift measurement |
+| EDS-7 | Antenna: flush with board edge (Rev 1) vs overhanging the outline | hardware maintainer | RF test in the finished enclosure |
+| EDS-8 | Neck width 3.0 / 3.5 / 5.0 mm for Variant B | hardware/mechanical maintainer | first bare-PCB mechanical inspection + Test 1 |
+| EDS-9Q | Qualify LP702040 supplier drawing, pack NTC thresholds, protection, timer/fault behavior and assembled retention | hardware maintainer | before enclosed battery charging |
+| EDS-10Q | Measure the locked USB100/USB500 policy on representative hosts and fault transitions | hardware/firmware maintainer | before unrestricted USB use |
+| EDS-11 | Prove C6 USB configuration/current-allocation observability, descriptor power request and suspend handling; USB500 remains disabled | firmware/hardware maintainer | architecture review before routing freeze and USB500 implementation |
+| EDS-12 | Prove the maximum CE/USB_ISEL deassertion latency on a hung CPU and before sleep; a pull-down cannot override an actively driven GPIO | firmware/hardware maintainer | watchdog/reset design review, then fault-injection qualification before charging |
 
 ## 11. Review checklist for this spec
 
