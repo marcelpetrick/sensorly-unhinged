@@ -142,7 +142,7 @@ def dru(v: Variant) -> str:
              ')',
              '',
              '(rule "USB differential pair"',
-             '\t(constraint diff_pair_gap (min 0.15mm) (opt 0.2mm))',
+             '\t(constraint diff_pair_gap (min 0.15mm) (opt 0.2mm) (max 0.25mm))',
              '\t(constraint diff_pair_uncoupled (max 2mm))',
              '\t(condition "A.NetClass == \'USB\'")',
              ')',

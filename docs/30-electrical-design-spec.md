@@ -416,6 +416,15 @@ here so the reviewer sees it was a decision, not an oversight.
 
 `USB_D_P`/`USB_D_N` use KiCad-recognized complementary P/N suffixes; the
 former DP/DM suffixes did not establish a pair for differential rule checks.
+The provisional pair geometry is 0.25 mm width with a 0.20 mm preferred gap,
+bounded to 0.15–0.25 mm as an explicit engineering routing assumption.
+The maximum is necessary: [KiCad 10 custom-rule documentation](https://docs.kicad.org/10.0/en/pcbnew/pcbnew.html#custom-design-rules)
+defines uncoupled tracks by nonparallel geometry or spacing outside the allowed
+gap range. A minimum/optimum without a maximum accepted widely separated
+parallel tracks. Isolated controls now reject a 6 mm pair at 2 mm centre spacing
+and accept 0.25 mm tracks at 0.20 mm gap. These dimensions do not establish
+90 Ω impedance; the exact stackup/field calculation and assembler review remain
+open before layout approval.
 D+/D− route to IO13/IO12 as a differential pair, 90 Ω target, kept short and
 away from the antenna and the inductor.
 

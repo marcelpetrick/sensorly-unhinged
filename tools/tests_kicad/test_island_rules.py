@@ -8,12 +8,13 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from tools.boardgen import geometry as G
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 class IslandRuleTests(unittest.TestCase):
-    def violations(self, net, width, via_at=None):
+    def violations(self, net, width, via_at=None, package_control=None):
         with tempfile.TemporaryDirectory(prefix="sensorly-drc-test-") as d:
             directory = Path(d)
             stem = "env-sensor-b"
@@ -22,6 +23,15 @@ class IslandRuleTests(unittest.TestCase):
             shutil.copyfile(ROOT / "_build/b/fp-lib-table", directory / "fp-lib-table")
             pcb = directory / f"{stem}.kicad_pcb"
             source = pcb.read_text().rstrip()
+            if package_control is not None:
+                # Isolate the package rule area from stronger overlapping
+                # thermal prohibitions and from production copper.
+                for kind in ("segment", "via", "zone"):
+                    for block in G._blocks(source, kind):
+                        if (kind == "zone" and package_control and
+                                '"Sensor package keepout U2"' in block):
+                            continue
+                        source = source.replace(block, "")
             self.assertTrue(source.endswith(")"))
             # B.Cu avoids touching the existing F.Cu traces, which KiCad can
             # otherwise use to reassociate an overlapping test segment's net.
@@ -68,31 +78,52 @@ class IslandRuleTests(unittest.TestCase):
                 with self.subTest(variant=key):
                     self.assertEqual(errors, [])
 
-    def test_usb_pair_naming_enables_uncoupled_length_rule(self):
+    def usb_pair_violations(self, separation):
         with tempfile.TemporaryDirectory(prefix="sensorly-usb-drc-") as d:
             directory = Path(d)
             stem = "env-sensor-b"
             for suffix in ("kicad_pcb", "kicad_pro", "kicad_dru"):
                 source = (ROOT / f"_build/b/{stem}.{suffix}").read_text()
-                # Older filled test inputs can exist before main-board regen.
-                source = source.replace("USB_DP", "USB_D_P").replace("USB_DM", "USB_D_N")
                 (directory / f"{stem}.{suffix}").write_text(source)
             shutil.copyfile(ROOT / "_build/b/fp-lib-table", directory / "fp-lib-table")
             pcb = directory / f"{stem}.kicad_pcb"
             source = pcb.read_text().rstrip()
+            # A short to production pads/pours can change KiCad's inferred net
+            # and hide the intended coupling violation. Use a copper-free
+            # fixture retaining the real project, rules and named test nets.
+            for kind in ("segment", "via", "zone", "footprint"):
+                for block in G._blocks(source, kind):
+                    source = source.replace(block, "")
             segments = '\n'.join(
-                f'(segment (start 102 {y}) (end 108 {y}) (width 0.15) '
+                f'(segment (start 102 {y}) (end 108 {y}) (width 0.25) '
                 f'(layer "B.Cu") (net "{net}") '
                 f'(uuid "f2d00105-765b-4c02-97ba-00000000000{i}"))'
-                for i, (net, y) in enumerate((("USB_D_P", 78), ("USB_D_N", 80))))
-            pcb.write_text(source[:-1] + segments + "\n)\n")
+                for i, (net, y) in enumerate((("USB_D_P", 78), ("USB_D_N", 78 + separation))))
+            # Give each test track real terminals so this control represents
+            # a complete routed pair rather than construction stubs.
+            pads = '\n'.join(
+                f'(pad "{i}" smd rect (at {x} {y}) (size 0.25 0.25) '
+                f'(layers "B.Cu" "B.Mask") (net "{net}"))'
+                for i, (x, y, net) in enumerate(
+                    ((102, 78, "USB_D_P"), (108, 78, "USB_D_P"),
+                     (102, 78 + separation, "USB_D_N"),
+                     (108, 78 + separation, "USB_D_N")), 1))
+            terminals = f'(footprint "USB test terminals" (layer "B.Cu") (at 0 0) (attr smd) {pads})'
+            pcb.write_text(source[:-1] + segments + terminals + "\n)\n")
             report = directory / "drc.json"
             subprocess.run([os.environ.get("KICAD_CLI", "kicad-cli"), "pcb", "drc",
                             "--format", "json", "-o", str(report), str(pcb)],
                            check=True, capture_output=True, timeout=120)
-            violations = json.loads(report.read_text())["violations"]
-            self.assertTrue(any(v["type"] == "diff_pair_uncoupled_length_too_long"
-                                for v in violations), violations)
+            return json.loads(report.read_text())["violations"]
+
+    def test_usb_pair_naming_enables_uncoupled_length_rule(self):
+        violations = self.usb_pair_violations(2.0)
+        self.assertTrue(any(v["type"] == "diff_pair_uncoupled_length_too_long"
+                            for v in violations), violations)
+        self.assertFalse(any(v["type"] in ("shorting_items", "tracks_crossing")
+                             for v in violations), violations)
+        coupled = self.usb_pair_violations(0.45)  # 0.25 mm width + 0.20 mm gap
+        self.assertFalse(any(v["severity"] == "error" for v in coupled), coupled)
 
     def test_vbat_cannot_use_power_class_to_enter_neck(self):
         violations = self.violations("VBAT", .15)
@@ -119,10 +150,12 @@ class IslandRuleTests(unittest.TestCase):
                              for v in violations), violations)
 
     def test_package_body_keepout_survives_library_zone_removal(self):
-        violations = self.violations("GND", .15, via_at=(115, 106))
+        violations = self.violations("GND", .15, via_at=(115, 106), package_control=True)
         self.assertTrue(any(v["type"] == "items_not_allowed" and
                             "Sensor package keepout U2" in v["description"]
                             for v in violations), violations)
+        disabled = self.violations("GND", .15, via_at=(115, 106), package_control=False)
+        self.assertFalse(any(v["type"] == "items_not_allowed" for v in disabled), disabled)
 
     def test_antenna_keepout_survives_library_zone_removal(self):
         violations = self.violations("GND", .15, via_at=(115, 63))
