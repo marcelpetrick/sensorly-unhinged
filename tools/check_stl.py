@@ -49,9 +49,8 @@ def main() -> int:
     checked = 0
     for k, v in VARIANTS.items():
         c = build(v)
-        # The lid's 1.2 mm locating lip is always present. Hold-down pillars
-        # extend farther only when the placement search found a legal one.
-        lid_reach = max(1.2, c.top_clear if c.holddowns else 0.0)
+        # The locating lip is always present; legal edge fingers reach the PCB.
+        lid_reach = max(1.2, c.top_clear if c.edge_holddowns else 0.0)
         want = {
             "base": (c.outer_w, c.outer_h, FLOOR + c.inner_z),
             "lid": (c.outer_w, c.outer_h, LID + lid_reach),
@@ -71,7 +70,7 @@ def main() -> int:
                 print(f"    {f.name} is empty")
                 bad += 1
                 continue
-            # Pillars end at the PCB top when the lid seating face is closed.
+            # Fingers end at the PCB top when the lid seating face is closed.
             axes = (0, 1, 2)
             for i in axes:
                 if abs(got[i] - w[i]) > TOL:

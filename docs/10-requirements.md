@@ -37,8 +37,8 @@ Every row is a **target** until a prototype measurement promotes it. Rows marked
 
 | ID | Requirement | Target |
 |---|---|---|
-| M-01 | Variant A envelope | PCB ~30 × 34 mm; selected-pack case about 47 × 39 × 19 mm |
-| M-02 | Variant B envelope | PCB ~28 × 48 mm incl. 12–20 mm sensor tongue |
+| M-01 | Variant A envelope | PCB ~30 × 34 mm; selected-pack case about 47 × 39 × 19.6 mm |
+| M-02 | Variant B envelope | PCB 30 × 51 mm incl. 8 mm neck and 18 × 9 mm sensor island |
 | M-03 | Sensor air access 🔒 | vents directly at the sensor, small dead volume |
 | M-04 | Antenna clearance 🔒 | ≥ 15 mm free space around the module antenna; no battery, metal or copper behind it |
 | M-05 | Thermal isolation (B) 🔒 | two routed slots, narrow FR-4 neck, four thin traces, **no inner-layer copper across the neck**, no thermal vias |
@@ -83,5 +83,5 @@ more than 20 units.
 | R-3 | Exact vent geometry / open area | thermal Test 5 response-time data |
 | R-4 | TWT available on deployment APs? | firmware bring-up |
 | R-5 | Sensor tongue neck width vs mechanical strength | first bare-PCB inspection |
-| R-8 | **Board retention.** Only 2 lid hold-down pillars fit on A and 1 on B — no bare board is left. Rev 2 should carry two **nylon** M2 holes; the M-04 objection to fasteners near the antenna is about metal, and nylon is not metal. | Rev 2 |
+| R-8 | **Board retention.** Both cases use component-free PCB-edge lid fingers and matching supports on the electronics body. B supports must not load the neck or sensor island. Removable external polymer tape retains the prototype lid; printed tolerance, insertion, handling and closure retention require physical acceptance. | before enclosed prototype tests |
 | R-9 | Qualify the selected pack's controlled drawing, NTC curve, protection behavior, lead routing, swelling space and assembled retention | before enclosed charging |

@@ -16,13 +16,11 @@ turns them into solids.
 """
 from __future__ import annotations
 
-import math
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import geometry as G
-from .design import PART_BY_REF
 from .place import place
 from .variants import (B_BODY_H, B_ISLAND_RECT, B_NECK_RECT, Variant, VARIANTS,
                        antenna_keepout, sensor_keepout)
@@ -35,9 +33,13 @@ FLOOR = 2.0               # below the battery bay
 LID = 2.0
 CLEAR_XY = 0.6            # board edge to inner wall
 BOARD_T = 1.6
-RIB_W = 1.6               # board support ribs
-SUPPORT_H = 0.8           # shelf below PCB, above reserved pack clearance
-HOLDDOWN_D = 2.2          # lid hold-down pillar diameter
+MIN_SUPPORT_H = 0.8       # provisional minimum printable support thickness
+USB_SHELL_W, USB_SHELL_H = 14.0, 8.0  # provisional max cable boot envelope
+USB_BODY_W = 8.94         # HRO TYPE-C-31-M-12 body width, source in HEIGHTS
+USB_GUIDE_T = 1.2         # provisional printed polymer guide thickness
+USB_PACK_CLEAR = 0.5      # additional separation from full swelling reserve
+EDGE_OVERLAP = 0.6        # provisional printed clamp bite onto PCB edge
+EDGE_LENGTH = 1.2         # provisional clamp length along edge
 VENT_W = 1.2              # vent slot width
 VENT_GAP = 1.4            # material between slots
 FILLET = 1.5
@@ -64,14 +66,25 @@ HEIGHTS = {
     "J2": (3.40, "Molex PicoBlade 53261-0371 drawing, mated height"),
     # J2 is overridden by the `connector` argument to build()
     "L1": (1.20, "Murata DFE201612E, 2.0 x 1.6 x 1.2"),
-    "SW1": (3.50, "Panasonic EVQ-PU tactile - TBC against the datasheet"),
-    "C1": (1.45, "0805 MLCC, typical maximum"),
-    "C9": (1.45, "0805 MLCC, typical maximum"),
-    "C10": (1.45, "0805 MLCC, typical maximum"),
-    "C11": (1.45, "0805 MLCC, typical maximum"),
+    "SW1": (1.95, "[Panasonic EVQPUJ02K reference specification, p.2](https://industrial.panasonic.com/cdbs/www-data/pdf/ATK0000/ATK0000COS4319.pdf), 1.65 +0.30/-0.10 mm, side-operated"),
+    "C1": (1.35, "[Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum"),
+    "C8": (1.35, "[Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum"),
+    "C9": (1.35, "[Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum"),
+    "C10": (1.35, "[Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum"),
+    "C11": (1.35, "[Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum"),
+    "U5": (1.45, "[ST USBLC6-2 DS4260 Rev7, Table3 p.12](https://www.st.com/resource/en/datasheet/usblc6-2.pdf), maximum"),
     "U4": (1.00, "VQFN-16 3x3, typical maximum"),
-    "U2": (0.50, "SHT4x DFN, 1.5 x 1.5 x 0.5"),
+    "Q1": (1.11, "[onsemi 2N7002L/D, CASE 318 Issue AU, p.4](https://www.onsemi.com/download/data-sheet/pdf/2n7002l-d.pdf), maximum"),
+    "D1": (1.10, "[Kingbright KP-1608SGC DSAB0301V21B, p.1](https://www.kingbright.com/attachments/file/psearch/000/00/20160808bak/KP-1608SGC%28Ver.21B%29.pdf), maximum"),
+    "U2": (0.73, "[Sensirion SHT4x v7.3, Fig16 p.16](https://sensirion.com/resource/datasheet/sht4x), filtered SHT45-AD1F 0.63 ±0.10 mm"),
 }
+# Raise both PCBs enough that even the tolerance-expanded cable access
+# envelope stays above the full pouch + swelling reserve. J1 height comes
+# from HEIGHTS; all shell and printed-tolerance values are explicit assumptions.
+SUPPORT_H = max(MIN_SUPPORT_H,
+                USB_PACK_CLEAR + USB_SHELL_H / 2 + TOL
+                - BOARD_T - HEIGHTS["J1"][0] / 2)
+
 DEFAULT_H = 1.0           # everything else: 0402/0603, SOT-23, SON
 
 
@@ -85,6 +98,7 @@ class Cutout:
     height: float
     z: float               # above the board's top face
     ref: str
+    reach_x: float = 0.0   # left access channel reaches the PCB front edge
 
 
 @dataclass
@@ -103,38 +117,21 @@ class Case:
     vents: list[tuple[float, float, float, float]] = field(default_factory=list)
     divider_y: float | None = None
     side_vents: list[tuple[float, float, float]] = field(default_factory=list)
-    holddowns: list[tuple[float, float, float]] = field(default_factory=list)
+    edge_holddowns: list[tuple[str, float]] = field(default_factory=list)
+    body_h: float = 0.0
     neck_slot: tuple[float, float] | None = None
     batt_bay: tuple[float, float, float, float] | None = None
     antenna_free: float = 0.0
     connector: str = "PicoBlade"
     vent_wall: str = "bottom"
+    lid_port_relief: bool = True
+    side_stops: bool = True
+    body_end_stops: bool = True
+    usb_guides: list[tuple[float, float, float, float, float]] = field(default_factory=list)
 
 
 def _height(ref: str) -> float:
     return HEIGHTS.get(ref, (DEFAULT_H, ""))[0]
-
-
-def _free_spot(v: Variant, boxes, target, d: float, y_max: float | None = None):
-    """Nearest point to `target` with `d` mm of bare board, inside the outline."""
-    ax0, ax1, ay0, ay1 = antenna_keepout(v)
-    for r in range(0, 40):
-        for dy in range(-r, r + 1):
-            for dx in range(-r, r + 1):
-                if max(abs(dx), abs(dy)) != r:
-                    continue
-                x, y = target[0] + dx * 0.5, target[1] + dy * 0.5
-                box = (x - d / 2, x + d / 2, y - d / 2, y + d / 2)
-                if not G.box_inside_polys(box, v.polys, margin=0.5):
-                    continue
-                if ay0 <= y <= ay1:
-                    continue        # nothing dense behind the antenna (M-04)
-                if y_max is not None and y > y_max:
-                    continue        # never on the sensor side of the wall
-                if any(G.boxes_overlap(box, b, 0.25) for b in boxes):
-                    continue
-                return x, y
-    return None
 
 
 def build(v: Variant, connector: str = "PicoBlade") -> Case:
@@ -172,9 +169,11 @@ def build(v: Variant, connector: str = "PicoBlade") -> Case:
     # --- cut-outs, positioned from the parts themselves --------------------
     j1, j2 = placed["J1"], placed["J2"]
     case.cutouts.append(Cutout("USB-C", "left", j1.x, j1.y,
-                               9.2 + TOL, height("J1") + TOL, height("J1") / 2, "J1"))
-    sw, d1 = placed["SW1"], placed["D1"]
-    case.cutouts.append(Cutout("button", "lid", sw.x, sw.y, 4.0, 4.0, 0.0, "SW1"))
+                               USB_SHELL_W + 2 * TOL, USB_SHELL_H + 2 * TOL,
+                               height("J1") / 2, "J1"))
+    # SW1 is side-operated, so a lid hole above it is not an actuator.
+    # Prototype servicing/provisioning requires the removable lid off.
+    d1 = placed["D1"]
     case.cutouts.append(Cutout("status LED", "lid", d1.x, d1.y,
                                2.0, 2.0, 0.0, "D1"))
 
@@ -186,7 +185,7 @@ def build(v: Variant, connector: str = "PicoBlade") -> Case:
         # B_NECK_RECT includes a 0.5 mm electrical-rule overlap onto the body.
         # The physical wall must start beyond the full-width PCB, not there.
         case.divider_y = B_BODY_H + TOL + WALL / 2
-        case.neck_slot = (nx1 - nx0 + 2 * TOL, BOARD_T + 2 * TOL)
+        case.neck_slot = (nx1 - nx0 + 4 * TOL, BOARD_T + 2 * TOL)
     else:
         sx0, sx1, sy0, sy1 = sensor_keepout(v)
         vent_area = (sx0 + 1.0, sy0 + 1.0, sx1 - 1.0, v.height - 1.5)
@@ -209,46 +208,49 @@ def build(v: Variant, connector: str = "PicoBlade") -> Case:
         case.side_vents.append((cx, VENT_W, 3.0))
     case.vent_wall = vent_wall
 
-    # --- lid hold-downs ----------------------------------------------------
-    # The board rests on ribs; without something pressing on it, it rattles.
-    # Short pillars come down from the lid onto bare board - found by searching
-    # for free space, not by assuming a corner is empty.
-    # A pillar on the sensor side of the chamber wall would be a plastic
-    # thermal bridge straight into the island - the one thing Variant B exists
-    # to avoid. Hold-downs live in the electronics chamber only.
-    #
-    # They also walk the board perimeter rather than aiming at the middle: on a
-    # board this dense the interior has no 2.5 mm of bare copper anywhere, but
-    # the edge band usually does.
-    body_h = B_NECK_RECT[1] if v.key == "b" else v.height
-    # On B, body_h *is* the chamber wall, so keep clear of the wall itself too.
-    y_max = (body_h - (HOLDDOWN_D / 2 + WALL + 0.5) if v.key == "b"
-             else body_h - 1.5)
+    # --- edge retention ----------------------------------------------------
+    # Rectangular fingers reach from the lid to a narrow component-free edge
+    # strip. Unlike an interior pillar they do not need a large round bare spot
+    # or a mounting hole. Supports below use these same coordinates, keeping
+    # clamp loads out of the pouch and out of B's neck/island.
+    case.body_h = B_BODY_H if v.key == "b" else v.height
     boxes = [p.box for p in placed.values()]
-    ax0, ax1, ay0, ay1 = antenna_keepout(v)
-    perimeter = []
-    step = 1.0
-    n = int(body_h / step)
-    for i in range(n):
-        y = 1.6 + i * step
-        perimeter += [(1.6, y), (v.width - 1.6, y)]
-    for i in range(int(v.width / step)):
-        x = 1.6 + i * step
-        perimeter += [(x, body_h - 1.6), (x, ay1 + 1.6)]
-    for sep, dia in ((9.0, HOLDDOWN_D), (6.0, 1.8)):
-        for (px, py) in perimeter:
-            if len(case.holddowns) >= 4:
-                break
-            if any(math.hypot(px - hx, py - hy) < sep
-                   for hx, hy, _ in case.holddowns):
+    ay1 = antenna_keepout(v)[3]
+    for side in ("left", "right"):
+        candidates = []
+        for i in range(int((case.body_h - ay1) * 2)):
+            y = ay1 + EDGE_LENGTH / 2 + TOL + i * 0.5
+            if y + EDGE_LENGTH / 2 + TOL >= case.body_h:
                 continue
-            spot = _free_spot(v, boxes, (px, py), dia, y_max=y_max)
-            if spot and math.hypot(spot[0] - px, spot[1] - py) < 1.0:
-                case.holddowns.append((spot[0], spot[1], dia))
-                boxes.append((spot[0] - dia / 2, spot[0] + dia / 2,
-                              spot[1] - dia / 2, spot[1] + dia / 2))
-        if len(case.holddowns) >= 3:
-            break
+            if side == "left" and abs(y - j1.y) < USB_SHELL_W / 2 + TOL + EDGE_LENGTH / 2:
+                continue  # retention must not bridge the cable access notch
+            x0 = 0 if side == "left" else v.width - EDGE_OVERLAP
+            box = (x0, x0 + EDGE_OVERLAP,
+                   y - EDGE_LENGTH / 2, y + EDGE_LENGTH / 2)
+            if not any(G.boxes_overlap(box, b, 0.25) for b in boxes):
+                candidates.append(y)
+        # Spread two fingers along each edge where possible. On B the left
+        # USB/regulator leave one window; the right edge provides two.
+        for y in reversed(candidates):
+            if sum(s == side for s, _ in case.edge_holddowns) >= 2:
+                break
+            if all(s != side or abs(y - cy) >= EDGE_LENGTH + 1.0
+                   for s, cy in case.edge_holddowns):
+                case.edge_holddowns.append((side, y))
+
+    # Positive Y registration uses the robust USB shell, away from RF and the
+    # sensor. Two lid rails flank its upper side faces; X and +Y PCB edge stops
+    # below the component layer supplement them. Rail bottoms stay above every
+    # neighbouring component envelope, so load is not applied to passives.
+    gx0 = EDGE_OVERLAP + TOL
+    gx1 = j1.x + 7.35 / 2 - TOL  # HRO body depth, source in HEIGHTS
+    for gy in (j1.y - USB_BODY_W / 2 - TOL - USB_GUIDE_T,
+               j1.y + USB_BODY_W / 2 + TOL):
+        rect = (gx0, gx1, gy, gy + USB_GUIDE_T)
+        nearby = [height(p.ref) for p in placed.values() if p.ref != "J1"
+                  and G.boxes_overlap(rect, p.box)]
+        lower_z = max(1.5, max(nearby, default=0) + TOL)
+        case.usb_guides.append((gx0, gy, gx1-gx0, USB_GUIDE_T, lower_z))
 
     # --- battery bay -------------------------------------------------------
     ax0, ax1, ay0, ay1 = antenna_keepout(v)
@@ -297,6 +299,28 @@ def check(v: Variant, c: Case) -> list[str]:
         if abs(p.x - co.cx) > 0.01 or abs(p.y - co.cy) > 0.01:
             out.append(f"{co.name} cut-out is not on {co.ref}")
 
+    usb = next(co for co in c.cutouts if co.ref == "J1")
+    if usb.width < USB_SHELL_W + 2 * TOL or usb.height < USB_SHELL_H + 2 * TOL:
+        out.append("USB opening does not clear the provisional cable shell")
+    if usb.reach_x < 0 or not c.lid_port_relief:
+        out.append("USB access does not relieve the recessed wall and lid lip")
+    if placed["J1"].rot % 360 != 270:
+        out.append("USB socket mouth does not face the left access opening")
+    shell_bottom = c.board_z + BOARD_T + usb.z - usb.height / 2
+    if shell_bottom < BATT_Z + BATT_Z_ALLOW + USB_PACK_CLEAR - 1e-9:
+        out.append("USB cable access enters the reserved battery/swelling clearance")
+
+    if not c.side_stops or not c.body_end_stops or len(c.usb_guides) != 2:
+        out.append("PCB has no complete positive XY registration")
+    for x, y, w, h, z in c.usb_guides:
+        if z >= _height("J1") - 0.35:
+            out.append("USB guide does not engage the upper socket shell")
+        if any(z < _height(p.ref) + TOL - 1e-9 for p in placed.values()
+               if p.ref != "J1" and G.boxes_overlap((x,x+w,y,y+h),p.box)):
+            out.append("USB registration guide loads another component")
+    if TOL >= CLEAR_XY:
+        out.append("Y registration may let the PCB antenna edge reach the wall")
+
     # battery must not sit under the antenna or under the sensor
     bx0, by0, bx1, by1 = c.batt_bay
     ax0, ax1, ay0, ay1 = antenna_keepout(v)
@@ -312,26 +336,24 @@ def check(v: Variant, c: Case) -> list[str]:
         out.append("no vent slot lies over the sensor")
     if not c.side_vents:
         out.append("the sensor chamber has no side vents")
-    if len(c.holddowns) < 2:
-        out.append(f"only {len(c.holddowns)} lid hold-down pillar(s) fit - "
-                   f"the electronics chamber has no bare board left. The board "
-                   f"needs a different retention scheme; see the note below")
-    ax0, ax1, ay0, ay1 = antenna_keepout(v)
-    for hx, hy, d in c.holddowns:
-        if ay0 <= hy <= ay1:
-            out.append("a hold-down pillar sits behind the antenna (M-04)")
-        if c.divider_y is not None and abs(hy - c.divider_y) < (d / 2 + WALL):
-            out.append("a hold-down pillar clashes with the chamber divider")
-        if hy > (c.divider_y or 1e9):
-            out.append("a hold-down pillar is on the sensor side of the wall")
-
+    if len(c.edge_holddowns) < 3 or {s for s, _ in c.edge_holddowns} != {"left", "right"}:
+        out.append("fewer than three edge clamps on both sides of the electronics body")
+    for side, y in c.edge_holddowns:
+        if side == "left" and abs(y - usb.cy) < usb.width / 2 + EDGE_LENGTH / 2:
+            out.append("an edge clamp obstructs the USB cable access notch")
+        x0 = 0 if side == "left" else v.width - EDGE_OVERLAP
+        box = (x0, x0 + EDGE_OVERLAP, y - EDGE_LENGTH / 2, y + EDGE_LENGTH / 2)
+        if any(G.boxes_overlap(box, p.box, 0.25) for p in placed.values()):
+            out.append("an edge clamp overlaps a component or test pad")
+        if y - EDGE_LENGTH / 2 <= ay1 or y + EDGE_LENGTH / 2 >= c.body_h:
+            out.append("an edge clamp leaves the electronics retention region")
     if v.key == "b":
         if c.divider_y is None:
             out.append("Variant B has no chamber divider")
         elif not (B_NECK_RECT[1] - 1 <= c.divider_y <= B_NECK_RECT[3] + 1):
             out.append("chamber divider is not at the neck")
-        if c.neck_slot and c.neck_slot[0] < (B_NECK_RECT[2] - B_NECK_RECT[0]):
-            out.append("neck slot is narrower than the neck")
+        if c.neck_slot and c.neck_slot[0] <= (B_NECK_RECT[2] - B_NECK_RECT[0]) + 2 * TOL:
+            out.append("neck slot has no reserve beyond positive X registration travel")
         if c.divider_y is not None and (
                 c.divider_y - WALL / 2 < B_BODY_H + TOL - 1e-9 or
                 c.divider_y + WALL / 2 > B_ISLAND_RECT[1] - TOL + 1e-9):
@@ -352,7 +374,6 @@ def planning_cell_fits(c: Case) -> bool:
 
 # --------------------------------------------------------------------------
 def scad_params(v: Variant, c: Case) -> str:
-    placed = {p.ref: p for p in place(v)}
     lines = ["// SPDX-FileCopyrightText: 2026 Marcel Petrick "
              "<mail@marcelpetrick.it>",
              "// SPDX-License-Identifier: GPL-3.0-or-later",
@@ -362,11 +383,16 @@ def scad_params(v: Variant, c: Case) -> str:
              f"board_w = {v.width}; board_h = {v.height}; board_t = {BOARD_T};",
              f"wall = {WALL}; floor_t = {FLOOR}; lid_t = {LID};",
              f"clear_xy = {CLEAR_XY}; fillet = {FILLET}; tol = {TOL};",
-             f"rib_w = {RIB_W}; support_h = {SUPPORT_H};",
+             f"support_h = {SUPPORT_H};",
+             f"usb_lid_relief = {str(c.lid_port_relief).lower()};",
+             f"side_stops = {str(c.side_stops).lower()}; body_end_stops = {str(c.body_end_stops).lower()};",
+             f"body_h = {c.body_h};",
+             f"edge_overlap = {EDGE_OVERLAP}; edge_length = {EDGE_LENGTH};",
              f"inner_w = {c.inner_w}; inner_h = {c.inner_h}; inner_z = {c.inner_z};",
              f"board_z = {c.board_z}; top_clear = {c.top_clear};",
              f"outer_w = {c.outer_w}; outer_h = {c.outer_h}; outer_z = {c.outer_z};",
              f"batt = [{BATT_X}, {BATT_Y}, {BATT_Z}];",
+             f"batt_reserved_z = {BATT_Z + BATT_Z_ALLOW};",
              "// battery bay in BOARD coordinates; it may extend past the",
              "// board edge, because the cavity is sized to the cell, not the PCB",
              f"batt_bay = [{c.batt_bay[0]}, {c.batt_bay[1]}, "
@@ -383,19 +409,20 @@ def scad_params(v: Variant, c: Case) -> str:
     lines.append("// [centre, width, height] on the sensor-chamber wall")
     lines.append("side_vents = [" + ", ".join(
         f"[{x}, {w}, {h}]" for x, w, h in c.side_vents) + "];")
-    lines.append("// [x, y, diameter] hold-down pillars, board coordinates")
-    lines.append("holddowns = [" + ", ".join(
-        f"[{x}, {y}, {d}]" for x, y, d in c.holddowns) + "];")
+    lines.append("usb_guides = [" + ", ".join(
+        f"[{x}, {y}, {w}, {h}, {z}]" for x,y,w,h,z in c.usb_guides) + "];")
+    lines.append("edge_holddowns = [" + ", ".join(
+        f'["{side}", {y}]' for side, y in c.edge_holddowns) + "];")
     lines.append("// [wall, x, y, width, height, z] - x,y in board coordinates")
     lines.append("cutouts = [" + ", ".join(
-        f'["{co.wall}", {co.cx}, {co.cy}, {co.width}, {co.height}, {co.z}]'
+        f'["{co.wall}", {co.cx}, {co.cy}, {co.width}, {co.height}, {co.z}, {co.reach_x}]'
         for co in c.cutouts) + "];")
     lines.append("board_outline = [" + ", ".join(
         f"[{x}, {y}]" for x, y in v.outline) + "];")
     return "\n".join(lines) + "\n"
 
 
-def report() -> str:
+def report(cases: dict[str, Case] | None = None, *, strict: bool = False) -> str:
     o = ["# 80 — Enclosure (generated)", "",
          "<!-- Generated by `make mech` from tools/boardgen/enclosure.py. -->", "",
          "The case is derived from the board model: outline, sensor position,",
@@ -411,16 +438,29 @@ def report() -> str:
          "The perimeter lip is relieved where it crosses B's divider. The",
          "OpenSCAD `interference` mode intersects the closed lid with the base;",
          "the expected result is empty. This does not prove pack/PCB fit.", "",
-         "USB opening height is centred on the connector body above the PCB,",
-         "not on the PCB surface. Cable-shell reach through the recessed wall",
-         "still requires a physical fit check with the intended cable.", "",
+         "The left USB opening and matching lid/lip notch expose the full recess",
+         "to the PCB front edge; the cable boot can enter it instead of relying",
+         "on extra metal-tip reach. J1 faces left (270°); its placement uses the",
+         "manufacturer PCB-edge datum. The provisional maximum boot envelope",
+         "is **14 × 8 mm**, with 0.35 mm clearance per edge. These are explicit",
+         "design assumptions, not USB-standard limits or a verified cable.", "",
+         f"Both support heights are derived as {SUPPORT_H:.2f} mm so the complete",
+         "tolerance-expanded cable envelope stays at least 0.5 mm above the",
+         "pack's maximum thickness plus full 1.0 mm swelling reserve. The",
+         "OpenSCAD `cable_interference` check intersects that access path with",
+         "the assembled case and reserved pack volume; it must be empty.", "",
+         "Before charging, fit the intended cable, record its maximum boot",
+         "dimensions and verify insertion, retention and lead/pack clearance.", "",
+         "SW1 (EVQPUJ02K) is side-operated. Remove the taped lid to press it",
+         "laterally with a nonconductive tool during bench setup/provisioning;",
+         "there is no top button opening. Refit the lid before thermal tests.", "",
          "## Component heights", "",
          "| Ref | Height | Source |", "|---|---:|---|"]
     for ref, (h, src) in sorted(HEIGHTS.items(), key=lambda kv: -kv[1][0]):
         o.append(f"| {ref} | {h:.2f} mm | {src} |")
     o += ["", "## Result", "",
           "| | Variant A | Variant B |", "|---|---:|---:|"]
-    cases = {k: build(v) for k, v in VARIANTS.items()}
+    cases = cases or {k: build(v) for k, v in VARIANTS.items()}
     rows = [
         ("Outer size (mm)", lambda c: f"{c.outer_w:.1f} × {c.outer_h:.1f} × {c.outer_z:.1f}"),
         ("Internal cavity height", lambda c: f"{c.inner_z:.1f} mm"),
@@ -434,7 +474,7 @@ def report() -> str:
         ("Selected pack fits modeled bay", lambda c: "yes" if planning_cell_fits(c) else "NO"),
         ("Vent slots over the sensor", lambda c:
          f"{len(c.vents)} in the lid + {len(c.side_vents)} in the wall"),
-        ("Lid hold-down pillars", lambda c: f"{len(c.holddowns)}"),
+        ("Lid edge clamps / matching supports", lambda c: f"{len(c.edge_holddowns)}"),
         ("Chambers", lambda c: "2, divided at the neck" if c.divider_y else "1"),
         ("Solid material beyond the antenna", lambda c: f"{c.antenna_free:.1f} mm"),
     ]
@@ -456,27 +496,36 @@ def report() -> str:
           "`1=black/-`, `2=yellow/NTC`, `3=red/+` before mating. An assembled "
           "lead-bend/retention "
           "test remains part of the battery qualification gate.", ""]
-    o += ["## Board retention, and a decision coming back around", "",
-          f"The board rests on four ribs and is meant to be pinned by short "
-          f"pillars from the lid onto bare copper-free board. The generator "
-          f"searches the placement for room rather than assuming a corner is "
-          f"empty, and finds **{len(cases['a'].holddowns)} on Variant A** but "
-          f"only **{len(cases['b'].holddowns)} on Variant B** - B's electronics "
-          f"chamber carries all 43 populated parts in a narrower body, and there is no "
-          f"bare board left.", "",
-          "The first attempt put two of B's pillars *on the sensor island*: "
-          "plastic bridging the lid straight into the thermally isolated part, "
-          "which would have quietly wrecked the experiment the island exists "
-          "for. That is now a hard check.", "",
-          "The real fix is two M2 nylon screws through the lid into bosses - "
-          "and the board has no holes for them, because `40-floorplans.md` "
-          "decided against mounting holes on the grounds that M-04 forbids "
-          "metal near the antenna and a nylon boss costs 19 mm² of a 1000 mm² "
-          "board. That was a reasonable call in the PCB phase and it is now a "
-          "retention problem in the mechanical phase. Nylon screws are not "
-          "metal; the antenna objection does not actually apply to them. **Rev 2 "
-          "should carry two nylon M2 holes in the electronics chamber**, which "
-          "costs a little copper and solves this cleanly.", "",
+    o += ["## Board retention and prototype lid closure", "",
+          "Both variants use rectangular lid fingers on component-free PCB edge "
+          "strips, with matching wall-connected support shelves below. The "
+          "generator checks every clamp against component and test-pad envelopes. "
+          "Variant B supports and clamps remain entirely in the electronics body; "
+          "no printed support touches its neck or sensor island.", "",
+          "Polymer side stops constrain X at the supported PCB edges. Rear "
+          "corner stops capture the electronics body end outside B's neck. "
+          "Two lid rails flank the upper USB shell and constrain both Y "
+          "directions without touching the PCB antenna end; their undersides "
+          "clear adjacent components. The modeled movement before stop contact "
+          "is 0.35 mm, below the 0.6 mm antenna-edge/wall gap. USB-shell contact, "
+          "stop strength and printed tolerances remain assembly qualification "
+          "gates; vertical friction alone is not the retention scheme. B’s neck "
+          "slot has an additional 0.35 mm per-side reserve beyond the modeled "
+          "X stop travel, so the stops engage before the neck touches the divider.", "",
+          f"The {EDGE_OVERLAP:.1f} mm edge bite, {EDGE_LENGTH:.1f} mm finger length, 0.35 mm printed cut-out "
+          "tolerance and 0.25 mm component margin are provisional design "
+          "assumptions, not demonstrated printer capability. These dimensions "
+          "must be checked on printed samples before qualification. Print the "
+          "base floor down with removable supports under the cantilever shelves; "
+          "print the lid outer face down. Remove every support and sharp edge "
+          "from the battery bay. Use the same recorded polymer and print settings "
+          "for both A/B cases.", "",
+          "The perimeter ring locates the lid but does not latch it. For the "
+          "prototype, retain the lid with removable nonmetallic tape across the "
+          "electronics chamber side walls, away from the antenna end, USB opening "
+          "and sensor vents. Tape is a provisional assembly assumption; record "
+          "material and position for both A/B cases. Positive lid closure and "
+          "drop/handling retention remain physically unqualified.", "",
           "## Battery qualification still requires hardware", "",
           "The selected pack passes the parametric plan-view and height checks in "
           "both variants. That is a design check, not evidence that a pouch, its "
@@ -485,6 +534,8 @@ def report() -> str:
           "both cases, then run the EDS §5.2 temperature, timer and fault tests.", ""]
     for k, v in VARIANTS.items():
         probs = check(v, cases[k])
+        if strict and probs:
+            raise ValueError(f"Variant {k.upper()} enclosure: {'; '.join(probs)}")
         o.append(f"**Variant {k.upper()} checks:** "
                  + ("all pass" if not probs else "")
                  )
@@ -495,12 +546,14 @@ def report() -> str:
 
 
 if __name__ == "__main__":
-    print(report())
+    cases = {k: build(v) for k, v in VARIANTS.items()}
+    rendered_report = report(cases, strict=True)
+    print(rendered_report)
     if "--write" in sys.argv:
         d = ROOT / "mechanical"
         d.mkdir(exist_ok=True)
         for k, v in VARIANTS.items():
-            (d / f"params-{k}.scad").write_text(scad_params(v, build(v)))
+            (d / f"params-{k}.scad").write_text(scad_params(v, cases[k]))
             (d / f"case-{k}.scad").write_text(
                 f"// SPDX-FileCopyrightText: 2026 Marcel Petrick "
                 f"<mail@marcelpetrick.it>\n"
@@ -509,4 +562,4 @@ if __name__ == "__main__":
                 f"Edit env-sensor-case.scad or the generator, not this file.\n"
                 f'include <params-{k}.scad>\n'
                 f'include <env-sensor-case.scad>\n')
-        (ROOT / "docs" / "80-enclosure.md").write_text(report() + "\n")
+        (ROOT / "docs" / "80-enclosure.md").write_text(rendered_report + "\n")
