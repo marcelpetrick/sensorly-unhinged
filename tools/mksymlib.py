@@ -6,7 +6,7 @@ The result is committed (like the footprints) so a checkout needs no system
 KiCad libraries. This tool documents and reproduces how it was built.
 
     git clone --depth 1 https://gitlab.com/kicad/libraries/kicad-symbols.git
-    python -m tools.mksymlib /path/to/kicad-symbols
+    make symbols KICAD_SYMBOLS_DIR=/path/to/kicad-symbols
 
 Two things it does that a plain copy cannot:
 
@@ -57,8 +57,9 @@ def block(text: str, head: str) -> str:
 
 
 def read(src: Path, lib: str, name: str) -> str:
-    return block((src / f"{lib}.kicad_symdir" / f"{name}.kicad_sym").read_text(),
-                 f'symbol "{name}"')
+    flat = src / f"{lib}.kicad_sym"
+    path = flat if flat.is_file() else src / f"{lib}.kicad_symdir" / f"{name}.kicad_sym"
+    return block(path.read_text(), f'symbol "{name}"')
 
 
 def properties(body: str) -> dict[str, str]:
@@ -134,6 +135,26 @@ def tps62840() -> str:
         "\t\t\t)", *pins, "\t\t)", "\t\t(embedded_fonts no)", "\t)"])
 
 
+def kingbright_led(body: str) -> str:
+    """Adapt KiCad LED graphics to Kingbright DSAB0301: 1=A, 2=K."""
+    body = body.replace('(symbol "LED', '(symbol "KP1608SGC')
+    body = body.replace('(number "1"', '(number "TEMP"')
+    body = body.replace('(number "2"', '(number "1"')
+    body = body.replace('(number "TEMP"', '(number "2"')
+    updates = {
+        "Value": "KP1608SGC",
+        "Footprint": "sensorly:Kingbright_KP1608SGC",
+        "Datasheet": "https://www.kingbright.com/attachments/file/psearch/000/00/20160808bak/KP-1608SGC%28Ver.21B%29.pdf",
+        "ki_fp_filters": "sensorly:Kingbright_KP1608SGC",
+    }
+    for name, value in updates.items():
+        old = properties(body).get(name)
+        if old:
+            body = body.replace(old, re.sub(r'(\(property "[^"]+" ")[^"]*',
+                                            lambda m: m.group(1) + value, old, count=1))
+    return body
+
+
 def main(argv):
     src = Path(argv[0])
     out = ["(kicad_symbol_lib", "\t(version 20251024)",
@@ -143,14 +164,28 @@ def main(argv):
         if name == "Conn_01x03_MountingPin":
             body = body.replace("Connector*:*_1x??-1MP*",
                                 "sensorly:Molex_PicoBlade_53261-0371_1x03-1MP_P1.25mm_Horizontal")
+        if name == "BQ24074RGT":
+            for field in ("Footprint", "ki_fp_filters"):
+                old = properties(body)[field]
+                new = re.sub(r'(\(property "[^"]+" ")[^"]*',
+                             r'\g<1>sensorly:TI_RGT0016B_VQFN16_3x3mm', old, count=1)
+                body = body.replace(old, new)
         out.append("\t" + body.replace("\n\t", "\n\t\t"))
     for lib, child, parent in FLATTEN:
-        out.append("\t" + flatten(src, lib, child, parent).replace("\n\t", "\n\t\t"))
+        body = flatten(src, lib, child, parent)
+        if child == "USBLC6-2SC6":
+            for field in ("Footprint", "ki_fp_filters"):
+                old = properties(body)[field]
+                new = re.sub(r'(\(property "[^"]+" ")[^"]*',
+                             r'\g<1>sensorly:ST_USBLC6_SOT23_6', old, count=1)
+                body = body.replace(old, new)
+        out.append("\t" + body.replace("\n\t", "\n\t\t"))
     out.append(tps62840())
+    out.append("\t" + kingbright_led(read(src, "Device", "LED")).replace("\n\t", "\n\t\t"))
     out.append(")")
     OUT.write_text("\n".join(out) + "\n")
     print(f"wrote {OUT.relative_to(ROOT)}: "
-          f"{len(VENDORED) + len(FLATTEN) + 1} symbols")
+          f"{len(VENDORED) + len(FLATTEN) + 2} symbols")
 
 
 if __name__ == "__main__":

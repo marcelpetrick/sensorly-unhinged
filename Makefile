@@ -4,6 +4,7 @@
 # AGENTS.md rule: if a step cannot be run from make, it is not part of the build.
 
 KICAD_CLI ?= kicad-cli
+KICAD_SYMBOLS_DIR ?= /usr/share/kicad/symbols
 PY        ?= python3
 VARIANTS  := a b
 ROOT      := $(CURDIR)
@@ -22,7 +23,7 @@ endif
 # Generation mutates inputs consumed by later goals, including `make -j all`.
 .NOTPARALLEL:
 
-.PHONY: all gen check erc drc outputs render bom thermal cost mech license clean help test
+.PHONY: all gen symbols check erc drc outputs render bom thermal cost mech license clean help test
 .DEFAULT_GOAL := help
 .PHONY: release-check release release-package
 .PHONY: power
@@ -32,6 +33,7 @@ power:
 
 help:
 	@echo "make gen      - regenerate the schematic, both boards, project files, DRC rules and SVGs"
+	@echo "make symbols KICAD_SYMBOLS_DIR=... - explicitly re-vendor symbols from a reviewed upstream source"
 	@echo "make check    - generator-side rule checks only (no KiCad needed)"
 	@echo "make license  - verify every authored source carries an SPDX header"
 	@echo "make erc      - KiCad ERC on the shared schematic"
@@ -55,6 +57,12 @@ all: license gen check erc drc bom thermal cost mech outputs
 
 gen:
 	$(PY) -m tools.boardgen
+
+# Explicit provenance operation, never a dependency of gen/all: a different
+# installed upstream revision must not silently replace committed symbols.
+symbols:
+	@test -d "$(KICAD_SYMBOLS_DIR)" || { echo "missing controlled symbol source: $(KICAD_SYMBOLS_DIR)"; exit 1; }
+	$(PY) -m tools.mksymlib "$(KICAD_SYMBOLS_DIR)"
 
 check:
 	$(PY) -m tools.boardgen --check-only
