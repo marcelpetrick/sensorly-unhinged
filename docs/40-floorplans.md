@@ -81,9 +81,10 @@ the actual comparison. The experiment must remain capable of choosing A.
 
 ## Routing status — stated plainly
 
-Both boards are **partially routed**. Fresh filled-board KiCad results and the
-development budget must match the regenerated checkpoint; historical counts do
-not qualify changed sources. What the generator routes, and why:
+Both boards are **partially routed**: the 2026-10-14 regenerated checkpoint has
+**59** unconnected items on A and **52** on B, checked with KiCad 10.0.6. The
+development budget records these exact counts; fabrication requires zero.
+What the generator routes, and why:
 
 | | |
 |---|---|
@@ -104,9 +105,9 @@ central claim is that a rule change regenerates *both* boards identically. Route
 by hand or by freerouting once, and the next time the neck width moves, someone
 has to do it again and hope they make the same decisions twice.
 
-The island-only layouts pass actual KiCad DRC on both variants. Full-board
-errors, warnings, connectivity and schematic parity must be checked again after
-regeneration; this source correction alone does not complete the layouts.
+Fresh filled-board KiCad reports for this checkpoint have **zero errors, zero
+warnings and zero schematic parity differences** on both variants. These checks
+do not complete the remaining routes or qualify the physical instrument.
 
 The cleanup checkpoint enforces Power-class width rules after the general
 fabrication minimum, uses bounded tagged pad-escape corridors, and takes the

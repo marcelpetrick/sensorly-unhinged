@@ -1,21 +1,13 @@
 {
-  "_comment": "Development-only budget reviewed with KiCad 10.0.6 on 2026-09-09. Zero errors and parity; no ignored checks. Warning allowances apply only to the exact listed items and cap repeated occurrences. Release allows none. U1/U2 retain the pre-existing embedded-keepout library mismatch waiver; isolated GND copper remains unfinished routing, not qualified production copper.",
+  "_comment": "Development-only checkpoint reviewed with fresh KiCad 10.0.6 reports on 2026-10-14. Zero ERC/DRC errors, zero warnings and zero schematic parity differences; no ignored checks or warning allowances. Routing remains incomplete and manufacturing gates require zero unconnected items.",
   "a": {
     "unconnected": 59,
-    "note": "The pack NTC, VBUS-isolated charge-enable and USB current-selection nets are present but routing remains unfinished; the new PicoBlade clearances fragment the provisional pour. Manufacturing remains blocked.",
-    "warnings": [
-      {"type": "lib_footprint_mismatch", "items": ["393736f2-cf42-5793-8144-b50f90a52a4b"], "count": 1},
-      {"type": "lib_footprint_mismatch", "items": ["4a7432ba-ecfa-5894-bc7f-cff09108962d"], "count": 1},
-      {"type": "isolated_copper", "items": ["480cd6e6-67eb-5873-ad27-8d84aaf8bd5b"], "count": 7}
-    ]
+    "note": "Controlled prototype shared model and strict power rules are present; USB pair, regulator/power connections, ground returns and remaining control/test-pad branches need deliberate routing. This exact development count is not fabrication approval.",
+    "warnings": []
   },
   "b": {
-    "unconnected": 60,
-    "note": "The shared pack/USB safety changes are applied; C6 taps locally and exactly four traces cross the neck. The new PicoBlade clearances fragment the provisional pour and main-board routing remains incomplete.",
-    "warnings": [
-      {"type": "lib_footprint_mismatch", "items": ["393736f2-cf42-5793-8144-b50f90a52a4b"], "count": 1},
-      {"type": "lib_footprint_mismatch", "items": ["4a7432ba-ecfa-5894-bc7f-cff09108962d"], "count": 1},
-      {"type": "isolated_copper", "items": ["758dbf52-3e0b-5eb9-8ab9-f8be2c326ad5"], "count": 15}
-    ]
+    "unconnected": 52,
+    "note": "Controlled prototype shared model and strict power rules are present; USB pair, regulator/power connections, ground returns and remaining control/test-pad branches need deliberate routing. This exact development count is not fabrication approval.",
+    "warnings": []
   }
 }
