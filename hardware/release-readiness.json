@@ -1,12 +1,47 @@
 {
   "schema": 1,
   "checks": [
-    {"id": "battery", "owner": "hardware/firmware maintainer", "evidence": null, "requirement": "EDS-9Q/12/docs 51: LP702040 lot confirmation, VBUS/Q1 reset-safe CE plus NTC inhibit, bounded watchdog/sleep shutdown, charge/timer/fault and retention tests"},
-    {"id": "usb", "owner": "hardware/firmware maintainer", "evidence": null, "requirement": "EDS-10Q/11/12/docs 51: C6 configuration/current-request proof, USB100 reset default, enumerated USB500 state machine, suspend current and representative-source/fault measurements"},
-    {"id": "power", "owner": "hardware maintainer", "evidence": null, "requirement": "Module rail transients, cutoff, sleep current and measured runtime budget"},
-    {"id": "mechanical", "owner": "mechanical maintainer", "evidence": null, "requirement": "Actual pack fits; PCB retention, connector access, antenna clearance and neck tested"},
-    {"id": "assembly", "owner": "hardware maintainer", "evidence": null, "requirement": "Exact MPNs, land patterns, approved CPL orientation and fab stackup"},
-    {"id": "firmware", "owner": "firmware maintainer", "evidence": null, "requirement": "F-03 through F-12 implemented and device acceptance tests passed"},
-    {"id": "instrument", "owner": "test maintainer", "evidence": null, "requirement": "Guarded thermal/RH accuracy and RF tests in finished enclosure"}
+    {
+      "id": "battery",
+      "owner": "hardware/firmware maintainer",
+      "evidence": null,
+      "requirement": "EDS-9Q/12/15/docs 51: LP702040 lot confirmation, protected NTC sensing (R21 must remain DNP until redesign), VBUS/Q1 reset-safe CE, bounded watchdog/sleep shutdown, charge/timer/fault and retention tests"
+    },
+    {
+      "id": "usb",
+      "owner": "hardware/firmware maintainer",
+      "evidence": null,
+      "requirement": "EDS-10Q/11/12/13/docs 51: unrestricted supported-source authorization and current limits; EN1/EN2 standby startup/rail-loss review, total suspend current and representative-source/fault measurements; ADR-001 controlled bring-up is not product qualification"
+    },
+    {
+      "id": "power",
+      "owner": "hardware maintainer",
+      "evidence": null,
+      "requirement": "Module rail transients, cutoff, sleep current and measured runtime budget; EDS-16 accepted part-specific effective-capacitance bounds and measured startup/TX/load-step stability"
+    },
+    {
+      "id": "mechanical",
+      "owner": "mechanical maintainer",
+      "evidence": null,
+      "requirement": "Actual pack fits; PCB retention, connector access, antenna clearance and neck tested"
+    },
+    {
+      "id": "assembly",
+      "owner": "hardware maintainer",
+      "evidence": null,
+      "requirement": "Exact MPNs, land patterns, approved CPL orientation and fab stackup"
+    },
+    {
+      "id": "firmware",
+      "owner": "firmware maintainer",
+      "evidence": null,
+      "requirement": "F-03 through F-12 implemented and device acceptance tests passed"
+    },
+    {
+      "id": "instrument",
+      "owner": "test maintainer",
+      "evidence": null,
+      "requirement": "Guarded thermal/RH accuracy and RF tests in finished enclosure"
+    }
   ]
 }

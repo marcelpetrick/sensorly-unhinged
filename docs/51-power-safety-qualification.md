@@ -19,6 +19,21 @@ The supplier page is not a controlled pack drawing; any conflict is resolved in
 favor of the signed drawing obtained with the lot, then reviewed as a design
 change if it alters the locked interface.
 
+## Controlled initial prototype disposition
+
+[ADR-001](adr/001-controlled-prototype-power-and-wake.md) changes the assembled
+initial A/B prototypes: R21 must be DNP, isolating raw TS from IO3; EN1/EN2 have
+MCU-rail pull-ups and bring-up selects standby. Charge enable never asserts.
+Inspect DNP continuity and capture both EN pins, MCU rail and VBUS/VSYS through
+startup, sleep and rail loss before USB attachment experiments. A protected
+charged pack or declared VBAT battery simulator is required; battery-less USB
+startup is unsupported. Standby alone is not suspend-current evidence.
+
+The charging and USB500 rows below remain **future product qualification cases**.
+The current image cannot pass them, and a supervised lab USB100 image requires
+its own reviewed source procedure. EDS-15 must add protected NTC sensing before
+any temperature-supervised charging implementation. Do not bridge R21 with 0Ω.
+
 ## Stop conditions
 
 Do not charge a pack in either enclosure until the supplier-document, incoming

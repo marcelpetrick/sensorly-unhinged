@@ -34,7 +34,7 @@ SYMBOL = {
     "U1": "ESP32-C6-MINI-1", "U2": "SHT4x", "U3": "TPS62840DLC",
     "U4": "BQ24074RGT", "U5": "USBLC6-2SC6", "Q1": "Q_NMOS_GSD",
     "J1": "USB_C_Receptacle_USB2.0_16P", "J2": "Conn_01x03_MountingPin",
-    "L1": "L", "D1": "LED", "SW1": "SW_Push",
+    "L1": "L", "D1": "KP1608SGC", "SW1": "SW_Push",
 }
 
 # Blocks follow the sheet split the vision document asked for. Each is a titled
@@ -42,17 +42,17 @@ SYMBOL = {
 # silently make two blocks overlap.
 # (title, column, refs, columns-of-parts)
 BLOCK_DEFS = [
-    ("01  ESP32-C6 module", 0, ["U1", "C1", "C2", "C3", "R1", "C4"], 3),
+    ("01  ESP32-C6 module", 0, ["U1", "C1", "C2", "C3", "R1", "C4", "R22"], 3),
     ("05  USB-C", 0, ["J1", "U5", "R16", "R17", "C14"], 3),
     ("08  Test / programming pads", 0, [f"TP{i}" for i in range(1, 18)], 6),
     ("02  Environmental sensor", 1, ["U2", "C6", "R3", "R4"], 4),
     ("04  Battery charger + power path", 1,
      ["U4", "Q1", "R7", "R8", "R9", "R10", "R11", "R12", "R13",
-      "R18", "C9", "C10", "C11", "C12"], 6),
-    ("06  Battery + measurement", 1, ["J2", "R14", "R15", "C13"], 4),
+      "R18", "R20", "C9", "C10", "C11", "C12"], 6),
+    ("06  Battery + measurement", 1, ["J2", "R14", "R15", "C13", "R21"], 4),
     ("03  System regulator  3.30 V baseline", 2,
      ["U3", "L1", "C7", "C8", "R5", "R6"], 3),
-    ("07  Button + status LED", 2, ["SW1", "C5", "D1", "R2"], 4),
+    ("07  Button + status LED", 2, ["SW1", "C5", "R19", "D1", "R2"], 4),
 ]
 
 LABEL_ALLOW = 21.59    # 17 x 1.27, room for a stub plus the longest net name
@@ -240,7 +240,7 @@ def emit() -> str:
         name = _symbol_for(ref)
         x, y = placements[ref]
         symbols.append(_symbol(name, ref, p.value, p.footprint, x, y, lib,
-                               sheet_uuid, in_bom=not p.exclude_from_bom))
+                               sheet_uuid, in_bom=not p.exclude_from_bom, dnp=p.dnp))
         for num, (px, py, ang) in sorted(lib.pins(name).items()):
             ax, ay = _snap(x + px), _snap(y - py)
             net = padnet.get((ref, num))
@@ -317,7 +317,7 @@ def _text(s, x, y, size, uid) -> str:
 
 
 def _symbol(name, ref, value, footprint, x, y, lib, sheet_uuid,
-            hide_ref=False, in_bom=True) -> str:
+            hide_ref=False, in_bom=True, dnp=False) -> str:
     hide = "\n\t\t\t(hide yes)" if hide_ref else ""
     pins = "".join(
         f'\t\t(pin "{n}"\n\t\t\t(uuid "{_u(f"p/{ref}/{n}")}")\n\t\t)\n'
@@ -326,7 +326,7 @@ def _symbol(name, ref, value, footprint, x, y, lib, sheet_uuid,
             f"\t\t(at {x} {y} 0)\n\t\t(unit 1)\n\t\t(body_style 1)\n"
             f"\t\t(exclude_from_sim no)\n\t\t(in_bom {'yes' if in_bom else 'no'})\n"
             f"\t\t(on_board yes)\n"
-            f"\t\t(dnp no)\n"
+            f"\t\t(dnp {'yes' if dnp else 'no'})\n"
             f'\t\t(uuid "{_u("sym/" + ref)}")\n'
             f'\t\t(property "Reference" "{ref}"\n\t\t\t(at {x} {_snap(y - 12.7)} 0){hide}\n'
             f"\t\t\t(effects\n\t\t\t\t(font\n\t\t\t\t\t(size 1.27 1.27)\n\t\t\t\t)\n\t\t\t)\n\t\t)\n"

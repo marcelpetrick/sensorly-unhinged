@@ -36,14 +36,15 @@ trade study deliberately does not.
 | Part | T accuracy (typ) | RH accuracy (typ) | T drift | RH drift | Package | Filter option | Notes |
 |---|---|---|---|---|---|---|---|
 | **Sensirion SHT40** | ±0.2 °C | ±1.8 %RH | <0.04 °C/y (max) | <0.25 %RH/y typ, <0.5 max | DFN 1.5×1.5×0.5 | SHT40-BD1B / SF2 cap | baseline in vision.md |
-| **Sensirion SHT45** | ±0.1 °C (5–60 °C) | ±1.0 %RH (20–70 %) | <0.04 °C/y | <0.25 %RH/y | DFN 1.5×1.5×0.5, **pin-compatible** | **SHT45-AD1F = integrated PTFE membrane** | strictly better bin of the same die |
+| **Sensirion SHT45** | ±0.1 °C (5–60 °C) | ±1.0 %RH (20–70 %) | <0.04 °C/y | <0.25 %RH/y | DFN 1.5×1.5, filtered height ≤0.73 mm, **pin-compatible** | **SHT45-AD1F = integrated polyimide membrane** | strictly better bin of the same die |
 | Sensirion SHT43 | ±0.2 °C | ±1.8 %RH | **<0.01 °C/y** | <0.25 %RH/y | same | — | temperature-stability bin |
 | **TI HDC3022** | ±0.1 °C class | **±0.5 %RH** | — | **0.19 %RH long-term** | 2.5×2.5 DEJ | **IP67 PTFE cover integral**, 99.99 % @100 nm | + on-chip *offset error correction* for ageing/contamination |
 | Bosch BME280 | **±0.5 °C** (0–65 °C) | ±3 %RH | — | **0.5 %RH/y** | LGA 2.5×2.5×0.93 | none | adds pressure |
 | Bosch BME680/688 | ±0.5 °C (+ heater self-heat) | ±3 %RH | — | — | LGA 3.0×3.0 | none | adds VOC gas, needs BSEC blob |
 | Aosong AHT20/DHT-class | ±0.3 °C | ±2 %RH | poor/unspecified | poor | — | none | not considered further |
 
-Sources: Sensirion SHT4x datasheet v7.x; SHT45-AD1F product page; TI HDC3022
+Sources: Sensirion SHT4x datasheet v7.3 (June 2026; §6.1 corrects membrane
+material to polyimide); SHT45-AD1F product page; TI HDC3022
 datasheet; Bosch BST-BME280-DS002.
 
 ### 1.2 Why **not** BME280 — the honest version
@@ -79,6 +80,10 @@ and requires Bosch's closed-source BSEC binary, which conflicts with §3 of
 `AGENTS.md`. If air quality is wanted later, it belongs on a separate,
 mains-powered node.
 
+The polyimide correction applies to Sensirion's filtered SHT4x. The TI
+redesign candidate retains its [permanent IP67 PTFE filter](https://www.ti.com/lit/ds/symlink/hdc3020.pdf);
+the two manufacturers' cover materials must not be conflated.
+
 ### 1.3 The real contest: SHT45-AD1F vs HDC3022
 
 This is close, and both are defensible.
@@ -88,20 +93,19 @@ This is close, and both are defensible.
 | RH accuracy | ±1.0 %RH | ±0.5 %RH |
 | T accuracy | ±0.1 °C | ±0.1 °C class |
 | Long-term RH | <0.25 %RH/y | 0.19 %RH stated |
-| Contamination | integrated PTFE membrane | integrated IP67 PTFE cover |
+| Contamination | integrated polyimide membrane | integrated IP67 PTFE cover |
 | Ageing correction | on-chip heater (condensation/creep recovery) | **on-chip offset error correction** |
-| Size | **1.5×1.5×0.5 mm** | 2.5×2.5 mm |
+| Size | **1.5×1.5×0.73 mm maximum** | 2.5×2.5 mm |
 | Ecosystem | ESP-IDF + Sensirion drivers everywhere; Sensirion publish the definitive PCB/enclosure design guide this whole product is built on | good TI docs, thinner hobby/IDF ecosystem |
 | Second source | SHT40/41/43/45 pin-compatible family | HDC3020/3021/3022 family |
 
-**Decision: SHT45-AD1F, with SHT40-AD1B as the drop-in cost-down option and
-HDC3022 as the qualified second source.**
+**Decision: SHT45-AD1F, with SHT40-AD1B as an unqualified cost-down candidate and
+HDC3022 as a Rev 2 redesign candidate. Neither is approved for substitution.**
 
 Rationale:
 - The SHT4x family gives us a **pin-compatible accuracy ladder** (SHT40 →
-  SHT43 → SHT45) on *one footprint*. We can populate different bins across the
-  10 prototypes without a board change — which is itself useful experimental
-  freedom.
+  SHT43 → SHT45) on *one footprint*. Both variants must use the same selected sensor bin for the controlled
+  A/B experiment; substitutions need a new assembly review and common BOM.
 - Sensirion's design-in guidance (slots, copper removal, thin necks, chamber
   separation) is the literal basis of Variant B. Using their sensor keeps our
   design and our reference document aligned.
@@ -120,11 +124,11 @@ substantially better on the two criteria that actually matter over 3 years.
 
 These are firmware/process items, tracked in the EDS and the firmware backlog:
 
-- **Periodic heater pulse.** SHT4x has an integrated heater specifically for
-  removing condensation and reversing RH creep. Schedule a low-duty pulse
+- **Heater recovery candidate, disabled until qualified.** SHT4x has an integrated heater specifically for
+  removing condensation and reversing RH creep. Evaluate a low-duty pulse
   (e.g. 200 mW / 100 ms, once per day, *and always after a >80 %RH excursion*),
-  then discard readings for a defined cool-down. Energy cost is negligible;
-  it measurably extends calibrated life.
+  then discard readings for a defined cool-down. Measure energy and thermal recovery before enabling it; no life-extension
+  claim is accepted without evidence.
 - **No-clean flux, no aqueous wash near the sensor, sensor placed last** in the
   assembly sequence where the vendor allows it; sensor kept in its ESD/dry bag
   until placement. Contamination during *assembly* is the most common cause of
@@ -163,12 +167,14 @@ tens-to-hundreds of mA. 5 µA vs 7 µA of sleep current is noise by comparison.
 That reframes the C3-vs-C6 question completely:
 
 - **C3 wins on sleep current and price. It loses on the thing that matters.**
-- **C6 supports 802.11ax Target Wake Time (TWT)**, which lets the node stay
-  *logically associated* and wake only in negotiated slots — eliminating the
-  20–50 ms association handshake and the DHCP round trip on every single upload.
-  Reported real-world idle drain improvements are in the tens of percent.
-- TWT requires a Wi-Fi 6 AP. **If the deployment AP is not Wi-Fi 6, C6 degrades
-  gracefully to exactly the C3 behaviour** — we lose nothing but the €1.
+- **C6 supports 802.11ax Target Wake Time (TWT)** as an option for Wi-Fi
+  power saving ([Espressif module datasheet v1.5 §1.1](https://www.espressif.com/sites/default/files/documentation/esp32-c6-mini-1_mini-1u_datasheet_en.pdf)).
+  It requires AP negotiation and a different sleep strategy from the baseline
+  deep-sleep/reconnect cycle. It does not establish that an association survives
+  deep sleep, or prove a battery-life improvement for this board.
+- **Without a compatible AP**, the baseline remains the measured deep-sleep and
+  reconnect path. Compare complete cycle energy on both boards before choosing
+  another power mode; C3/C6 energy parity is not assumed.
 
 So the C6 is bought as an *option on a better power mode*, plus an option on
 Thread/Matter, for about one euro. On a 20-unit run that is €20 total. Take it.
@@ -176,8 +182,9 @@ Thread/Matter, for about one euro. On a 20-unit run that is €20 total. Take it
 ### 2.3 Decision
 
 **ESP32-C6-MINI-1-N4 confirmed** (module, not bare silicon — the module carries
-the crystal, RF matching, antenna and an existing RED/CE type examination, which
-removes the single largest RF risk from a 20-unit project).
+the crystal, RF matching and antenna; module certification documents can support
+the final product assessment, which
+reduces module RF design work; final enclosure/device compliance remains open).
 
 Firmware must implement both paths and *measure* them on the prototypes:
 1. classic deep-sleep + reconnect (baseline, always works),
@@ -192,7 +199,7 @@ That measurement is a Rev-1 prototype deliverable, not an assumption.
 | Item | vision.md | This study | Impact |
 |---|---|---|---|
 | Sensor | SHT40 (bare) | **SHT45-AD1F** (filtered, ±0.1 °C / ±1.0 %RH) | same footprint & driver; +~€1.5; large long-term gain |
-| Sensor 2nd source | — | **HDC3022** (alt footprint on B only, see EDS) | risk removed |
+| Sensor 2nd source | — | **HDC3022** (redesign candidate only, both variants) | supply risk remains open |
 | BME280/680 | not considered | **rejected, with reasons** | avoids a common default |
 | MCU | ESP32-C6-MINI-1 | **confirmed**, with the reasoning corrected (TWT, not sleep µA) | firmware must test TWT |
 | MCU fallback | — | C3-MINI-1 pin-strategy noted; H2 as Variant-C | supply-chain resilience |
@@ -215,4 +222,4 @@ Sources:
 [HDC3022](https://www.ti.com/product/HDC3022) ·
 [BME280 datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf) ·
 [field sensor comparison](https://olegtarasov.me/environmental-sensors/) ·
-[ESP32-C6 TWT vs deep sleep](https://industrialmonitordirect.com/blogs/knowledgebase/esp32-c6-wi-fi-6-twt-power-saving-vs-deep-sleep-analysis)
+[ESP32-C6 module datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-c6-mini-1_mini-1u_datasheet_en.pdf)

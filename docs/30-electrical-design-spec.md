@@ -55,18 +55,21 @@ Espressif's RED/CE type examination. 13.20 × 16.60 × 2.40 mm, 53 pads
 | `CHG_N` | IO23 | **29** | charger `/CHG`, open-drain, external 100 k pull-up |
 | `PG_N` | IO22 | **28** | charger `/PGOOD` — this is the "USB is present" flag required by E-08 |
 | `LED_N` | IO19 | **25** | status LED, active low |
-| `BTN_PROV` | IO9 | **23** | strapping pin with internal weak pull-up: button low at reset = download mode, low at runtime = start BLE provisioning. One button, two jobs. |
-| `USB_DM` | IO12 | **17** | native USB Serial/JTAG |
-| `USB_DP` | IO13 | **18** | native USB Serial/JTAG |
+| `BTN_PROV` | IO1 | **13** | runtime button and C6 EXT1 wake; R19 external pull-up; no boot-strap function |
+| `BOOT_N` | IO9 | **23** | independent factory download strap on TP7, no runtime button |
+| `USB_D_N` | IO12 | **17** | native USB Serial/JTAG |
+| `USB_D_P` | IO13 | **18** | native USB Serial/JTAG |
 | `UART_TX` | TXD0/IO16 | **31** | test pad only (fallback console) |
 | `UART_RX` | RXD0/IO17 | **30** | test pad only |
 | `TEST_MODE` | IO20 | **26** | test pad; fixture pulls low to enter factory test |
-| `USB_ISEL` | IO21 | **27** | charger EN1; 100 kΩ pull-down makes USB100 the reset default; USB500 implementation held by EDS-11/12 |
+| `USB_ISEL` | IO21 | **27** | charger EN1; R8 pull-up to +3V0 selects standby with EN2 high while rail valid |
+| `USB_EN2` | IO14 | **19** | charger EN2; R20 pull-up to +3V0; firmware keeps EN1/EN2 high in bring-up |
 | `CHARGE_ENABLE` | IO18 | **24** | drives Q1 gate; external pull-down defaults low, and Q1 can pull charger `/CE` low only after firmware validates pack temperature |
-| `PACK_TS` | IO3 / ADC1_CH3 | **6** | reads the pack's 103AT-2 NTC/charger TS voltage; not a spare GPIO |
-| *(reserved)* | IO0, IO1 | 12, 13 | `XTAL_32K_P/N` — **left free** for an optional 32.768 kHz crystal if deep-sleep timing accuracy proves insufficient |
-| *(spare)* | IO4, IO5, IO14 | 9, 10, 19 | available for later use |
-| **NC** | IO8, IO15 | 22, 20 | strapping pins (boot-mode / JTAG-select) — deliberately unconnected |
+| `PACK_TS_SENSE` | IO3 / ADC1_CH3 | **6** | isolated from raw PACK_TS by mandatory DNP R21; not sampled by bring-up |
+| *(reserved)* | IO0 | 12 | IO1 is allocated to runtime wake; an external crystal now requires a reviewed pin reassignment (EDS-6) |
+| *(spare)* | IO4, IO5 | 9, 10 | strapping functions must be reviewed before use |
+| `BOOT_MODE_H` | IO8 | **22** | R22 = 10 kΩ to +3V0; joint download requires IO8 high and IO9 low |
+| **NC** | IO15 | 20 | JTAG-select strapping pin — deliberately unconnected |
 | `+3V0` | 3V3 | 3 | |
 | `EN` | EN | 8 | see §2.2 |
 | `GND` | GND | 1, 2, 11, 14, 36–53 | all tied, all via-stitched |
@@ -76,34 +79,49 @@ Espressif's RED/CE type examination. 13.20 × 16.60 × 2.40 mm, 53 pads
   USB Serial/JTAG on the C6 removes any need for a UART bridge IC, makes
   bring-up and debugging vastly easier, and costs two traces plus one ESD array.
   Production programming still uses the pogo fixture.
-- IO8 and IO15 are left NC rather than used as spares: both are latched
-  strapping pins, and an unexpected external load on them is a classic
-  "boots on the bench, not in the enclosure" failure.
+- IO8 is intentionally strapped high by R22 for deterministic download with
+  TP7 low. IO15 remains NC. These strapping pins are not runtime spares.
 
 ### 2.2 Support circuitry
 
 | Ref | Value | Purpose / source |
 |---|---|---|
-| C1 | 22 µF / 6.3 V X5R 0805 | bulk at supply entrance. Espressif requires ≥ 10 µF; TX peaks reach ~382 mA (datasheet §6.4) |
+| C1 | 10 µF / 16 V X5R 0805, GRM21BR61C106KE15L ±10% | nominal entrance bulk per [Espressif C6 schematic checklist §Power Supply](https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32c6/schematic-checklist.html#power-supply); total rail capacitance maximum reviewed in docs/63; measured TX/startup rail qualification remains open |
 | C2 | 100 nF / 16 V X7R 0402 | HF decoupling, at pin 3 |
-| C3 | 1 µF / 16 V X7R 0402 | mid-frequency decoupling |
+| C3 | 1 µF / 16 V X5R 0402 | mid-frequency decoupling |
 | R1 | 10 kΩ 0402 | EN pull-up to +3V0 |
 | C4 | 1 µF 0402 | EN RC delay (≈10 ms with R1) — "do not leave EN floating" (datasheet Table 3-1) |
-| SW1 | SMD tactile, 3.5 × 2.9 mm | `BTN_PROV` → GND, no external pull-up needed (internal weak PU) |
+| SW1 | EVQPUJ02K, 4.7 × 3.5 mm body plus 1.0 mm side knob | `BTN_PROV` / IO1 → GND, R19 = 100 kΩ pull-up to +3V0 |
+| R19 | 100 kΩ 1 % 0402 | external button pull-up; with C5, RC = 10 ms (engineering debounce choice, qualification pending) |
 | C5 | 100 nF 0402 | SW1 debounce |
+| R22 | 10 kΩ 1 % 0402 | IO8 strap pull-up; engineering resistor choice; joint-download truth table from module datasheet v1.5 Tables 4-1/4-3 |
 | D1 | LED 0603, green | status |
 | R2 | 3.3 kΩ 0402 | LED series — ~0.5 mA at 3.0 V; the LED is a diagnostic, not a lamp |
 
-Active-low current path: `+3V0 → R2.1 → R2.2 → D1.2 (A) → D1.1 (K)
-→ U1.25 (LED_N)`. Pin names are verified against the vendored KiCad LED
-symbol and LED_0603 footprint; their geometry and rotation are unchanged.
+The [ESP32-C6-MINI-1 datasheet v1.5](https://www.espressif.com/sites/default/files/documentation/esp32-c6-mini-1_datasheet_en.pdf)
+Tables 4-1/4-3 require GPIO8=1 and GPIO9=0 for joint USB/UART download.
+GPIO8 defaults floating, so TP7 low alone was insufficient. R22 gives it a
+defined high. Fixture holds TP7 low before releasing EN and through at least
+**3 ms** after release (Table 4-2 strap hold time); independently verify strap
+voltages/timing on the first boards. GPIO9 high retains normal SPI boot.
+The SW1 dimensions/side operation come from [Panasonic EVQPUJ02K p.2](https://industrial.panasonic.com/cdbs/www-data/pdf/ATK0000/ATK0000COS4319.pdf).
+
+Active-low current path: `+3V0 → R2.1 → R2.2 → D1.1 (A) → D1.2 (K)
+→ U1.25 (LED_N)`. Pin names use the dedicated manufacturer-numbered KP1608SGC symbol and
+Kingbright_KP1608SGC footprint: pin 1 anode, pin 2 cathode, per Kingbright
+[DSAB0301 V.21B](https://www.kingbrightusa.com/images/catalog/SPEC/KP-1608SGC.pdf)
+pp.1/4. The package lands are 0.8 mm squares at ±0.825 mm; use the matching
+CPL orientation rather than the former generic KiCad 1K/2A convention.
 `make test` guards this path and charger timer wiring for both variants.
 
 ---
 
 ## 3. U2 — SHT45-AD1F (environmental sensor)
 
-DFN-4, 1.5 × 1.5 × 0.5 mm, no central pad. I²C address **0x44**.
+DFN-4, 1.5 × 1.5 mm, no central pad. The selected filtered AD1F package
+is 0.63 ±0.10 mm high (**0.73 mm maximum**), not the bare sensor’s
+0.50 mm height ([Sensirion SHT4x v7.3, Fig. 16](https://sensirion.com/resource/datasheet/sht4x)).
+I²C address **0x44**.
 
 | Symbol pin | Name | Net |
 |---|---|---|
@@ -139,8 +157,23 @@ island; a second ground detour through the neck is a thermal-rule failure even
 though it introduces no new electrical net. B routes the ground tap before its
 supply feed and searches for plane access just above the neck, always excluding
 the neck from via placement. These search seeds are geometry assumptions, not
-fixed electrical values. A has no neck and retains its existing routing order
-and fan-out. Both variants retain the same circuit and netlist.
+fixed electrical values. The generator reserves all four outward horizontal U2 pad exits before routing
+longer paths and blocks the exact shared package-body polygon plus half trace
+width. A routes right-side supplies before left-side buses. B routes outer-left
+SCL before inner-left SDA, then inner-right GND and outer-right supply. Both
+main-board plane-access search seeds lie to the right of the neck centre; these
+are geometry assumptions, not fixed electrical values. B rotates the nonpolar
+C6 by 180° to place its GND tap on the inner side and supply tap on the outer
+side. A retains C6 at 90°. B guides GND through a point 0.5 mm right of the
+neck centre and 1.0 mm below its island end, while supply passes 1.1 mm right
+and 0.3 mm below that end. These provisional routing waypoints reserve inner
+and outer lanes before entering the neck; no additional conductor or via
+crosses the neck. Masks use the larger interacting net-class clearance,
+including 0.20 mm for ground/supply versus sensor copper. This deliberately
+differs in geometry only; both
+variants retain the same circuit, netlist, values and firmware. The short
+horizontal exit extends to 1.3 mm from the sensor centre, a provisional routing
+seed outside the package, not a measured thermal dimension.
 
 **Why trace width is the primary lever** — first-order conduction through the
 Variant-B neck (3.5 mm wide × 8.0 mm long × 1.6 mm FR-4, four 0.15 mm traces in
@@ -157,6 +190,30 @@ bridge**. Widening them to 0.3 mm would double total neck conduction. This is
 the single most important number in the Variant-B design, and it is why §3.1.2
 is a hard rule rather than a preference. (First-order estimate, 1-D conduction,
 no convection along the neck — to be validated by Test 1–4.)
+
+### 3.2 Main-board power widths and bounded pad escapes
+
+Main-board Power-class trunks are at least **0.4 mm** wide. General fabrication
+minimum rules precede the specific power rule: KiCad resolves matching width
+rules in reverse order, so the former later 0.127 mm default could override the
+power minimum. Executable KiCad controls must reject a 0.2 mm Power track away
+from any approved escape and accept a 0.4 mm trunk.
+
+Only explicitly generated **fully enclosed** `Power escape *` corridors permit
+0.15 mm pad/plane neckdowns, with a maximum 2.5 mm routed path per neckdown.
+The corridor is emitted from tagged, reviewed generator tracks; it is not a
+blanket exception for an IC, net or board region. The sensor's four 0.15 mm
+feeders retain their separate thermal allowance and forbidden-via rules.
+Negative controls reject a thin track extending outside its corridor.
+
+For a screening calculation, assume copper resistivity **1.8 ×10⁻⁸ Ω·m**
+(an explicit engineering assumption, not a laminate or temperature measurement),
+35 µm outer copper from the shared stackup, length 2.5 mm and width 0.15 mm:
+`R = ρL/(wt) = 8.6 mΩ`. At requirement E-07's 500 mA capability, this gives
+4.3 mV DC drop and 2.1 mW loss **per neckdown**. Sum series neckdowns for the
+actual supply path. These figures do not qualify temperature rise, fabrication
+thickness tolerance, current transients, via losses or regulator-loop inductance;
+those remain layout review and rail/thermal bench gates before unrestricted use.
 
 ---
 
@@ -180,7 +237,7 @@ SON-8 (DLC), 1.5 × 2.0 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq
 |---|---|---|
 | L1 | **2.2 µH**, DFE201612E-2R2M (2.0 × 1.6 × 1.2 mm), DCR ≈ 116 mΩ | datasheet Table 4 |
 | C7 | 4.7 µF / 10 V X5R 0603 (input) | "a 4.7-µF ceramic capacitor is required" at VIN |
-| C8 | 10 µF / 6.3 V X5R 0603 (output) | datasheet §9.2.2.2 |
+| C8 | 10 µF / 16 V X5R 0805 (output), GRM21BR61C106KE15L | datasheet §9.2.2.2; effective capacitance/stability remains qualification, see docs 63 |
 | R5 | 0 Ω 0402 | EN tie (a resistor, not a short, so EN can be lifted for current measurement) |
 | **R6** | **267 kΩ 1 % 0402 → V<sub>OUT</sub> = 3.3 V baseline** | datasheet Table 1 (E96 nominal) |
 | *R6 characterization* | *52.3 kΩ 1 % → V<sub>OUT</sub> = 3.0 V* | controlled characterization only; same table |
@@ -214,11 +271,11 @@ VQFN-16 3 × 3 mm with exposed pad (EP → `GND`).
 
 | Pin | Name | Net / value |
 |---|---|---|
-| 1 | TS | `PACK_TS`: J2.2 → selected pack's **103AT-2 NTC** → J2.1/GND; also U1 ADC1_CH3 (see §5.2) |
+| 1 | TS | `PACK_TS`: J2.2 → selected pack's **103AT-2 NTC** → J2.1/GND; no direct MCU connection; R21 DNP (see §5.2) |
 | 2, 3 | BAT | `VBAT` |
 | 4 | /CE | `CHARGE_EN_N`: R18 = 47 kΩ to `VBUS`, Q1 drain; VBUS disables charging before MCU power-up |
-| 5 | EN2 | `GND` — resistor-programmed ILIM mode cannot be selected in normal operation |
-| 6 | EN1 | `USB_ISEL` (IO21) + R8 = 100 kΩ to GND |
+| 5 | EN2 | `USB_EN2` (IO14) + R20 = 100 kΩ to +3V0; high with EN1 high selects standby |
+| 6 | EN1 | `USB_ISEL` (IO21) + R8 = 100 kΩ to +3V0 |
 | 7 | /PGOOD | `PG_N` (open drain) + R9 = 100 kΩ pull-up to `+3V0` |
 | 8, 17(EP) | VSS | `GND` |
 | 9 | /CHG | `CHG_N` (open drain) + R10 = 100 kΩ pull-up to `+3V0` |
@@ -229,10 +286,10 @@ VQFN-16 3 × 3 mm with exposed pad (EP → `GND`).
 | 15 | ITERM | R12 (see below) |
 | 16 | ISET | R13 (see below) |
 
-EN2 is hard-low. EN1 low selects USB100; EN1 high selects USB500 (datasheet
-Table 7-2). R8 keeps EN1 low while the ESP32 is off, reset or high-impedance.
-The 500 mA state therefore requires an explicit firmware action after USB
-enumeration/configuration; no boot transient can select it.
+EN1 and EN2 are both pulled high to the valid MCU rail. The bring-up image
+keeps both high: TI Table 7-2 standby, not USB500. Neither pull-up establishes
+a safe logic high before the MCU rail exists; startup and loss-of-rail remain
+qualification cases. See [ADR-001](adr/001-controlled-prototype-power-and-wake.md).
 
 ### 5.1 Charge current — the most thermally consequential resistor on the board
 
@@ -242,7 +299,7 @@ K<sub>ITERM</sub> = 0.0300 (ISET mode).
 | Ref | Function | Equation | Value | Result |
 |---|---|---|---|---|
 | R13 | fast charge | nominal 890/4420; worst case 975/(4420 × 0.99) | **4.42 kΩ 1 %** | 201 mA nominal, **≤223 mA** worst case |
-| R11 | ILIM fallback | nominal 1550/8000; worst case 1720/(8000 × 0.99) | **8.00 kΩ 1 %** | **194 mA nominal, ≤217 mA** if EN2 is reworked high; mode is unreachable as built |
+| R11 | ILIM fallback | nominal 1550/8060; worst case 1720/(8060 × 0.99) | **8.06 kΩ 1 %** | **192 mA nominal, ≤216 mA** if EN2=1/EN1=0; prohibited by bring-up policy |
 | R12 | termination | nominal 0.0300 × 3010/4420 | **3.01 kΩ 1 %** | ≈20.4 mA nominal, ≤26.1 mA worst case |
 
 The 4.42 kΩ value is selected against E-03's 250 mA ceiling, using the BQ24074
@@ -269,44 +326,35 @@ the bounded 223 mA is acceptable inside the enclosure or whether the series buil
 
 ### 5.2 Pack temperature and charge qualification
 
-J2.2 connects the selected pack's Semitec 103AT-2 NTC directly to TS and to
-U1 ADC1_CH3. The BQ24074 direct-NTC window is approximately 0–50 °C for that
-thermistor, while pack drawing FD_3245_20 permits charging only from 0–45 °C.
-The charger TS input alone therefore cannot enforce the pack's upper limit.
+J2.2 connects the pack 103AT-2 NTC directly to the BQ24074 TS pin.
+**R21 is mandatory DNP:** it separates raw `PACK_TS` from MCU
+`PACK_TS_SENSE` / IO3. The earlier direct ADC connection had no proven safe
+voltage under an open NTC or an unpowered MCU. TI SLUS810N §9.3.6 does not
+provide a design guarantee limiting open TS to a powered-down MCU's input range.
+A nominal room-temperature voltage does not establish fault safety.
+Do not populate R21 as a plain zero-ohm link. EDS-15 requires a protected sensing
+interface and loading/error analysis before firmware charge supervision.
 
-R18 = 47 kΩ pulls `/CE` directly to VBUS. This reaches a valid high before the
-BQ24074's 4.35 V minimum operating input, rather than depending on the later
-3 V MCU rail. Q1 (onsemi 2N7002LT1G; G-S-D pins 1-2-3) isolates IO18 from
-VBUS. R7 = 100 kΩ holds Q1's gate low at reset or with missing firmware, so Q1
-is off and charging is disabled. Firmware may drive `CHARGE_ENABLE` high only
-after `PG_N` indicates VBUS and repeated calibrated
-`PACK_TS` readings prove the NTC is inside the pack's 0–45 °C charge range with
-an uncertainty guard band. It must release CE on out-of-range, implausible,
-open/short, ADC, watchdog or timing fault. The BQ24074's own TS hot/cold window
-and floating-TMR safety timers remain independent backups.
+R18 = 47 kΩ pulls `/CE` to VBUS; Q1 isolates IO18 from VBUS and R7 = 100 kΩ
+holds Q1 off at reset. These are unchanged. At the charger's 4.35 V minimum
+operating input, using TI's approximate 285 kΩ internal CE pull-down,
+4.35 × 285/(285 + 47) = **3.73 V**, above its 1.4 V high threshold.
+At nominal 5 V, R18 requires approximately **106 µA** sink current.
+This nominal calculation is not startup qualification; slow-ramp behavior and
+MCU rail loss remain EDS-9Q tests. The bring-up firmware never asserts Q1.
 
-R18 is checked against TI's approximately 285 kΩ internal CE pull-down:
-at the 4.35 V minimum operating input, 4.35 × 285/(285 + 47) = **3.73 V**, above
-the 1.4 V high threshold; nominally CE crosses 1.4 V at 1.63 V VBUS, below
-charger UVLO. When Q1 is on, R18 asks it to sink only about 5/47 kΩ = **106 µA**.
-The onsemi part's maximum 2.5 V gate threshold is specified at 250 µA, so a
-3.0 V GPIO drive has margin at this lower drain load. The slow-ramp/startup
-waveform is nevertheless part of EDS-9Q because the internal pull-down is only
-specified as approximate.
-
-Obtain written confirmation that the shipped pack matches FD_3245_20, then
-calculate the firmware thresholds from the Semitec 103AT-2 R/T curve and the
-BQ24074 worst-case 72–78 µA TS current. Test cold, hot, sensor-open,
-sensor-short, charge termination, safety-timer expiry and recovery on five
-packs. Charging in a closed enclosure remains prohibited until that evidence
-is linked from `hardware/release-readiness.json`; the circuit implementation
-alone is not qualification.
+The charger direct-NTC window is approximately 0–50 °C, whereas pack drawing
+FD_3245_20 limits charging to 0–45 °C. Therefore native TS alone cannot qualify
+charging. Supplier confirmation, a protected measured temperature interface,
+reviewed guard bands, fault/timer tests and bounded fail-safe shutdown are all
+required before charging is authorized. A supervised lab image must have its
+own reviewed procedure; the shipped engineering image keeps charging disabled.
 
 | Ref | Value | Purpose |
 |---|---|---|
 | C9 | 10 µF / 16 V X5R 0805 | IN bypass (datasheet: 1–10 µF) |
-| C10 | 10 µF / 6.3 V X5R 0805 | OUT bypass |
-| C11 | 10 µF / 6.3 V X5R 0805 | BAT bypass |
+| C10 | 10 µF / 16 V X5R 0805 | OUT bypass |
+| C11 | 10 µF / 16 V X5R 0805 | BAT bypass |
 | C12 | 100 nF 0402 | IN HF bypass |
 
 ---
@@ -350,55 +398,43 @@ here so the reviewer sees it was a decision, not an oversight.
 |---|---|---|
 | J1 | USB-C receptacle, 16-pin SMD, through-hole mounting lugs | mechanical strength is the selection criterion, not pin count |
 | R16, R17 | 5.1 kΩ 1 % 0402, CC1→GND, CC2→GND | UFP (sink) advertisement — **two separate resistors, never one shared** |
-| U5 | USBLC6-2SC6, SOT-23-6 | ESD on D+/D− and VBUS |
+| U5 | USBLC6-2SC6, dedicated ST_USBLC6_SOT23_6 footprint | ESD on D+/D− and VBUS; 1.2 × 0.6 mm lands at x ±1.15 mm, y pitch 0.95 mm, ST DS4260 Rev 7 Fig.19 |
 | C14 | 100 nF 0402 | VBUS local |
 | — | shield → `GND` | direct tie for Rev 1; document if EMC testing later wants an RC |
 
+`USB_D_P`/`USB_D_N` use KiCad-recognized complementary P/N suffixes; the
+former DP/DM suffixes did not establish a pair for differential rule checks.
 D+/D− route to IO13/IO12 as a differential pair, 90 Ω target, kept short and
 away from the antenna and the inductor.
 
-### 7.1 Source-current policy — fail-safe USB100, enumerated USB500
+### 7.1 Source-current policy — prototype standby, controlled bench only
 
-**Implementation hold, 2026-09-18 (EDS-11).** USB500 is a requirement, not an
-implemented capability. Espressif documents the C6 USB Serial/JTAG block as a
-[fixed-function hardware device](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-guides/usb-serial-jtag-console.html).
-The inspected [ESP-IDF v5.5.1 public driver API](https://github.com/espressif/esp-idf/blob/v5.5.1/components/esp_driver_usb_serial_jtag/include/driver/usb_serial_jtag.h)
-has no configured/deconfigured callback; its connection predicate observes SOF
-traffic, which does not establish host configuration or an authorized current
-allocation. Do not substitute that predicate, an open serial port, or TinyUSB
-callbacks for proof. Keep `USB_ISEL` low until a C6-specific implementation,
-the actual descriptor's power request, and all fault transitions are reviewed
-and measured. If the policy cannot be implemented, revise it through an ADR
-before changing either board. USB100 alone is not proof of suspend compliance:
-measure total VBUS current, including the power path, during suspend.
+The shared initial prototype implements the disposition in
+[ADR-001](adr/001-controlled-prototype-power-and-wake.md): EN1/EN2 default high
+while +3V0 is valid, and the bring-up image drives both high (standby). It never
+selects USB500, USB100 or resistor-programmed ILIM. USB is for battery-powered
+serial/debug only in this image. Battery-less startup is unsupported; the
+factory uses a declared battery simulator/fixture supply at VBAT.
 
-The supported policy is explicit:
+A separate reviewed lab image may select EN1=EN2=0 (USB100) only under a
+supervised, measured bench-source protocol. An ordinary data host, open serial
+port, SOF traffic, Type-C Rd, PG_N or adapter appearance does not authorize a
+higher current mode. C6 USB Serial/JTAG is fixed-function hardware; the pinned
+[ESP-IDF v5.5.4 API](https://github.com/espressif/esp-idf/blob/v5.5.4/components/esp_driver_usb_serial_jtag/include/driver/usb_serial_jtag.h)
+does not expose the configuration/current-allocation callback previously assumed.
 
-1. At reset R8 holds the released EN1 GPIO low while EN2 is hard-low. Firmware
-   must keep EN1 low on attach and while unconfigured. The BQ24074 USB100 state
-   limits total input current to 100 mA maximum (system load plus battery charge).
-   A CPU hang with EN1 driven high does not release it automatically; EDS-12
-   requires a verified watchdog/reset path.
-2. A USB 2.0/3.x data host may be used for charging/debugging. Firmware may set
-   `USB_ISEL` high only after the device reaches the USB configured state and
-   must clear it on suspend, deconfiguration, detach or USB-stack failure. This
-   selects USB500, whose datasheet maximum is 500 mA.
-3. USB-C power adapters and charge-only/unknown sources are supported only at
-   the 100 mA default because this design does not decode Rp current or charging
-   port signatures. They never justify `USB_ISEL=1`.
-4. Radio operation from USB with a missing or deeply depleted pack is not
-   supported: ESP32 transmit peaks can exceed the 100 mA default. The protected
-   battery supplies the transient through the BQ24074 power path. Factory
-   battery-less testing uses the declared regulated fixture supply and disables
-   radio until USB configuration.
+R8/R20 = 100 kΩ are engineering pull-up choices. TI SLUS810N §8.5 lists
+1.4 V high threshold and 10 µA high-input current; the module v1.5 Table 6-3
+lists 50 nA high-input current. Treating both as adverse load, at a valid
+3.0 V rail and 101 kΩ maximum resistor: 3.0 − 101000 × (10e-6 + 50e-9)
+= **1.98 V**, above 1.4 V. This is a static margin calculation, not proof
+under reset pulls, transient coupling or rail loss; those must be measured. Before
+the rail exists, those pull-ups are not high; USB100 startup or supply cycling
+can occur. Capture EN1, EN2, +3V0, VSYS, VBUS and total input current during
+attach, reset, suspend, detach, sleep, brownout and no-pack cases. Standby selection
+alone is not proof of complete USB suspend compliance. EDS-10Q/11/12/13 remain
+open for unrestricted operation; E-03 charging is not yet fulfilled.
 
-R11 is retained because TI requires ILIM to be terminated, but EN2 low makes its
-mode unreachable as assembled. Its 8.00 kΩ value also bounds a deliberate EN2
-rework to 217 mA worst case. Qualify with a USB current analyzer: attach/reset,
-configuration, suspend/resume, detach, firmware crash, low-battery TX and VBUS
-transients on representative USB 2.0 and USB 3.x hosts plus a charge-only source.
-The policy and circuit are locked; measured evidence is still required before
-the USB release gate closes.
 
 ---
 
@@ -416,7 +452,9 @@ The drawing's maximum assembled envelope is 42 × 20.5 × 7.3 mm. Cavity order i
 | 3 | red | `VBAT` (+) |
 
 J2 is Molex **53261-0371**, the 1.25 mm PicoBlade right-angle SMT header mating
-with 51021-0300. The board silk prints `− T +` in cavity order. Its footprint is verified against
+with 51021-0300. The board silk prints the explicit cavity legend `J2 1- 2T 3+`;
+J2's 90° placement makes the actual pad row vertical, so the legend must not
+imply a horizontal viewing order. Its footprint is verified against
 Molex drawing 532610271-SD; incoming inspection must continuity-check every pack
 before mating because reverse polarity can destroy the charger and vent a cell.
 
@@ -444,11 +482,11 @@ side, all within one rectangular region so the fixture is a simple plate.
 | 4 | `+3V0` | rail check |
 | 5 | `VBAT` | battery injection / cell voltage |
 | 6 | `EN` | force reset |
-| 7 | `BTN_PROV` (IO9) | force download mode |
+| 7 | `BOOT_N` (IO9) | force download mode independently of SW1 |
 | 8 | `UART_TX` | console |
 | 9 | `UART_RX` | console |
-| 10 | `USB_DP` | native USB flashing via fixture |
-| 11 | `USB_DM` | native USB flashing via fixture |
+| 10 | `USB_D_P` | native USB flashing via fixture |
+| 11 | `USB_D_N` | native USB flashing via fixture |
 | 12 | `SDA` | I²C bring-up / sensor probe |
 | 13 | `SCL` | I²C bring-up / sensor probe |
 | 14 | `CHG_N` | charger state |
@@ -466,21 +504,20 @@ unroutable. Both generators now allow those main-board branches at 0.15 mm while
 retaining the existing island routes and spatial via prohibition. KiCad negative
 controls exercise an illegal neck via and a legal main-board sensor via.
 
-### Implementation findings before routing freeze (2026-09-18)
+### Locked prototype architecture disposition (2026-10-12)
 
-BQ24074 EN2 is currently hard-wired to GND. TI's
-[BQ2407x datasheet](https://www.ti.com/lit/ds/symlink/bq24074.pdf), Table 7-2,
-requires EN2=EN1=1 for standby/USB suspend. Clearing `/CE` only disables charging;
-it cannot select that power-path state. EDS-13 must resolve the hardware/source
-policy before claiming host suspend compliance. The bring-up image keeps charge
-and USB500 disabled; this does not close EDS-11, EDS-12 or EDS-13.
+| Decision | Locked implementation | Evidence still required |
+|---|---|---|
+| EDS-14 architecture | SW1 on IO1 with R19; independent IO9 TP7 download strap | button wake, held-button and boot tests; provisioning remains unimplemented |
+| EDS-13 prototype | MCU-controlled EN2 and both EN pins pulled to valid +3V0; bring-up standby only | startup/loss-of-rail and measured suspend current; unrestricted source policy |
+| EDS-15 prototype | R21 mandatory DNP isolates ADC from raw charger TS | protected temperature sensing redesign and qualification before charging |
 
-The current IO9 provisioning/boot button is not a C6 EXT1 deep-sleep wake source:
-only GPIO0–7 support that function in the
-[ESP-IDF C6 sleep API](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/system/sleep_modes.html).
-EDS-14 must decide between moving the runtime button to an RTC pin (and retaining
-an independent download strap) or explicitly changing the user interaction.
-No pin reassignment is silently locked by the firmware implementation.
+Both A and B use these same schematic/netlist/firmware decisions. This locks a
+controlled prototype disposition, not product qualification or compliance.
+
+Variant B electronics body now uses the same 30 mm width as A, adding 2 mm
+right-side passive clearance while retaining shared electronics anchors. Neck
+width/length and the shared electrical platform remain as specified.
 
 ## 10. Open items (this document does **not** close them)
 
@@ -489,22 +526,24 @@ No pin reassignment is silently locked by the firmware implementation.
 | EDS-1 | Exact USB-C receptacle MPN (JLCPCB basic-part availability drives this) | hardware maintainer | before prototype order |
 | EDS-4 | Whether the bounded 223 mA charging design is thermally acceptable in the enclosure, or the 100 mA option is required | hardware/test maintainer | thermal Test 3 |
 | EDS-5 | 3.0 V vs 3.3 V — R6 value for the series build | hardware maintainer | prototype power + RF measurement |
-| EDS-6 | Whether the 32.768 kHz crystal on IO0/IO1 is needed | firmware maintainer | deep-sleep timing drift measurement |
+| EDS-6 | Whether precision sleep timing is needed; IO1 wake assignment requires an ADR before adding a crystal | firmware maintainer | deep-sleep timing drift measurement |
 | EDS-7 | Antenna: flush with board edge (Rev 1) vs overhanging the outline | hardware maintainer | RF test in the finished enclosure |
 | EDS-8 | Neck width 3.0 / 3.5 / 5.0 mm for Variant B | hardware/mechanical maintainer | first bare-PCB mechanical inspection + Test 1 |
 | EDS-9Q | Qualify LP702040 supplier drawing, pack NTC thresholds, protection, timer/fault behavior and assembled retention | hardware maintainer | before enclosed battery charging |
-| EDS-10Q | Measure the locked USB100/USB500 policy on representative hosts and fault transitions | hardware/firmware maintainer | before unrestricted USB use |
-| EDS-11 | Prove C6 USB configuration/current-allocation observability, descriptor power request and suspend handling; USB500 remains disabled | firmware/hardware maintainer | architecture review before routing freeze and USB500 implementation |
-| EDS-13 | EN2 fixed low prevents BQ24074 standby/USB suspend; decide supported power-path/source architecture | hardware/firmware maintainer | ADR and schematic review before routing freeze, then measured suspend current |
-| EDS-14 | IO9 cannot wake C6 from deep sleep; choose runtime wake pin or revised interaction | hardware/firmware maintainer | pin/strap ADR before routing freeze and button/wake bench test |
+| EDS-10Q | Measure prototype standby/startup and qualify the eventual USB source policy | hardware/firmware maintainer | before unrestricted USB use |
+| EDS-11 | Prove C6 USB configuration/current-allocation observability, descriptor power request and suspend handling; USB500 remains disabled | firmware/hardware maintainer | supported source-policy/descriptor review before unrestricted USB or USB500 implementation |
+| EDS-13 | Qualify EN1/EN2 rail pull-ups and standby; complete unrestricted source policy | hardware/firmware maintainer | ADR-001 schematic review for controlled prototype; rail-rise/loss and suspend measurements before unrestricted USB |
+| EDS-14 | Validate locked IO1 runtime wake and independent IO9 download strap | hardware/firmware maintainer | ADR-001 pin review, then button/wake/held-button bench test |
+| EDS-15 | Protected PACK_TS sensing, open-NTC and unpowered-MCU fault bounds; R21 remains DNP | hardware/firmware maintainer | protected interface ADR before charge-enabled build, then bench qualification |
 | EDS-12 | Prove the maximum CE/USB_ISEL deassertion latency on a hung CPU and before sleep; a pull-down cannot override an actively driven GPIO | firmware/hardware maintainer | watchdog/reset design review, then fault-injection qualification before charging |
+| EDS-16 | Bound effective C7 input and total +3V0 capacitance C1/C2/C3/C6/C8 including zero-bias startup, tolerance, temperature and aging; 21.2 µF nominal /26.818 µF positive-tolerance/temperature upper envelope; C8 minimum uses stated typical bias assumptions, not a guaranteed3–40 µF effective envelope | hardware maintainer | before controlled prototype order: desk review of stated component bounds/derating assumptions; before unrestricted operation: accepted part-specific effective bounds and measured startup/TX/load-step stability (docs/63) |
 
 ## 11. Review checklist for this spec
 
 - [ ] every ESP32 module pin number re-checked against datasheet v1.5 Table 3-1
 - [ ] SHT4x pin 1 orientation re-checked against the Sensirion land pattern
 - [ ] BQ24074 EP tied to GND with a via array
-- [ ] no strapping pin loaded (IO8, IO9, IO15, MTMS/IO4, MTDI/IO5)
+- [ ] no unreviewed strapping-pin load (IO8 R22 high and IO9 TP7 download are intentional; IO15, IO4, IO5 unused)
 - [ ] every open-drain charger output has exactly one pull-up
 - [ ] CC1 and CC2 have separate 5.1 kΩ resistors
 - [ ] battery connector polarity printed on silkscreen

@@ -2,10 +2,35 @@
   "schema": 1,
   "purpose": "controlled-5-plus-5-engineering-prototypes",
   "checks": [
-    {"id": "electrical", "owner": "hardware/firmware maintainer", "evidence": null, "requirement": "Reviewed resolution of EDS-11/12/13/14; PACK_TS open/short/unpowered voltage limits; reset/suspend/source policy; safe staged bring-up disposition"},
-    {"id": "assembly", "owner": "hardware maintainer and assembler", "evidence": null, "requirement": "U1-U5, Q1, J1/J2 and D1 pin-1/rotation against manufacturer drawings; exact CPL/top-bottom assembly review; stackup and DFM acceptance; return paths and USB geometry review"},
-    {"id": "procurement", "owner": "hardware maintainer", "evidence": null, "requirement": "Exact purchasing BOM, ratings and alternate/risk dispositions; controlled pack/harness/NTC drawing and current-limit discrepancy resolved before connector mating"},
-    {"id": "mechanical", "owner": "mechanical maintainer", "evidence": null, "requirement": "Reviewed retention model, leads/connector access, sensor ventilation, antenna clearance and fit-test plan for both variants; no claim of actual fit before samples"},
-    {"id": "order", "owner": "project maintainer", "evidence": null, "requirement": "Named reviewer accepts the exact source revision for 5 A + 5 B engineering prototypes, with staged test sequence and remaining product qualifications explicitly open"}
+    {
+      "id": "electrical",
+      "owner": "hardware/firmware maintainer",
+      "evidence": null,
+      "requirement": "Reviewed ADR-001 controlled prototype: mandatory DNP R21 isolates TS/ADC; IO1 wake/independent IO9 download; EN1/EN2 standby while MCU rail valid; startup/rail-loss restrictions, protected VBAT fixture, no USB500 or charging authorization; EDS-9Q/10Q/11/12/13/14/15 physical/product gates remain open; EDS-16 component capacitance bounds and explicit derating assumptions reviewed before controlled order"
+    },
+    {
+      "id": "assembly",
+      "owner": "hardware maintainer and assembler",
+      "evidence": null,
+      "requirement": "U1-U5, Q1, J1/J2 and D1 pin-1/rotation against manufacturer drawings; exact CPL/top-bottom assembly review; stackup and DFM acceptance; return paths and USB geometry review"
+    },
+    {
+      "id": "procurement",
+      "owner": "hardware maintainer",
+      "evidence": null,
+      "requirement": "Exact purchasing BOM, ratings and alternate/risk dispositions; controlled pack/harness/NTC drawing and current-limit discrepancy resolved before connector mating"
+    },
+    {
+      "id": "mechanical",
+      "owner": "mechanical maintainer",
+      "evidence": null,
+      "requirement": "Reviewed retention model, leads/connector access, sensor ventilation, antenna clearance and fit-test plan for both variants; no claim of actual fit before samples"
+    },
+    {
+      "id": "order",
+      "owner": "project maintainer",
+      "evidence": null,
+      "requirement": "Named reviewer accepts the exact source revision for 5 A + 5 B engineering prototypes, with staged test sequence and remaining product qualifications explicitly open"
+    }
   ]
 }

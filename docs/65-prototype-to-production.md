@@ -25,11 +25,16 @@ remaining risks. No placeholder, generated PASS or synthetic log closes a review
 
 ## Order of work and handoffs
 
-1. **Electrical architecture — hardware/firmware maintainers.** Close the C6
-   USB configuration/current and BQ24074 suspend-mode problems (EDS-11/13),
-   watchdog/control shutdown design (EDS-12), IO9 wake conflict (EDS-14), and
-   PACK_TS open/short/unpowered voltage limits. Record the selected shared
-   architecture and any changed locked decisions in the EDS before routing freeze.
+1. **Electrical architecture — hardware/firmware maintainers.** Review
+   [ADR-001](adr/001-controlled-prototype-power-and-wake.md) against both layouts:
+   R21 mandatory DNP isolates charger TS from ADC; SW1 uses IO1 and TP7 is the
+   independent IO9 download strap; EN1/EN2 pull to the valid MCU rail and the
+   bring-up image selects standby only. Accept the explicit controlled bench
+   disposition, including unsupported battery-less USB startup and unproven
+   rail-rise/loss behavior, without closing charging or unrestricted USB gates.
+   EDS-15 protected NTC sensing and EDS-11/12/13 source/fault qualification are
+   required before those product functions are authorized. Ordinary USB-host
+   charging and USB500 are not supported by the initial image.
 2. **Sourcing/library — hardware maintainer.** Obtain the pack/harness drawing,
    polarity, protection and NTC specification; resolve the current-limit
    discrepancy. Select exact MPNs for every populated line, with ratings and
@@ -56,10 +61,14 @@ remaining risks. No placeholder, generated PASS or synthetic log closes a review
    serial traceability, inspect polarity/placement and shorts before power.
    Follow docs 51 in staged, current-limited bench operation. Flash the recorded
    bring-up image and retain fixture output using docs 72. Scope/measure rails,
-   GPIO fault behavior, charge inhibit, USB modes, battery/NTC faults, temperatures
-   and sleep current. Do not infer these from firmware's printed booleans.
+   GPIO fault behavior, charge inhibit, standby and rail-rise/loss input current,
+   runtime-button/held-button wake and separate download strap, battery/NTC faults,
+   temperatures and sleep current. Confirm R21 is physically unpopulated. A
+   protected charged pack or declared VBAT simulator powers the initial image;
+   any lab USB100 charge-enabled experiment needs a separate reviewed procedure. Do not infer these from firmware's printed booleans.
 7. **Instrument firmware and experiment — firmware/test maintainers.** Complete
-   and device-test docs 71: journal/recovery, provisioning, MQTT/TLS, signed OTA,
+   and device-test docs 71, including the protected sensing/source redesign before
+   charging, journal/recovery, provisioning, MQTT/TLS, signed OTA,
    timestamps/quality and bounded energy. Run the predeclared thermal/RH/RF and
    battery experiments; keep raw records and uncertainty/calibration provenance.
 8. **Revision and controlled series — all maintainers.** Apply measured findings,

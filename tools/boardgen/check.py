@@ -15,7 +15,8 @@ from dataclasses import dataclass
 from . import geometry as G
 from .design import PART_BY_REF
 from .place import COURTYARD_GAP, EDGE_MARGIN, Placement
-from .variants import Variant, antenna_keepout, sensor_keepout, B_NECK_RECT
+from .variants import (Variant, antenna_keepout, sensor_keepout, B_NECK_RECT,
+                       USB_EDGE_DATUM)
 
 HEAT_SOURCES = {"U4", "U3", "L1", "D1", "J1", "R13", "R11"}
 MIN_SENSOR_CLEARANCE = 8.0        # mm, variant A target
@@ -48,7 +49,19 @@ def check(v: Variant, placed: list[Placement]) -> list[Finding]:
     # Courtyards may reach the outline (a USB receptacle is meant to be flush);
     # copper may not - pads keep the copper-to-edge clearance.
     for p in placed:
-        if not G.box_inside_polys(p.box, v.polys, margin=0.0):
+        box = p.box
+        usb_at_edge = (p.rot % 360 == 270 and
+                       abs(p.x - v.body_dx - USB_EDGE_DATUM) < 1e-6)
+        if p.ref == "J1" and not usb_at_edge:
+            out.append(Finding("ERROR", "usb-edge-orientation",
+                               "J1 must face left at the manufacturer PCB-edge datum"))
+        if p.ref == "J1" and usb_at_edge:
+            # The manufacturer PCB-edge datum intentionally leaves the mouth
+            # and its front courtyard outside the left edge. Only that side of
+            # this correctly oriented connector may overhang; pad checks and
+            # KiCad copper/hole clearances still apply without an exception.
+            box = (max(0.0, box[0]), box[1], box[2], box[3])
+        if not G.box_inside_polys(box, v.polys, margin=0.0):
             out.append(Finding("ERROR", "off-board",
                                f"{p.ref} courtyard leaves the board outline"))
         fp = G.get(p.footprint)

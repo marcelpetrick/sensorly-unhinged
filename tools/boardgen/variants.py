@@ -20,6 +20,10 @@ from dataclasses import dataclass, field
 # --------------------------------------------------------------------------
 BODY_W = 28.0
 BODY_H = 34.0
+# HRO TYPE-C-31-M-12 drawing: PCB edge 5.79 mm forward of the NPTH
+# datum at footprint y=-2.60 mm. With the mouth facing left (270 degrees),
+# the footprint origin is 5.79 - 2.60 = 3.19 mm inside the PCB edge.
+USB_EDGE_DATUM = 5.79 - 2.60
 
 # ref -> (x, y, rotation)   -- mechanically constrained parts, placed by hand
 ANCHORED = {
@@ -29,7 +33,7 @@ ANCHORED = {
     #    Both sit on the SIDES, not the bottom: in Variant B the bottom edge is
     #    where the thermal neck leaves the board, and the two variants share
     #    this table.
-    "J1":  (5.5, 24.5, 90),      # USB-C, mouth at the left edge
+    "J1":  (USB_EDGE_DATUM, 24.5, 270),  # mouth overhangs left edge by 0.46 mm
     "J2":  (24.8, 24.5, 90),      # PicoBlade 3P, mouth at the right edge
     # 3. heat sources, as far from the sensor end as the outline allows
     "U4":  (24.4, 10.5, 0),      # charger - 0.40 W worst case, the hot part
@@ -61,6 +65,8 @@ NEAR = {
     "R18": ("U4", 90),
     "R16": ("J1", 0), "R17": ("J1", 0), "C14": ("J1", 0),
     "R14": ("J2", 90), "R15": ("J2", 90), "C13": ("J2", 90),
+    # Prototype controls go after all existing bypass/measurement components.
+    "R19": ("SW1", 0), "R20": ("U4", 90), "R21": ("J2", 90), "R22": ("U1", 0),
 }
 
 # Pogo field: 2.54 mm grid on the bottom side, one contiguous rectangle.
@@ -119,7 +125,7 @@ VARIANT_A = Variant(
 # --------------------------------------------------------------------------
 # Variant B - thermally isolated sensor island
 # --------------------------------------------------------------------------
-B_W = 28.0
+B_W = 30.0  # prototype control passives need the same 2 mm right-side allowance as A
 B_BODY_H = 34.0
 B_NECK_W = 3.5        # EDS S3.1 - drives the FR-4 term of the neck conductance
 B_NECK_L = 8.0        # longer neck = lower conductance, weaker mechanically
