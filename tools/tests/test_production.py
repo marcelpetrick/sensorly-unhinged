@@ -13,7 +13,7 @@ def record():
     return dict(schema=1, kind="sensorly-bringup", chip_id="001122334455",
                 firmware_sha256="a" * 64, reset_reason=1, uptime_us=15000,
                 acquired_at_utc=None, clock_valid=False, factory_mode=True,
-                radio_started=False, charge_enabled=False, input_mode="USB100",
+                radio_started=False, charge_enabled=False, input_mode="STANDBY",
                 usb_present=True, charging=False, sensor_status="ESP_OK", adc_status="ESP_OK",
                 temperature_c=21.5, humidity_rh=48.2, battery_mv=3800,
                 quality_flags=["engineering_unqualified", "battery_meter_check_pending",
@@ -37,7 +37,8 @@ class CaptureTests(unittest.TestCase):
     def test_invalid_types_missing_fields_and_nonfinite_are_rejected(self):
         for key, bad in (("factory_mode", "true"), ("battery_mv", True),
                          ("temperature_c", float('nan')), ("humidity_rh", 101),
-                         ("input_mode", "USB500"), ("chip_id", "bad"),
+                         ("input_mode", "USB500"), ("input_mode", "USB100"),
+                         ("input_mode", "ILIM"), ("chip_id", "bad"),
                          ("firmware_sha256", "a"), ("quality_flags", [])):
             row = record(); row[key] = bad
             with self.subTest(key=key), self.assertRaises(ValueError):

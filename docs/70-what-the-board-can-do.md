@@ -5,8 +5,11 @@ writing only software?*
 
 The short answer is that the board is a **general-purpose 2.4 GHz wireless node
 with a laboratory-grade hygrometer and a battery**, and that the radio silicon
-is considerably more capable than the product it was chosen for. Most of the
-list below costs firmware and nothing else.
+is considerably more capable than the product it was chosen for. The list below describes candidate firmware capabilities, not a verified
+prototype. The current shared bring-up image acquires over serial, keeps charging
+and radio disabled, selects charger standby, and sleeps; see [docs 72](72-firmware-bringup.md)
+and [ADR-001](adr/001-controlled-prototype-power-and-wake.md). Product network,
+provisioning, journal and OTA functions remain unimplemented.
 
 ---
 
@@ -18,11 +21,11 @@ What the parts physically give you, before any decisions:
 |---|---|
 | **Compute** | RISC-V @160 MHz, 4 MB flash, plus a **separate low-power RISC-V core** that can run while the main core sleeps |
 | **Radios (all three, same chip)** | Wi-Fi 6 (802.11ax, 2.4 GHz) · Bluetooth LE 5.3 · **IEEE 802.15.4** |
-| **Sense** | ±0.1 °C / ±1.0 %RH, factory calibrated, PTFE filtered, with an on-chip heater |
-| **Power** | 1S LiPo, USB-C charge with power path, ~7 µA deep sleep, battery voltage on an ADC |
+| **Sense** | ±0.1 °C / ±1.0 %RH, factory calibrated, polyimide filtered, with an on-chip heater |
+| **Power** | 1S LiPo and charger power path; controlled prototypes inhibit charge and require battery/fixture power. Chip deep-sleep figures are not measured board current; battery voltage has an ADC divider |
 | **Know its own state** | USB present, charging, battery volts, RSSI, reset reason |
 | **Talk to you** | one LED, one button, native USB serial/JTAG, 16 pogo test pads |
-| **Grow** | 8 spare GPIOs and the I²C bus brought out to test pads |
+| **Grow** | I²C on test pads; remaining module pins require a pin/strap and load review |
 
 ---
 
@@ -125,11 +128,14 @@ Room enough as well for two OTA slots, so updates are safe and reversible.
 
 ---
 
-## 7. The eight spare pins and the exposed I²C bus
+## 7. Remaining pins and the exposed I²C bus
 
-Free GPIOs: **IO3, IO4, IO5, IO14, IO18, IO21**, plus **IO0/IO1** held in
-reserve for an optional 32.768 kHz crystal. `SDA` and `SCL` are on test pads
-TP12/TP13.
+IO1 is the runtime wake button, IO14 is charger EN2, IO18 enables charge,
+and IO21 drives EN1. IO3 terminates at the isolated, DNP battery-temperature
+sensing link and is not an extension port. IO0 remains unallocated; IO4/IO5
+are strapping/JTAG pins and need review before any external load. The former
+IO0/IO1 crystal reservation cannot be fitted with the current wake assignment.
+`SDA` and `SCL` are on TP12/TP13. See the EDS pin table before adding any load.
 
 That is a real extension port. Without touching the PCB you could hang on:
 
@@ -184,5 +190,6 @@ If you want the shortest path from bare board to something useful:
 | 8 | OTA | you stop unscrewing enclosures |
 | 9 | derived metrics (§3), LP core (§5) | it stops being a thermometer and starts being useful |
 
-Stages 1–4 are a weekend. Stages 5–8 are what turn ten prototypes into twenty
-deployable devices, and they are where the effort actually goes.
+Only the bounded serial bring-up application exists today. Remaining stages
+need implementation and device testing against the firmware contract before
+any deployment or qualification claim.

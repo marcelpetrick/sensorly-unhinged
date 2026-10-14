@@ -22,9 +22,12 @@ record the ELF SHA-256, git commit and tool versions with each flashed unit.
 
 ## Implemented behavior
 
-On entry, clear GPIO18/21 before configuring their output drivers. The external
-pull-downs remain the reset defaults. These pins are never asserted by this
-application. LED off, no radio initialization, no charger enable, no USB500.
+On entry, preload GPIO18 low and GPIO21/14 high before configuring outputs.
+GPIO18 never enables Q1. EN1/EN2 both high select charger standby; R8/R20 pull
+them high while the MCU rail is valid. No active USB-current mode is selected.
+LED off, no radio initialization, no charger enable, no USB500. See
+[ADR-001](adr/001-controlled-prototype-power-and-wake.md); unpowered rail and
+suspend current still need qualification.
 Configure a five-second task watchdog with panic/reset and subscribe the main
 task. This timeout is an engineering choice, not a measured shutdown guarantee.
 
@@ -39,8 +42,8 @@ bring-up margin, not a measured power budget.
 After acquisition, allow 550 ms divider settling (EDS §6), read ADC1 channel 2
 with ESP-IDF curve-fitting calibration, and multiply by the nominal 2:1 divider.
 A failed calibration/read produces null voltage. Resistor, loading and ADC errors
-still need external-meter characterization. PACK_TS is deliberately not sampled
-or used to enable charge before its fault-voltage review closes.
+still need external-meter characterization. PACK_TS is physically separated from the ADC by mandatory DNP R21 and is not
+sampled. Never populate R21 as a zero-ohm link; EDS-15 requires a protected interface.
 
 Emit one JSON line with chip MAC identity, image hash, reset cause, acquisition
 uptime, values/status and quality flags. UTC is null and clock validity false.
@@ -48,19 +51,28 @@ A chip MAC is **not** a production serial. This image has no persistent journal,
 provisioning, network credentials, TLS, MQTT, OTA or user button actions; those
 acceptance cases remain open. The USB/cooldown/ADC qualification flags are explicit.
 
-The fixture pulls IO20 low before reset. Factory mode gives a three-second
+Charger status inputs IO22/23 disable MCU pull-ups/pull-downs: R9/R10 are the
+sole pull-ups for these open-drain nets, keeping the declared loading intact.
+The independent TEST_MODE/IO20 input enables its internal pull-up; the fixture
+pulls IO20 low before reset. Factory mode gives a three-second
 console receive window, then clears control outputs again and enters five-minute
 timer deep sleep. Normal mode sleeps after the record. These intervals are
-engineering bring-up defaults. The IO9 button cannot provide C6 EXT1 wake;
-EDS-14 tracks the required pin-assignment decision. Console logs and the watchdog
+engineering bring-up defaults. SW1 now uses IO1 and supports EXT1 low-level wake. The image arms it only if
+released at sleep entry; a held button leaves timer wake armed. IO9/TP7 is an
+independent factory download strap; R22 holds IO8 high. The fixture holds
+TP7 low before EN release and at least 3 ms afterward (module Table 4-2),
+then verifies joint USB/UART download on the first boards. Button wake and EDS-14 still require bench
+evidence; no provisioning behavior is implemented. Console logs and the watchdog
 can affect consumption; measure the eventual release firmware separately.
 
 ## First-board procedure
 
 Follow [power-safety qualification](51-power-safety-qualification.md) before
 energizing assembled boards. Current PCB drafts are not fabrication approved.
-A disconnected battery and charge-disabled GPIO are not proof of USB suspend
-compliance or PACK_TS electrical safety. Verify those circuits independently.
+Use a protected charged pack or the declared battery simulator at VBAT.
+Battery-less USB startup is unsupported. EN standby and the DNP ADC link do not
+prove complete suspend compliance, startup behavior or temperature supervision.
+Inspect R21 DNP and capture those circuits independently.
 
 1. Record serial, variant/revision, assembly/BOM lot and independently read chip ID.
 2. Build from the recorded commit; archive the ELF/binary hashes and tool versions.

@@ -65,7 +65,7 @@ def parse_log(raw: bytes) -> dict:
         required.add("unexpected_charge_status")
     if not required.issubset(flags):
         raise ValueError("Incomplete quality flags")
-    if row.get("input_mode") != "USB100":
+    if row.get("input_mode") != "STANDBY":
         raise ValueError("Unexpected input-current policy")
     return row
 

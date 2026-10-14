@@ -51,52 +51,37 @@ and unsigned images, wrong hardware, and a crashing image. Key lifecycle and
 irreversible eFuse choices need a reviewed production procedure and hardware
 tests; no key-burning operation is part of this review.
 
-## USB input-current state machine
+## USB and charge supervision
 
-**Implementation prerequisite:** close EDS-11 before enabling USB500. The C6
-uses fixed-function USB Serial/JTAG, not a programmable USB OTG device. The
-reviewed ESP-IDF v5.5.1 public driver offers SOF-based connection detection,
-not the configuration callback assumed below. The required transitions are
-acceptance criteria, not evidence that an API exists. Identify a supported
-C6-specific mechanism and validate the descriptor's current request first;
-otherwise keep IO21 low and record an ADR for the source-policy change. Sources
-and the architecture hold are in EDS §7.1.
+[ADR-001](adr/001-controlled-prototype-power-and-wake.md) supersedes the initial
+prototype's assumed USB500 callback and EN2-to-ground wiring. Bring-up drives
+EN1/IO21 and EN2/IO14 high (standby), never USB100/USB500/ILIM, with CE disabled.
+R8/R20 pull both EN pins to +3V0 while that rail is valid. Before deep sleep the
+image releases them to those pull-ups. Rail absent/ramping/collapsing and CPU-hang
+behavior still require measurement; no output pull-up overrides an actively
+asserted low driver. Battery-less USB startup is unsupported.
 
-Charging is separately fail-safe. `CHARGE_ENABLE` is IO18 and drives Q1's gate;
-external R7 holds the gate low at reset. Separate R18 pulls BQ24074 `/CE` to
-VBUS, so charging is disabled before the MCU rail exists. After `PG_N` asserts,
-sample `PACK_TS` on IO3/ADC1_CH3 repeatedly,
-convert using the Semitec 103AT-2 curve and the measured BQ24074 TS bias, and
-drive `CHARGE_ENABLE` high only when the entire uncertainty interval lies inside the pack
-drawing's 0–45 °C charge range. Release CE immediately on out-of-range,
-implausible/open/short readings, ADC error, stale sample, watchdog warning,
-suspend or loss of VBUS; clearing the GPIO turns Q1 off and releases CE high.
-Thresholds and hysteresis are generated from reviewed
-calibration constants, not raw ADC magic numbers. Until this code and its tests
-exist, the board must remain in its default charging-disabled state.
+The product requirement for USB-C charging is still open. EDS-11/13 must provide
+a supported source authorization and complete suspend policy before unrestricted
+operation. SOF, serial-port open, PG_N and Type-C Rd are not configured-current
+allocation evidence. The pinned fixed-function C6 public driver offers no
+configuration callback; USB500 remains prohibited. A controlled lab image may
+use USB100 only under a separately reviewed bench-source procedure.
 
-`USB_ISEL` is IO21 and drives BQ24074 EN1. Configure it as an input/high-Z or
-drive it low from the first startup instruction; the external 100 kΩ pull-down
-then guarantees USB100. Drive it high only from the native USB stack's
-**configured** callback. Clear it before acknowledging suspend,
-deconfiguration or detach, and on every USB-stack error path. A charge-only
-adapter never configures the USB device and therefore remains at 100 mA.
+R21 is mandatory DNP and raw PACK_TS is therefore physically isolated from IO3.
+Do not populate a zero-ohm link to implement the prior direct ADC connection.
+EDS-15 must first define protected sensing across open/short NTC and unpowered
+MCU cases, with loading, error and rail-injection bounds. Only then implement
+calibrated repeated NTC readings and a charge guard band covering the entire
+uncertainty interval inside the pack's 0–45 °C range. Release charge enable on
+invalid/open/short/stale samples, ADC failure, suspend and VBUS loss. EDS-12
+must bound and measure the watchdog/reset shutdown interval before charging.
+The native charger TS window alone does not enforce the pack's upper limit.
 
-Do not infer source current from `PG_N`, VBUS voltage or the Type-C Rd resistors.
-They establish presence/attachment, not host configuration. Do not start Wi-Fi
-from USB100 with a missing or deeply depleted pack; report a power-policy fault
-and remain in bounded low-power/debug operation. Persist no “500 mA allowed”
-state across reset. Telemetry and factory output must expose the selected
-USB100/USB500 state alongside USB-present and charging state.
-
-Before every light/deep-sleep entry, clear both `CHARGE_ENABLE` and `USB_ISEL`;
-do not retain asserted outputs through GPIO hold. Charging requires active
-temperature supervision. A pull-down provides the reset default but cannot
-force an actively driven GPIO low during a CPU hang. EDS-12 must establish the
-watchdog/reset path and a reviewed maximum fault-to-disable interval, then test
-that interval on hardware. Until then crash fallback is unqualified. USB suspend
-testing must measure total input current; disabling charge alone does not prove
-that the system power path meets the source's suspend requirement.
+Runtime SW1 is now IO1 with an external pull-up, separate from IO9/TP7 download.
+Bring-up supports button EXT1 wake experiments; BLE provisioning, factory reset
+and their acceptance cases remain product work. A held low button is not armed
+for low-level wake, avoiding an immediate wake loop; timer wake remains enabled.
 
 ## Required executable acceptance cases
 

@@ -26,20 +26,23 @@
 _Static_assert(CONFIG_ESP_TASK_WDT_TIMEOUT_S == 5, "Review watchdog policy before changing timeout");
 
 // EDS §2.1; both layouts share this pin mapping.
-enum { SDA = 6, SCL = 7, CHARGE_ENABLE = 18, LED_N = 19, TEST_MODE = 20,
+enum { BTN_PROV = 1, USB_EN2 = 14, SDA = 6, SCL = 7, CHARGE_ENABLE = 18, LED_N = 19, TEST_MODE = 20,
        USB_ISEL = 21, PG_N = 22, CHG_N = 23 };
 // Bring-up policy choices, not measured energy or safety limits. See docs/72.
 enum { I2C_TIMEOUT_MS = 50, SAMPLE_INTERVAL_S = 300, FACTORY_WINDOW_MS = 3000 };
 
 static void safe_outputs(void) {
-    // Preload low before enabling the output drivers. Never hold an asserted
-    // charger/current-select output across sleep. Hardware pull-downs cover reset.
+    // Charge disabled, EN1=EN2=1 standby (TI Table 7-2; ADR-001).
+    // No active USB-current mode is authorized in this image.
+    ESP_ERROR_CHECK(gpio_set_level(CHARGE_ENABLE, 0));
+    ESP_ERROR_CHECK(gpio_set_level(USB_ISEL, 1));
+    ESP_ERROR_CHECK(gpio_set_level(USB_EN2, 1));
+    // Preload safe latches before releasing any hold left by an earlier image.
     ESP_ERROR_CHECK(gpio_hold_dis(CHARGE_ENABLE));
     ESP_ERROR_CHECK(gpio_hold_dis(USB_ISEL));
-    ESP_ERROR_CHECK(gpio_set_level(CHARGE_ENABLE, 0));
-    ESP_ERROR_CHECK(gpio_set_level(USB_ISEL, 0));
+    ESP_ERROR_CHECK(gpio_hold_dis(USB_EN2));
     gpio_config_t outputs = {
-        .pin_bit_mask = (1ULL << CHARGE_ENABLE) | (1ULL << USB_ISEL),
+        .pin_bit_mask = (1ULL << CHARGE_ENABLE) | (1ULL << USB_ISEL) | (1ULL << USB_EN2),
         .mode = GPIO_MODE_OUTPUT,
     };
     ESP_ERROR_CHECK(gpio_config(&outputs));
@@ -104,13 +107,22 @@ static esp_err_t battery_mv(int *millivolts) {
 void app_main(void) {
     safe_outputs();
     ESP_ERROR_CHECK(esp_task_wdt_add(NULL));
-    gpio_config_t inputs = {
-        .pin_bit_mask = (1ULL << PG_N) | (1ULL << CHG_N) | (1ULL << TEST_MODE),
-        .mode = GPIO_MODE_INPUT, .pull_up_en = GPIO_PULLUP_ENABLE,
+    // Open-drain charger outputs already have R9/R10 external pull-ups.
+    gpio_config_t charger_inputs = {
+        .pin_bit_mask = (1ULL << PG_N) | (1ULL << CHG_N),
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE, .pull_down_en = GPIO_PULLDOWN_DISABLE,
     };
-    ESP_ERROR_CHECK(gpio_config(&inputs));
+    ESP_ERROR_CHECK(gpio_config(&charger_inputs));
+    gpio_config_t factory_input = {
+        .pin_bit_mask = 1ULL << TEST_MODE, .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE, .pull_down_en = GPIO_PULLDOWN_DISABLE,
+    };
+    ESP_ERROR_CHECK(gpio_config(&factory_input));
     ESP_ERROR_CHECK(gpio_set_level(LED_N, 1));
     ESP_ERROR_CHECK(gpio_set_direction(LED_N, GPIO_MODE_OUTPUT));
+    gpio_config_t button = {.pin_bit_mask = 1ULL << BTN_PROV, .mode = GPIO_MODE_INPUT};
+    ESP_ERROR_CHECK(gpio_config(&button));
     // No Wi-Fi/BLE init is linked from this application. Sensor precedes ADC
     // and console activity; no stale reading is substituted on any failure.
     vTaskDelay(pdMS_TO_TICKS(10)); // sensor power-up margin; docs/72
@@ -136,13 +148,14 @@ void app_main(void) {
         cJSON_AddStringToObject(record, "chip_id", chip_id);
         cJSON_AddStringToObject(record, "firmware_sha256", image_hash);
         cJSON_AddNumberToObject(record, "reset_reason", esp_reset_reason());
+        cJSON_AddNumberToObject(record, "wake_reason", esp_sleep_get_wakeup_cause());
         cJSON_AddNumberToObject(record, "uptime_us", acquired_us);
         cJSON_AddNullToObject(record, "acquired_at_utc");
         cJSON_AddBoolToObject(record, "clock_valid", false);
         cJSON_AddBoolToObject(record, "factory_mode", factory_mode);
         cJSON_AddBoolToObject(record, "radio_started", false);
         cJSON_AddBoolToObject(record, "charge_enabled", false);
-        cJSON_AddStringToObject(record, "input_mode", "USB100");
+        cJSON_AddStringToObject(record, "input_mode", "STANDBY");
         cJSON_AddBoolToObject(record, "usb_present", usb_present);
         cJSON_AddBoolToObject(record, "charging", charging);
         cJSON_AddStringToObject(record, "sensor_status", esp_err_to_name(sensor_err));
@@ -171,6 +184,13 @@ void app_main(void) {
     safe_outputs();
     ESP_ERROR_CHECK(esp_task_wdt_reset());
     ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup((uint64_t)SAMPLE_INTERVAL_S * 1000000));
-    // IO9 is not an ESP32-C6 EXT1 wake pin: do not claim button wake here.
+    // A held button must not cause an immediate repeated deep-sleep reset loop.
+    // Timer wake remains armed; release the button to arm EXT1 on the next cycle.
+    if (gpio_get_level(BTN_PROV))
+        ESP_ERROR_CHECK(esp_sleep_enable_ext1_wakeup_io(1ULL << BTN_PROV, ESP_EXT1_WAKEUP_ANY_LOW));
+    // Release the EN outputs to external R8/R20 pull-ups before digital power-off.
+    gpio_config_t standby = {.pin_bit_mask = (1ULL << USB_ISEL) | (1ULL << USB_EN2),
+                             .mode = GPIO_MODE_INPUT};
+    ESP_ERROR_CHECK(gpio_config(&standby));
     esp_deep_sleep_start();
 }
