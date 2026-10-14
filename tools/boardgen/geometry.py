@@ -99,10 +99,18 @@ def load(name: str) -> Footprint:
             continue
         pads.setdefault(name, []).append((float(at.group(1)), float(at.group(2))))
         if sz:
+            # Pad sizes are expressed in the pad's own coordinate system.
+            # Its local angle is independent of the footprint placement angle;
+            # ignoring it underestimates the long axis of rotated module pads.
+            angle = re.search(rf"\(at {_num} {_num} {_num}\)", body)
+            rotation = math.radians(float(angle.group(3))) if angle else 0.0
+            c, s = abs(math.cos(rotation)), abs(math.sin(rotation))
             # Repeated numbers need not have identical shapes (USB shield
             # lugs are 1x2.1 and 1x1.6 mm). Router obstacles must conservatively
             # cover every occurrence, not inherit whichever was parsed last.
             w, h = float(sz.group(1)), float(sz.group(2))
+            w, h = w * c + h * s, w * s + h * c
+            w, h = round(w, 9), round(h, 9)
             old_w, old_h = size.get(name, (0.0, 0.0))
             size[name] = (max(w, old_w), max(h, old_h))
     bottom = '(layer "B.Cu")' in text.split("(pad", 1)[0]
@@ -163,3 +171,25 @@ def point_in_poly(pt, poly) -> bool:
             if x < xin:
                 inside = not inside
     return inside
+
+
+def sensor_package_keepout_polygon(v):
+    """Upstream SHT4x package-body polygon, with notches for the four pads.
+
+    Shared by PCB rule-area emission and route occupancy; library README
+    identifies the vendored land pattern and its no-under-package restriction.
+    """
+    local = [(0.75, -0.55), (0.45, -0.55), (0.45, -0.25), (0.75, -0.25),
+             (0.75, 0.25), (0.45, 0.25), (0.45, 0.55), (0.75, 0.55),
+             (0.75, 0.75), (-0.75, 0.75), (-0.75, 0.55), (-0.45, 0.55),
+             (-0.45, 0.25), (-0.75, 0.25), (-0.75, -0.25), (-0.45, -0.25),
+             (-0.45, -0.55), (-0.75, -0.55), (-0.75, -0.75), (0.75, -0.75)]
+    sx, sy = v.sensor_xy
+    return [(sx + x, sy + y) for x, y in local]
+
+
+def distance_to_segment(point, a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    length2 = dx * dx + dy * dy
+    u = max(0.0, min(1.0, ((point[0]-a[0])*dx + (point[1]-a[1])*dy) / length2)) if length2 else 0.0
+    return math.hypot(point[0] - a[0] - u * dx, point[1] - a[1] - u * dy)

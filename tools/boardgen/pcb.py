@@ -196,7 +196,7 @@ def _zone(name, netname, netidx, layers, poly, seed, keepout=None,
     else:
         head += ("\t\t(fill yes\n\t\t\t(thermal_gap 0.3)\n"
                  "\t\t\t(thermal_bridge_width 0.4)\n"
-                 "\t\t\t(island_removal_mode 1)\n\t\t\t(island_area_min 5)\n\t\t)\n")
+                 "\t\t\t(island_removal_mode 0)\n\t\t\t(island_area_min 5)\n\t\t)\n")
     head += f"\t\t(polygon\n\t\t\t(pts\n\t\t\t\t{pts}\n\t\t\t)\n\t\t)\n\t)\n"
     return head
 
@@ -243,6 +243,15 @@ KO_RF = dict(tracks="not_allowed", vias="not_allowed", pads="not_allowed",
 
 def _zones(v: Variant, netidx) -> str:
     out = []
+    # Preserve the upstream SHT4x no-under-package routing polygon explicitly
+    # on the board. Embedded footprint zones cause library-parity warnings in
+    # KiCad; a board rule area retains the restriction without that mismatch.
+    out.append(_zone("Sensor package keepout U2", "", netidx, ["F.Cu"],
+                     G.sensor_package_keepout_polygon(v),
+                     f"zone/sensor-body/{v.key}",
+                     keepout=dict(tracks="not_allowed", vias="not_allowed",
+                                  pads="allowed", copperpour="not_allowed",
+                                  footprints="allowed")))
     # GND on the outer layers and the L2 reference plane
     out.append(_zone("GND pour", "GND", netidx,
                      ["F.Cu", "In1.Cu", "B.Cu"], v.outline, f"zone/gnd/{v.key}",
@@ -303,8 +312,11 @@ def _silk(v: Variant, placed=()) -> str:
     txt("SENSOR", 0.6, 2.9, 0.7, seed="name2")
     txt(v.revision, 0.6, 4.1, 0.7, seed="rev")
     txt("2026", 0.6, 5.3, 0.6, seed="year")
-    txt("- T +", 22.0, 27.7, 0.7, layer="B.SilkS", mirror=True,
-        seed="batpinout")  # J2 pins 1/2/3
+    # J2's rotated pad row is vertical. An unnumbered horizontal '- T +'
+    # legend implied the wrong viewing/order convention; cavity numbers remain
+    # unambiguous from either side of the assembled board.
+    txt("J2 1- 2T 3+", 22.0, 27.7, 0.7, layer="B.SilkS", mirror=True,
+        seed="batpinout")
     txt("USB-C 5V", *_free_label(v, placed, 5.0, 0.6, prefer=(1.2, 31.8)),
         size=0.6, seed="usb")
     txt(f"VARIANT {v.key.upper()}", 1.2, 32.6, 0.6, layer="B.SilkS",

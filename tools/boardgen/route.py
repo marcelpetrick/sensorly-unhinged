@@ -16,7 +16,7 @@ import math
 from dataclasses import dataclass
 
 from . import geometry as G
-from .design import PART_BY_REF
+from .design import PART_BY_REF, NETCLASSES
 from .place import Placement
 from .variants import B_BODY_H, B_ISLAND_RECT, Variant, antenna_keepout, sensor_keepout
 
@@ -25,6 +25,7 @@ ISLAND_WIDTH = 0.15          # EDS S3.1 - the dominant thermal term
 ISLAND_CLEAR = 0.15
 EDGE_CLEAR = 0.50      # 0.3 mm copper-to-edge + half the widest track
 TURN_PENALTY = 12
+ISLAND_ROUTING_ORDER = {"a": (4, 2, 5, 3, 0, 1), "b": (1, 0, 2, 3, 4, 5)}
 
 
 @dataclass
@@ -147,12 +148,12 @@ class Grid:
                     break
 
     def block_rect(self, x0, y0, x1, y1):
-        # Round outward by less than a cell. `int(x) + 2` over-blocks by 0.2 mm,
-        # which is enough to seal a 0.5 mm-pitch pad's own escape corridor.
-        for iy in range(max(0, math.floor(y0 / GRID)),
-                        min(self.h, math.ceil(y1 / GRID) + 1)):
-            for ix in range(max(0, math.floor(x0 / GRID)),
-                            min(self.w, math.ceil(x1 / GRID) + 1)):
+        # Block exactly the grid centres inside the clearance envelope.
+        # Extra outward rounding seals legal fine-pitch escape corridors.
+        for iy in range(max(0, math.ceil(y0 / GRID)),
+                        min(self.h, math.floor(y1 / GRID) + 1)):
+            for ix in range(max(0, math.ceil(x0 / GRID)),
+                            min(self.w, math.floor(x1 / GRID) + 1)):
                 self.blocked[iy * self.w + ix] = 1
 
     def free(self, ix, iy):
@@ -173,6 +174,21 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
     by_ref = {p.ref: p for p in placed}
     grid = Grid(v)
 
+    # Keep track copper out of the same exact package polygon emitted in PCB.
+    # Pads sit in notches and may escape outward; only half track width is
+    # needed here, since this is an overlap prohibition, not a net clearance.
+    body = G.sensor_package_keepout_polygon(v)
+    margin = ISLAND_WIDTH / 2 + 1e-9
+    x0, x1 = min(x for x, _ in body) - margin, max(x for x, _ in body) + margin
+    y0, y1 = min(y for _, y in body) - margin, max(y for _, y in body) + margin
+    for iy in range(max(0, math.ceil(y0 / GRID)), min(grid.h, math.floor(y1 / GRID) + 1)):
+        for ix in range(max(0, math.ceil(x0 / GRID)), min(grid.w, math.floor(x1 / GRID) + 1)):
+            point = (ix * GRID, iy * GRID)
+            if G.point_in_poly(point, body) or any(
+                    G.distance_to_segment(point, a, b) <= margin
+                    for a, b in zip(body, body[1:] + body[:1])):
+                grid.blocked[iy * grid.w + ix] = 1
+
     # every pad on the board is an obstacle, with clearance
     pads: dict[tuple[str, str], tuple[float, float]] = {}
     for p in placed:
@@ -181,9 +197,15 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         for name, pts in _pad_points(p, None).items():
             for (x, y) in pts:
                 pads[(p.ref, name)] = (x, y)
-    clr = ISLAND_CLEAR + ISLAND_WIDTH / 2
+    # Ground/supply belong to Power: KiCad uses the larger interacting
+    # class clearance, including sensor traces approaching a Power pad.
+    routing_clear = max(ISLAND_CLEAR, NETCLASSES["Power"]["clearance"])
+    power_nets = set(NETCLASSES["Power"]["nets"])
+    padnet = {(ref, pad): net for net, pins in netlist.items() for ref, pad in pins}
+    def copper_clearance(a, b):
+        return routing_clear if a in power_nets or b in power_nets else ISLAND_CLEAR
 
-    def block_pads(exclude: set):
+    def block_pads(exclude: set, mine_net):
         grid2 = Grid.__new__(Grid)
         grid2.__dict__.update(grid.__dict__)
         grid2.blocked = bytearray(grid.blocked)
@@ -197,6 +219,7 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
                 w, h = fp.pad_size.get(name, (0.6, 0.6))
                 if p.rot % 180:
                     w, h = h, w
+                clr = copper_clearance(mine_net, padnet.get((p.ref, name))) + ISLAND_WIDTH / 2
                 for (lx, ly) in pts:
                     x, y = G.xform(lx, ly, p.x, p.y, p.rot)
                     grid2.block_rect(x - w / 2 - clr, y - h / 2 - clr,
@@ -216,23 +239,33 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         ("+3V0", ("U2", "3"), None, None),
         ("+3V0", ("C6", "1"), None, "+3V0"),
     ]
-    if v.key == "a":
-        # A has no neck; retain its existing routing order and fan-out.
-        plan = [plan[i] for i in (0, 1, 4, 2, 5, 3)]
+    plan = [plan[i] for i in ISLAND_ROUTING_ORDER[v.key]]
     tracks: list[Track] = []
     vias: list[Via] = []
     extra_blocked: list[tuple] = []
+    # Reserve every legal outward sensor-pad exit before any long-haul net.
+    # This keeps early routes from sealing a later pad behind the package.
+    for net, pad in (("SDA", "1"), ("SCL", "2"), ("+3V0", "3"), ("GND", "4")):
+        start = pads[("U2", pad)]
+        outward = -1 if start[0] < v.sensor_xy[0] else 1
+        end = (v.sensor_xy[0] + outward * 1.3, start[1])
+        tracks.append(Track(net, ISLAND_WIDTH, "F.Cu", [start, end]))
+        pads[("U2", pad)] = end
+        margin = ISLAND_WIDTH / 2
+        extra_blocked.append((net, (min(start[0], end[0])-margin, start[1]-margin,
+                                    max(start[0], end[0])+margin, start[1]+margin)))
 
     routed_cells: dict[str, set[tuple[int, int]]] = {}
     for net, src, dst, tap in plan:
         exclude = {src}
         if dst:
             exclude.add(dst)
-        g = block_pads(exclude)
+        g = block_pads(exclude, net)
         for owner, (x0, y0, x1, y1) in extra_blocked:
-            if tap and owner == tap:
+            if owner == net:
                 continue      # tapping our own net: its clearance is not ours
-            g.block_rect(x0, y0, x1, y1)
+            margin = copper_clearance(net, owner) + ISLAND_WIDTH / 2
+            g.block_rect(x0 - margin, y0 - margin, x1 + margin, y1 + margin)
         if v.key == "a":
             sx0, sx1, sy0, sy1 = sensor_keepout(v)
             quiet = (sx0, sx1, sy0, sy1)
@@ -264,11 +297,22 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
                 # Geometry seed, not an electrical value: search for legal
                 # main-board plane access just above the neck. Long lateral
                 # fan-outs unnecessarily block the other dense board routes.
-                preferred = (v.width/2 + (1.5 if net == "GND" else -2),
+                preferred = (v.width/2 + (.5 if net == "GND" else 2),
                              B_BODY_H - 2)
             tx, ty = _free_spot(gv, preferred, 0.55)
-        path = _dijkstra(g, (sx, sy), (tx, ty) if goals is None else None,
-                         goals=goals)
+        if v.key == "b" and src[0] == "U2" and net in ("GND", "+3V0"):
+            # Keep GND inside the supply lane. A shortest path can otherwise
+            # take the outermost legal neck column and strand the supply feed.
+            waypoint = (v.width / 2 + (.5 if net == "GND" else 1.1),
+                        B_ISLAND_RECT[1] + (1.0 if net == "GND" else .3))
+            if not g.free(round(waypoint[0] / GRID), round(waypoint[1] / GRID)):
+                raise RuntimeError(f"blocked {net} island waypoint {waypoint}")
+            first = _dijkstra(g, (sx, sy), waypoint)
+            second = _dijkstra(g, waypoint, (tx, ty)) if first else None
+            path = first[:-1] + second if first and second else None
+        else:
+            path = _dijkstra(g, (sx, sy), (tx, ty) if goals is None else None,
+                             goals=goals)
         if path is None:
             raise RuntimeError(f"island route failed for {net} from {src}")
         pts = _simplify(path)
@@ -290,12 +334,13 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         for i in range(len(pts) - 1):
             ax, ay = pts[i]
             bx, by = pts[i + 1]
-            extra_blocked.append((net, (min(ax, bx) - 0.3, min(ay, by) - 0.3,
-                                        max(ax, bx) + 0.3, max(ay, by) + 0.3)))
+            extra_blocked.append((net, (min(ax, bx) - (ISLAND_WIDTH / 2), min(ay, by) - (ISLAND_WIDTH / 2),
+                                        max(ax, bx) + (ISLAND_WIDTH / 2), max(ay, by) + (ISLAND_WIDTH / 2))))
         if dst is None and tap is None:
             vx, vy = pts[-1]
-            extra_blocked.append((net, (vx - 0.55, vy - 0.55,
-                                        vx + 0.55, vy + 0.55)))
+            margin = vias[-1].size / 2
+            extra_blocked.append((net, (vx - margin, vy - margin,
+                                        vx + margin, vy + margin)))
     return tracks, vias
 
 

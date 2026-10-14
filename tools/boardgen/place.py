@@ -82,7 +82,7 @@ def place(v: Variant) -> list[Placement]:
 
     # 2. sensor and its single allowed decoupling cap
     add("U2", *v.sensor_xy, 0)
-    add("C6", *v.sensor_cap_xy, 90 if v.key == "a" else 0)
+    add("C6", *v.sensor_cap_xy, 90 if v.key == "a" else 180)
 
     # 3. pogo field, bottom side
     tp_origin = (TESTPAD_ORIGIN[0] + v.body_dx, TESTPAD_ORIGIN[1])
