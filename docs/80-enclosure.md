@@ -19,40 +19,60 @@ The perimeter lip is relieved where it crosses B's divider. The
 OpenSCAD `interference` mode intersects the closed lid with the base;
 the expected result is empty. This does not prove pack/PCB fit.
 
-USB opening height is centred on the connector body above the PCB,
-not on the PCB surface. Cable-shell reach through the recessed wall
-still requires a physical fit check with the intended cable.
+The left USB opening and matching lid/lip notch expose the full recess
+to the PCB front edge; the cable boot can enter it instead of relying
+on extra metal-tip reach. J1 faces left (270°); its placement uses the
+manufacturer PCB-edge datum. The provisional maximum boot envelope
+is **14 × 8 mm**, with 0.35 mm clearance per edge. These are explicit
+design assumptions, not USB-standard limits or a verified cable.
+
+Both support heights are derived as 1.67 mm so the complete
+tolerance-expanded cable envelope stays at least 0.5 mm above the
+pack's maximum thickness plus full 1.0 mm swelling reserve. The
+OpenSCAD `cable_interference` check intersects that access path with
+the assembled case and reserved pack volume; it must be empty.
+
+Before charging, fit the intended cable, record its maximum boot
+dimensions and verify insertion, retention and lead/pack clearance.
+
+SW1 (EVQPUJ02K) is side-operated. Remove the taped lid to press it
+laterally with a nonconductive tool during bench setup/provisioning;
+there is no top button opening. Refit the lid before thermal tests.
 
 ## Component heights
 
 | Ref | Height | Source |
 |---|---:|---|
-| SW1 | 3.50 mm | Panasonic EVQ-PU tactile - TBC against the datasheet |
 | J2 | 3.40 mm | Molex PicoBlade 53261-0371 drawing, mated height |
 | J1 | 3.16 mm | HRO TYPE-C-31-M-12, 8.94 x 7.35 x 3.16 |
 | U1 | 2.40 mm | ESP32-C6-MINI-1 datasheet v1.5 S10.1, 13.2 x 16.6 x 2.4 |
-| C1 | 1.45 mm | 0805 MLCC, typical maximum |
-| C9 | 1.45 mm | 0805 MLCC, typical maximum |
-| C10 | 1.45 mm | 0805 MLCC, typical maximum |
-| C11 | 1.45 mm | 0805 MLCC, typical maximum |
+| SW1 | 1.95 mm | [Panasonic EVQPUJ02K reference specification, p.2](https://industrial.panasonic.com/cdbs/www-data/pdf/ATK0000/ATK0000COS4319.pdf), 1.65 +0.30/-0.10 mm, side-operated |
+| U5 | 1.45 mm | [ST USBLC6-2 DS4260 Rev7, Table3 p.12](https://www.st.com/resource/en/datasheet/usblc6-2.pdf), maximum |
+| C1 | 1.35 mm | [Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum |
+| C8 | 1.35 mm | [Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum |
+| C9 | 1.35 mm | [Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum |
+| C10 | 1.35 mm | [Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum |
+| C11 | 1.35 mm | [Murata GRM21BR61C106KE15L drawing, p.2](https://www.farnell.com/datasheets/3929902.pdf), 1.25 ±0.10 mm maximum |
 | L1 | 1.20 mm | Murata DFE201612E, 2.0 x 1.6 x 1.2 |
+| Q1 | 1.11 mm | [onsemi 2N7002L/D, CASE 318 Issue AU, p.4](https://www.onsemi.com/download/data-sheet/pdf/2n7002l-d.pdf), maximum |
+| D1 | 1.10 mm | [Kingbright KP-1608SGC DSAB0301V21B, p.1](https://www.kingbright.com/attachments/file/psearch/000/00/20160808bak/KP-1608SGC%28Ver.21B%29.pdf), maximum |
 | U4 | 1.00 mm | VQFN-16 3x3, typical maximum |
-| U2 | 0.50 mm | SHT4x DFN, 1.5 x 1.5 x 0.5 |
+| U2 | 0.73 mm | [Sensirion SHT4x v7.3, Fig16 p.16](https://sensirion.com/resource/datasheet/sht4x), filtered SHT45-AD1F 0.63 ±0.10 mm |
 
 ## Result
 
 | | Variant A | Variant B |
 |---|---:|---:|
-| Outer size (mm) | 47.0 × 39.2 × 18.8 | 47.0 × 56.2 × 18.8 |
-| Internal cavity height | 14.8 mm | 14.8 mm |
+| Outer size (mm) | 47.0 × 39.2 × 19.6 | 47.0 × 56.2 × 19.6 |
+| Internal cavity height | 15.6 mm | 15.6 mm |
 | Battery bay below board | 7.3 mm | 7.3 mm |
-| Clearance above board | 4.1 mm | 4.1 mm |
-| Tallest part | SW1 at 3.50 mm | SW1 at 3.50 mm |
+| Clearance above board | 4.0 mm | 4.0 mm |
+| Tallest part | J2 at 3.40 mm | J2 at 3.40 mm |
 | Modeled maximum pack envelope | 42.0 × 20.5 × 7.3 mm | 42.0 × 20.5 × 7.3 mm |
 | Selected pack | LP702040, 550 mAh | LP702040, 550 mAh |
 | Selected pack fits modeled bay | yes | yes |
 | Vent slots over the sensor | 1 in the lid + 4 in the wall | 2 in the lid + 4 in the wall |
-| Lid hold-down pillars | 2 | 0 |
+| Lid edge clamps / matching supports | 3 | 3 |
 | Chambers | 1 | 2, divided at the neck |
 | Solid material beyond the antenna | 2.6 mm | 2.6 mm |
 
@@ -60,17 +80,19 @@ still requires a physical fit check with the intended cable.
 
 Both cases are sized for the selected **LP702040 550 mAh** protected pack. Drawing FD_3245_20 specifies 550 mAh minimum, maximum assembled dimensions 42 × 20.5 × 7.3 mm, a Semitec 103AT-2 NTC and a 45 ± 3 mm three-wire Molex 51021-0300 PicoBlade harness. J2 is the mating 53261-0371 right-angle header at 3.40 mm mated height.
 
-The generated case is **18.8 mm** thick. The model reserves 0.5 mm around every pack edge and 1.0 mm above the drawing's maximum pouch thickness for manufacturing tolerance and swelling. The support shelves begin above that allowance; nothing rigid may occupy it.
+The generated case is **19.6 mm** thick. The model reserves 0.5 mm around every pack edge and 1.0 mm above the drawing's maximum pouch thickness for manufacturing tolerance and swelling. The support shelves begin above that allowance; nothing rigid may occupy it.
 
 Incoming inspection must confirm the drawing and cavity order `1=black/-`, `2=yellow/NTC`, `3=red/+` before mating. An assembled lead-bend/retention test remains part of the battery qualification gate.
 
-## Board retention, and a decision coming back around
+## Board retention and prototype lid closure
 
-The board rests on four ribs and is meant to be pinned by short pillars from the lid onto bare copper-free board. The generator searches the placement for room rather than assuming a corner is empty, and finds **2 on Variant A** but only **0 on Variant B** - B's electronics chamber carries all 43 populated parts in a narrower body, and there is no bare board left.
+Both variants use rectangular lid fingers on component-free PCB edge strips, with matching wall-connected support shelves below. The generator checks every clamp against component and test-pad envelopes. Variant B supports and clamps remain entirely in the electronics body; no printed support touches its neck or sensor island.
 
-The first attempt put two of B's pillars *on the sensor island*: plastic bridging the lid straight into the thermally isolated part, which would have quietly wrecked the experiment the island exists for. That is now a hard check.
+Polymer side stops constrain X at the supported PCB edges. Rear corner stops capture the electronics body end outside B's neck. Two lid rails flank the upper USB shell and constrain both Y directions without touching the PCB antenna end; their undersides clear adjacent components. The modeled movement before stop contact is 0.35 mm, below the 0.6 mm antenna-edge/wall gap. USB-shell contact, stop strength and printed tolerances remain assembly qualification gates; vertical friction alone is not the retention scheme. B’s neck slot has an additional 0.35 mm per-side reserve beyond the modeled X stop travel, so the stops engage before the neck touches the divider.
 
-The real fix is two M2 nylon screws through the lid into bosses - and the board has no holes for them, because `40-floorplans.md` decided against mounting holes on the grounds that M-04 forbids metal near the antenna and a nylon boss costs 19 mm² of a 1000 mm² board. That was a reasonable call in the PCB phase and it is now a retention problem in the mechanical phase. Nylon screws are not metal; the antenna objection does not actually apply to them. **Rev 2 should carry two nylon M2 holes in the electronics chamber**, which costs a little copper and solves this cleanly.
+The 0.6 mm edge bite, 1.2 mm finger length, 0.35 mm printed cut-out tolerance and 0.25 mm component margin are provisional design assumptions, not demonstrated printer capability. These dimensions must be checked on printed samples before qualification. Print the base floor down with removable supports under the cantilever shelves; print the lid outer face down. Remove every support and sharp edge from the battery bay. Use the same recorded polymer and print settings for both A/B cases.
+
+The perimeter ring locates the lid but does not latch it. For the prototype, retain the lid with removable nonmetallic tape across the electronics chamber side walls, away from the antenna end, USB opening and sensor vents. Tape is a provisional assembly assumption; record material and position for both A/B cases. Positive lid closure and drop/handling retention remain physically unqualified.
 
 ## Battery qualification still requires hardware
 
@@ -78,6 +100,5 @@ The selected pack passes the parametric plan-view and height checks in both vari
 
 **Variant A checks:** all pass
 
-**Variant B checks:** 
-- ⚠️ only 0 lid hold-down pillar(s) fit - the electronics chamber has no bare board left. The board needs a different retention scheme; see the note below
+**Variant B checks:** all pass
 
