@@ -24,7 +24,7 @@ has closed: the EDS/library review checklist and exact purchasing BOM remain
 open. The maintainer has confirmed that no physical boards, pack samples or measurements
 exist outside the repository either.
 
-## Current implementation checkpoint — 2026-09-18
+## Historical implementation checkpoint — 2026-09-18
 
 The original audit below is retained as history. Since it, the repository gained:
 
@@ -46,6 +46,81 @@ signed OTA are still unimplemented. Boards remain at 59/60 unrouted connections.
 All five prototype review slots and all seven product qualification slots remain
 open. A public engineering source prerelease does not authorize fabrication.
 
+## Active prototype completion plan — 2026-10-14
+
+### Immediate source cleanup and atomic commit plan
+
+The current work order is to finish and verify the existing changed files before
+starting additional routing experiments. Freeze delegated edits after their
+validated handoffs, then:
+
+1. Review manufacturer-derived libraries and the shared electrical model; retain
+   the controlled-power ADR and all unresolved supplier/bench gates.
+2. Fix generator routing/rule defects and enclosure interference/retention in
+   both variants. Keep incomplete routes visible in the development DRC record;
+   never weaken prototype or product qualification to obtain a passing gate.
+3. Regenerate all deterministic sources and reports, run host/KiCad regressions,
+   ERC/DRC/parity, enclosure meshes and the pinned firmware build.
+4. Commit library, electrical, firmware/capture, routing, enclosure and BOM/build
+   changes as separate reviewable ideas with their affected documentation.
+   Commit regenerated artifacts separately where practical, referencing the
+   source commits. Record exact remaining routing counts and review limitations.
+5. Run the complete local pipeline against committed generated files, fix any
+   remaining drift or failures, and push the branch without rewriting history.
+
+These commits preserve an engineering checkpoint. A fabrication package still
+requires completed routing and genuine pack, assembler and order-review records.
+
+The requested target is a reproducible **5 A + 5 B fabrication package**, followed
+by verification on the manufactured prototypes. Source preparation and physical
+qualification are separate gates; no board, pack sample, supplier confirmation
+or assembler approval has been supplied during this continuation.
+
+The delegated electrical review, sourcing review and mechanical work are recorded
+in [ADR-001](adr/001-controlled-prototype-power-and-wake.md),
+[the purchasing review](63-assembly-qualification.md) and
+[the enclosure model](80-enclosure.md). The shared prototype now separates the
+runtime IO1 wake button from the IO9 download strap, pulls GPIO8 high for joint
+ROM download, controls EN2, defaults the bring-up image to standby, and leaves
+R21 unpopulated to isolate raw TS from the ADC. B widens to 30 mm to accommodate
+the shared controls; both variants still use one electrical model and firmware.
+These changes do not implement unrestricted USB charging or close measured
+startup/suspend/watchdog/pack fault qualification.
+
+Primary drawing reviews also corrected L1, U4, U5, Q1 and D1 land patterns,
+D1 manufacturer polarity numbering, J1 orientation, and the filtered sensor
+height. C1/C8 now use sourced 10 µF/16 V, ±10% capacitors: the conservative
+positive tolerance/temperature rail sum is 26.818 µF below the regulator’s
+40 µF effective maximum. Minimum DC-bias/aging assumptions and physical
+startup/TX/load-step qualification remain explicit in EDS-16.
+
+All fitted passives have exact candidate ordering codes and BOM validation rejects
+missing MPN/manufacturer/risk dispositions. Alternatives remain unqualified.
+The model now respects each pad's local angle when constructing routing obstacles;
+previously rotated module pads were represented with their width/height reversed.
+The sensor-island router respects the package-body keepout, actual net-class
+clearances and four reserved pad escapes. Both island-only layouts pass actual
+KiCad DRC; B uses C6 at 180° for planar supply taps while A retains 90°.
+USB pair names now use complementary P/N suffixes and a KiCad negative control
+proves the uncoupled-pair rule is active. Full-board routing remains open.
+
+Both cases use electronics-body edge retention with removable tape lid closure;
+the side-actuated button is accessed with the lid removed. Printed fit is untested.
+
+| Next action | Owner / handoff | Acceptance |
+|---|---|---|
+| Complete explicit IC fanout, power loops, USB pair and remaining branches on **both** boards | PCB maintainer; isolated generator experiments only until KiCad validates them | Zero errors, warnings, unconnected items and parity differences; reviewed return paths/stackup; no budget-based fabrication approval |
+| Finish primary land-pattern overlays, effective capacitance/inductor ratings and exact purchasing review | Hardware maintainer + supplier | Source drawings, retained calculations and actual available order codes; no unqualified alternate fitted |
+| Obtain pack lot/harness/NTC/current-limit confirmation | Supplier + hardware maintainer | Written records matching the selected drawing, reconciled limits and incoming continuity/inspection procedure |
+| Review assembly/CPL, stackup and DFM on the completed layouts | Assembler + named hardware reviewer | Actual preview and DFM disposition linked to exact source revision |
+| Approve and package the controlled engineering batch | Project maintainer + reviewer | Five genuine prototype review records, clean committed sources, full pipeline, pinned firmware build, successful A/B prototype packaging and archive checksums |
+| Inspect and measure received prototypes | Hardware/test maintainer | Staged docs 51 tests and serial-linked docs 72 records; measured rails/faults/sleep/wake/fit before enclosed operation |
+
+Commit and push reviewable source/model changes after validation. Do not manufacture
+from draft outputs or populate readiness evidence with this plan, synthetic logs
+or agent-generated approval placeholders. The product firmware/thermal experiment,
+Rev 2 and 20-unit series remain later work in the ordered plan below.
+
 ## Ordered work and completion gates
 
 Work in this order. Where a task needs unavailable hardware or supplier data,
@@ -56,9 +131,9 @@ Owners below are engineering roles; the project maintainer assigns people.
 | Order | Priority / owner | Work | Completion and review gate | State |
 |---|---|---|---|---|
 | 1 | P0 / build maintainer | Close release-export and packaging bypasses; require the complete manufacturing set and carry qualification evidence in the archive. | Fault injection proves missing qualification, files or failed exports cannot produce a release; full development pipeline still passes. | Done and reviewed; see verification below |
-| 2 | P0 / hardware + firmware | Resolve EDS-11 USB configuration/current-allocation and suspend implementation; resolve EDS-12 watchdog/sleep output release. Keep USB500 and charging disabled until their prerequisites hold. | Review a C6-specific implementation and actual descriptor; define and measure fault latency and total suspend current. Use an ADR if architecture/policy changes. | Open; C6 configuration, hard-wired EN2 suspend and IO9 wake conflicts recorded (EDS-11–14) |
+| 2 | P0 / hardware + firmware | Resolve EDS-11 USB configuration/current-allocation and suspend implementation; resolve EDS-12 watchdog/sleep output release. Keep USB500 and charging disabled until their prerequisites hold. | Review a C6-specific implementation and actual descriptor; define and measure fault latency and total suspend current. Use an ADR if architecture/policy changes. | Controlled prototype architecture implemented in ADR-001; product USB policy, TS protection and measured transitions remain open |
 | 3 | P0 / hardware | Obtain the controlled pack drawing/lot confirmation; confirm harness polarity, NTC curve, protection and current-limit discrepancy. Review PACK_TS electrical limits under open/short/unpowered faults. | Supplier evidence and a reviewed worst-case calculation; five incoming-inspection records before mating/charging. | Supplier records and samples required |
-| 4 | P1 / hardware | Recheck U1–U5, Q1, J1/J2 and D1 pin numbers, pin-1 and rotations against primary drawings; select exact passive and connector MPNs. | EDS §11 checklist and assembly review signed; BOM ratings/DC bias/inductor saturation and second-source risks recorded. | Open |
+| 4 | P1 / hardware | Recheck U1–U5, Q1, J1/J2 and D1 pin numbers, pin-1 and rotations against primary drawings; select exact passive and connector MPNs. | EDS §11 checklist and assembly review signed; BOM ratings/DC bias/inductor saturation and second-source risks recorded. | Exact passive candidates and desk review recorded; overlays, ratings and assembler approvals remain open |
 | 5 | P1 / PCB maintainer | Finish routing on A and B from the shared model: power/ground and regulator loops, fine-pitch escapes, charger controls, USB pair, remaining signals and test pads. | Zero unconnected items, errors, warnings and parity differences on both; review return paths, USB geometry/stackup, thermal neck and antenna keepouts. Reduce budgets only after inspecting the new DRC results. | Open |
 | 6 | P1 / mechanical | Verify PCB/pack retention, connector access and lead routing, sensor vents/chambers and antenna clearance in both cases. | Mesh gates plus physical fit/handling records for all five packs; address weak B board retention before deployment. | Model exists; physical tests pending |
 | 7 | P1 / firmware | Add a pinned ESP-IDF build and minimal safe bring-up: default-low charge/current controls, calibrated NTC supervision, acquisition before radio, bounded failures and sleep. | Reproducible build, executable policy/fault tests, and scope traces on hardware. EDS-11/12 block enabling higher current/charging. | Bring-up image compiles with pinned ESP-IDF v5.5.4; decoder/failure tests pass. NTC supervision and device traces remain open |
