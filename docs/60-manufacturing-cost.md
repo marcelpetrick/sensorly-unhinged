@@ -15,14 +15,14 @@ Rates researched 2026-09-09. USD→EUR at 0.92. German import VAT
 
 | | |
 |---|---:|
-| Components per board (excl. test pads) | 43 |
-| SMT solder joints | 196 |
+| Components per board (excl. test pads) | 47 |
+| SMT solder joints | 200 |
 | Through-hole joints (USB-C shield lugs) | 4 |
-| Distinct BOM lines | 28 |
-| Passives (0402/0603/0805) | 32 |
+| Distinct BOM lines | 26 |
+| Passives (0402/0603/0805) | 36 |
 | Likely extended-library parts | 9 |
 | Variant A area | 10.2 cm² |
-| Variant B area | 14.3 cm² |
+| Variant B area | 15.3 cm² |
 
 Both boards fit inside 50 × 50 mm, which is the size band where 4-layer
 fabrication is cheapest — that is not an accident of the floorplan.
@@ -33,13 +33,13 @@ fabrication is cheapest — that is not an accident of the floorplan.
 | Line | | Cost |
 |---|---|---:|
 | PCB fabrication | USD, pre-VAT | $4–18 |
-| Assembly — setup, stencil, feeders, 196 joints × 10 | USD, pre-VAT | $84–118 |
-| Components — 10 × board BOM | USD, pre-VAT | $93–154 |
+| Assembly — setup, stencil, feeders, 200 joints × 10 | USD, pre-VAT | $84–118 |
+| Components — 10 × board BOM | USD, pre-VAT | $93–156 |
 | Freight to Germany | USD | $14–28 |
-| **Landed PCBA, incl. 19% import VAT** | EUR | **€214–349** |
+| **Landed PCBA, incl. 19% import VAT** | EUR | **€214–350** |
 | Batteries, printed cases, labels — bought in the EU | EUR | €49–127 |
-| **Total programme** | EUR | **€263–476** |
-| **Per finished unit** | EUR | **€26.28–47.58** |
+| **Total programme** | EUR | **€263–477** |
+| **Per finished unit** | EUR | **€26.33–47.72** |
 
 
 ## Rev 2 series — 20 × the chosen variant
@@ -47,13 +47,13 @@ fabrication is cheapest — that is not an accident of the floorplan.
 | Line | | Cost |
 |---|---|---:|
 | PCB fabrication | USD, pre-VAT | $11–32 |
-| Assembly — setup, stencil, feeders, 196 joints × 20 | USD, pre-VAT | $48–67 |
-| Components — 20 × board BOM | USD, pre-VAT | $186–309 |
+| Assembly — setup, stencil, feeders, 200 joints × 20 | USD, pre-VAT | $48–67 |
+| Components — 20 × board BOM | USD, pre-VAT | $187–311 |
 | Freight to Germany | USD | $14–28 |
-| **Landed PCBA, incl. 19% import VAT** | EUR | **€283–477** |
+| **Landed PCBA, incl. 19% import VAT** | EUR | **€284–480** |
 | Batteries, printed cases, labels — bought in the EU | EUR | €98–254 |
-| **Total programme** | EUR | **€381–731** |
-| **Per finished unit** | EUR | **€19.07–36.57** |
+| **Total programme** | EUR | **€382–734** |
+| **Per finished unit** | EUR | **€19.11–36.71** |
 
 
 ## Where the money goes
@@ -62,7 +62,7 @@ At these quantities the **components dominate**, and inside the components two
 parts dominate: the ESP32-C6 module ($3.03–3.92)
 and the SHT45-AD1F ($4.00–6.13).
 Together they are roughly two thirds of the bill of materials. Everything else —
-charger, regulator, connectors, 32 passives — is about a dollar and a half.
+charger, regulator, connectors, 36 passives — is about a dollar and a half.
 
 That has a direct consequence for the A/B decision: **variant B's extra 28 % of
 board area is nearly free.** Fabrication is a small fraction of the total and

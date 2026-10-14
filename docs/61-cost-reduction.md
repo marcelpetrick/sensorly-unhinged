@@ -15,10 +15,10 @@ Each row includes the ones above it.
 
 | Change | Assembly (USD) | Per finished unit | Saved |
 |---|---:|---:|---:|
-| Baseline — two separate orders | $84–118 | €26.28–47.58 | — |
-| Panelise A and B on one panel | $52–70 | €22.55–41.32 | 14–13 % |
-| + all-SMD USB-C, fewer extended parts | $33–43 | €20.45–38.37 | 22–19 % |
-| + SHT40-AD1F instead of SHT45-AD1F | $33–43 | €18.70–36.26 | 29–24 % |
+| Baseline — two separate orders | $84–118 | €26.33–47.72 | — |
+| Panelise A and B on one panel | $52–70 | €22.60–41.46 | 14–13 % |
+| + all-SMD USB-C, fewer extended parts | $33–43 | €20.49–38.51 | 22–19 % |
+| + SHT40-AD1F instead of SHT45-AD1F | $33–43 | €18.74–36.40 | 29–24 % |
 
 ## Why each one works
 
@@ -26,7 +26,7 @@ Each row includes the ones above it.
 
 **+ all-SMD USB-C, fewer extended parts.** A fully-SMD USB-C receptacle removes the 4 through-hole shield lugs, and with them the hand-soldering line entirely. Sourcing the connector, inductor, button and battery header from the basic library halves the per-part feeder fees.
 
-**+ SHT40-AD1F instead of SHT45-AD1F.** Keeps the PTFE membrane — the part that protects the multi-year measurement — and drops only the accuracy bin, ±0.2 °C / ±1.8 %RH instead of ±0.1 / ±1.0. Same footprint, same I²C address, same driver.
+**+ SHT40-AD1F instead of SHT45-AD1F.** Keeps the polyimide membrane — the part that protects the multi-year measurement — and drops only the accuracy bin, ±0.2 °C / ±1.8 %RH instead of ±0.1 / ±1.0. Same footprint, same I²C address, same driver.
 
 
 ## The single biggest lever is free
