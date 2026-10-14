@@ -427,4 +427,4 @@ def emit(v: Variant, placed: list[Placement], tracks, vias) -> str:
 
 def write(path: Path, text: str):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text)
+    path.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n")

@@ -138,6 +138,8 @@ need routing, and filled-board DRC is the acceptance check for both variants.
 Track identifiers include layer, both endpoints and width. Branches leaving the
 same point, or tracks starting at the same via on opposite layers, must not
 share a UUID. A regression protects distinct identities and stable regeneration.
+PCB output also strips trailing whitespace inherited from vendored footprint
+indentation, so regenerated diffs pass the repository whitespace check.
 
 The U1/U2 embedded library keepouts move to board-level rule areas to remove
 KiCad library-comparison warnings without waiving them. The whole-board RF
