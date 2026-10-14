@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
 # SPDX-License-Identifier: GPL-3.0-or-later
 import unittest
+import re
 from dataclasses import replace
 from tools.boardgen.geometry import load
 from tools.boardgen import geometry as G
@@ -10,6 +11,18 @@ from tools.boardgen.variants import VARIANTS
 
 
 class GeometryTests(unittest.TestCase):
+    def test_branch_and_layer_segments_have_distinct_stable_ids(self):
+        from tools.boardgen.pcb import _tracks
+        from tools.boardgen.route import Track
+        tracks = [Track("VBAT", 0.4, "F.Cu", [(2, 3), (4, 3)]),
+                  Track("VBAT", 0.4, "B.Cu", [(2, 3), (4, 3)]),
+                  Track("VBAT", 0.4, "F.Cu", [(2, 3), (2, 5)])]
+        source = _tracks(tracks, [], {"VBAT": 1})
+        identifiers = re.findall(r'\(uuid "([^"]+)"\)', source)
+        self.assertEqual(len(identifiers), 3)
+        self.assertEqual(len(set(identifiers)), 3)
+        self.assertEqual(source, _tracks(tracks, [], {"VBAT": 1}))
+
     def test_module_pad_local_rotation_changes_obstacle_extent(self):
         fp = load("ESP32-C6-MINI-1")
         self.assertEqual(fp.pad_size["1"], (0.8, 0.4))

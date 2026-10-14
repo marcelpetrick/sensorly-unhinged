@@ -335,7 +335,7 @@ def _tracks(tracks: list[Track], vias: list[Via], netidx) -> str:
                 f"\t(segment\n\t\t(start {ax} {ay})\n\t\t(end {bx} {by})\n"
                 f'\t\t(width {t.width})\n\t\t(layer "{t.layer}")\n'
                 f"\t\t(net {netidx[t.net]})\n"
-                f'\t\t(uuid "{_u(f"seg/{t.net}/{i}/{ax}/{ay}")}")\n\t)\n')
+                f'\t\t(uuid "{_u(f"seg/{t.net}/{t.layer}/{i}/{ax}/{ay}/{bx}/{by}/{t.width}")}")\n\t)\n')
     for vv in vias:
         x, y = _xy(vv.x, vv.y)
         out.append(

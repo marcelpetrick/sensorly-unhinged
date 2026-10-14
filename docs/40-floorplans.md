@@ -128,6 +128,10 @@ This removes orphan fill rather than waiving its DRC warnings. It does not join
 an unconnected ground pad to the reference plane; missing connections still
 need routing, and filled-board DRC is the acceptance check for both variants.
 
+Track identifiers include layer, both endpoints and width. Branches leaving the
+same point, or tracks starting at the same via on opposite layers, must not
+share a UUID. A regression protects distinct identities and stable regeneration.
+
 The U1/U2 embedded library keepouts move to board-level rule areas to remove
 KiCad library-comparison warnings without waiving them. The whole-board RF
 keepout retains the antenna exclusion on all four copper layers. U2's exact
