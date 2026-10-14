@@ -29,7 +29,7 @@
 )
 
 (rule "USB differential pair"
-	(constraint diff_pair_gap (min 0.15mm) (opt 0.2mm))
+	(constraint diff_pair_gap (min 0.15mm) (opt 0.2mm) (max 0.25mm))
 	(constraint diff_pair_uncoupled (max 2mm))
 	(condition "A.NetClass == 'USB'")
 )
