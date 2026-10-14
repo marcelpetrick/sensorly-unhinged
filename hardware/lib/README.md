@@ -150,3 +150,9 @@ SW1 pins 1 and 2 are distinct while the switch is released. These metadata
 changes retain the vendored library licence and model internal component metal;
 they do not permit copper shorts between different nets. Connector contacts
 receive no corresponding assumption without a manufacturer source.
+
+The shared J1 edge placement puts the connector front beyond the PCB. Its
+front horizontal silkscreen line is omitted and the side silkscreen ends stop
+at local y=3.0 mm, inside the documented PCB-edge datum y=3.19 mm. Copper,
+drills, courtyard, numbering and the complete F.Fab body drawing are retained.
+This is a board-printing adaptation, not a changed manufacturer land pattern.
