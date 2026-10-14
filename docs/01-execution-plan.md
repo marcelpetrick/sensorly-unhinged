@@ -71,6 +71,33 @@ validated handoffs, then:
 These commits preserve an engineering checkpoint. A fabrication package still
 requires completed routing and genuine pack, assembler and order-review records.
 
+### Verified source cleanup checkpoint — 2026-10-14
+
+The existing changed files have been corrected, regenerated and committed as
+separate library, electrical, firmware/capture, routing, enclosure, purchasing
+and generated-output changes. The final full local pipeline passed **all 15
+stages without skips** at `dfc85a2`, using Python 3.14.7 and KiCad 10.0.6.
+This record concerns source/build verification, not tested physical prototypes.
+
+| Check | Result |
+|---|---|
+| Host regressions | 90 tests pass; the firmware decoder also passes its known-CRC, endpoints and 48 single-bit fault controls. |
+| KiCad controls | 14 tests pass, covering sensor/antenna keepouts, thermal neck rules, component internal conductors, bounded power escapes and USB coupling. The isolated USB control exposed the missing maximum gap; the corrected rule rejects separated tracks and accepts the preferred geometry. |
+| Generated sources | Shared schematic, both PCB projects/rules, BOM/netlist, model SVGs, enclosure parameters and generated reports reproduce byte-identically against committed files. No duplicate PCB UUIDs or whitespace errors remain. |
+| ERC / DRC / parity | Zero ERC violations; both filled boards have zero DRC errors, warnings and schematic parity differences. A has 59 unconnected items; B has 52. The development budget records these counts and has no warning allowances. |
+| Mechanical | Four meshes pass bounds checks; both seated lid/base and both cable/case-plus-pack intersections are empty. Physical printed fit and handling remain untested. |
+| Docs / BOM / outputs | 19/19 checked figures match; 47 BOM lines and 46 fitted placements. Complete A/B draft fabrication outputs are generated and explicitly unapproved for fabrication. |
+| ESP-IDF application | Pinned ESP-IDF v5.5.4 build passes at source checkpoint `60f56e3`; later changes affect routing rules, tests and documentation, not the application. No device behavior is inferred from this build. |
+| Qualification rejection | `make prototype-check` rejects unfinished routing and all five missing prototype review records. `make release-check` rejects unfinished routing and all seven missing product qualification records. Evidence fields remain null. |
+
+Local diagnostics are retained under `_build/current-checkpoint-*.log`; they
+are ignored build artifacts, not supplier, assembler or physical evidence.
+The next implementation task is deliberate completion of the USB pair, power
+loops/ground returns and remaining branches on both boards. Pack/harness,
+stackup/DFM/CPL and named order-review records are also still required before
+producing the 5 A + 5 B batch. Physical bring-up, A/B measurement, product firmware,
+Rev 2 and the controlled 20-unit series retain their ordered gates below.
+
 The requested target is a reproducible **5 A + 5 B fabrication package**, followed
 by verification on the manufactured prototypes. Source preparation and physical
 qualification are separate gates; no board, pack sample, supplier confirmation
