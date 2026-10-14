@@ -46,6 +46,14 @@ def bom_rows(parts=None):
     return rows
 
 
+def sourcing_errors(rows):
+    """Reject fitted lines that purchasing cannot identify or review."""
+    return [f"{row['Refs']}: missing {field}" for row in rows
+            if row["Populate"] == "yes"
+            for field in ("MPN", "Manufacturer", "Second source")
+            if not row[field].strip()]
+
+
 def main():
     out = ROOT / "hardware" / "outputs"
     out.mkdir(parents=True, exist_ok=True)
@@ -66,13 +74,10 @@ def main():
     unique = len(rows)
     print(f"wrote hardware/outputs/bom.csv     {unique} lines, {total} placements")
     print(f"wrote hardware/outputs/netlist.txt {len(NETS)} nets")
-    # AGENTS.md rule 6 applies to specified parts. A 0402 resistor given as
-    # value + package + tolerance is multi-sourced by construction, so only
-    # parts carrying an MPN need an explicit alternate.
-    missing = [r["Refs"] for r in rows if r["MPN"] and not r["Second source"]]
+    missing = sourcing_errors(rows)
     if missing:
-        print("  AGENTS.md rule 6 - no second source recorded for:",
-              ", ".join(missing))
+        print("  purchasing identity / AGENTS.md rule 6 failure:",
+              "; ".join(missing))
     else:
         print("  alternate candidates recorded; NO substitute is qualified for assembly")
     return 1 if missing else 0

@@ -69,7 +69,7 @@ PASSIVE_USD = (0.008, 0.030)     # per 0402/0603/0805 1% part, LCSC basic
 # Cost-down candidates: ref -> (new price range, what it is, what it costs you)
 SWAPS = {
     "sensor": ("U2", (1.20, 2.50), "SHT40-AD1B",
-               "+-0.2 C / +-1.8 %RH instead of +-0.1 / +-1.0, and no PTFE "
+               "+-0.2 C / +-1.8 %RH instead of +-0.1 / +-1.0, and no polyimide "
                "membrane. Same footprint, same address, same driver."),
     "sensor_mid": ("U2", (2.40, 4.20), "SHT40-AD1F",
                    "keeps the filter membrane, drops only the accuracy bin. "
@@ -355,7 +355,7 @@ def reduction_report() -> str:
          scenario(d, "sensor", [("a", 5), ("b", 5)], "fab_5pcs_usd",
                   "enclosure_self", panelized=True, hand_solder=False,
                   extended=4, swaps=("sensor_mid",)),
-         "Keeps the PTFE membrane — the part that protects the multi-year "
+         "Keeps the polyimide membrane — the part that protects the multi-year "
          "measurement — and drops only the accuracy bin, ±0.2 °C / ±1.8 %RH "
          "instead of ±0.1 / ±1.0. Same footprint, same I²C address, same driver."),
     ]

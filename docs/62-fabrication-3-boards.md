@@ -22,13 +22,15 @@ three as their standard product, and three German fabs have no minimum at all.
 
 ### What three boards actually costs, bare
 
-Computed from the real outlines at OSH Park's published 4-layer rate:
+Historical sizing estimate using the previously recorded $5/in² three-copy
+4-layer rate; this is not a current supplier quote. Areas below use outline
+bounding rectangles (B has milled cutouts). Obtain a current quote before ordering:
 
 | Board | Size | Area | OSH Park 4-layer (3 copies) | Per board |
 |---|---|---:|---:|---:|
 | A — Compact | 30 × 34 mm | 1.58 in² | $15.81 | $5.27 |
-| B — Thermally isolated | 28 × 51 mm | 2.21 in² | $22.13 | $7.38 |
-| **Both, 3 + 3 = 6 boards** | | | **$37.94** | **$6.32** |
+| B — Thermally isolated | 30 × 51 mm | 2.37 in² | $23.72 | $7.91 |
+| **Both, 3 + 3 = 6 boards** | | | **$39.53** | **$6.59** |
 
 AISLER prices by area as well and quotes instantly from the uploaded files;
 their published entry point is €14.20 and roughly €9 for three small boards, so
