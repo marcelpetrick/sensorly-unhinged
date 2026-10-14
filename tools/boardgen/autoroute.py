@@ -12,7 +12,7 @@ routing session, however good the router, breaks that - the next time the neck
 width changes, someone has to route both boards again by hand and hope they made
 the same decisions twice. A router in the generator keeps the property.
 
-It is a plain Dijkstra on a 0.1 mm grid with a turn penalty and a via penalty,
+It is an A* search on a 0.1 mm grid with a turn penalty and a via penalty,
 multi-terminal via repeated multi-source searches (Prim-style), routing the
 shortest nets first. No rip-up, no shoving. It is not a good autorouter; it is a
 reproducible one, and KiCad's DRC is the judge.
@@ -24,15 +24,15 @@ import math
 from dataclasses import dataclass
 
 from . import geometry as G
-from .design import NETS, PART_BY_REF
+from .design import NETS, PART_BY_REF, NETCLASSES
 from .place import Placement
 from .route import GRID, Grid, Track, Via
 from .variants import (B_ISLAND_RECT, B_NECK_RECT, Variant, antenna_keepout,
                        sensor_keepout)
 
 LAYERS = ("F.Cu", "B.Cu")
-SIGNAL_W = 0.20
-POWER_W = 0.35
+SIGNAL_W = 0.15
+POWER_W = 0.40
 # KiCad applies the larger of the two nets' class clearances, so the router has
 # to as well. Using one worst-case number everywhere is safe and useless: at
 # 0.22 the blocking band around a 0.5 mm-pitch pad is 0.52 mm, which seals its
@@ -47,7 +47,7 @@ VIA_DRILL = 0.3
 # Blocking radii are measured from a centreline or centre, and depend on the
 # width of the net being routed *now* - blocking everything at worst-case width
 # is correct but throws away most of the board.
-MASK_EXP = 0.03
+MASK_EXP = 0.0
 
 
 def is_power(net: str | None) -> bool:
@@ -55,8 +55,10 @@ def is_power(net: str | None) -> bool:
 
 
 def clr(net_a: str | None, net_b: str | None) -> float:
-    return (CLR_POWER if (is_power(net_a) or is_power(net_b))
-            else CLR_DEFAULT) + SAFETY
+    def net_clearance(net):
+        return max((nc["clearance"] for nc in NETCLASSES.values()
+                    if net in nc["nets"]), default=CLR_DEFAULT)
+    return max(net_clearance(net_a), net_clearance(net_b)) + SAFETY
 
 
 def m_track(existing_w: float, mine: float, c: float) -> float:
@@ -112,11 +114,19 @@ def _terminals(placed: list[Placement]) -> dict[str, list[Term]]:
     return by_net
 
 
+_BASE_GRIDS = {}
+
+
 class Board:
     """Occupancy for both routable layers."""
 
     def __init__(self, v: Variant, placed: list[Placement]):
-        base = Grid(v)                      # outline + antenna keep-out
+        key = (v.key, v.width, v.height, tuple(v.outline),
+               antenna_keepout(v), sensor_keepout(v))
+        base = _BASE_GRIDS.get(key)
+        if base is None:
+            base = Grid(v)
+            _BASE_GRIDS[key] = base
         self.v = v
         self.w, self.h = base.w, base.h
         self.blocked = [bytearray(base.blocked), bytearray(base.blocked)]
@@ -140,10 +150,10 @@ class Board:
         # over-blocks by 0.2 mm, which is enough to seal every pad on a 0.5 mm
         # pitch part and make the whole connector unroutable.
         b = self.blocked[layer]
-        y_lo = max(0, math.floor(y0 / GRID))
-        y_hi = min(self.h, math.ceil(y1 / GRID) + 1)
-        x_lo = max(0, math.floor(x0 / GRID))
-        x_hi = min(self.w, math.ceil(x1 / GRID) + 1)
+        y_lo = max(0, math.ceil(y0 / GRID))
+        y_hi = min(self.h, math.floor(y1 / GRID) + 1)
+        x_lo = max(0, math.ceil(x0 / GRID))
+        x_hi = min(self.w, math.floor(x1 / GRID) + 1)
         for iy in range(y_lo, y_hi):
             row = iy * self.w
             for ix in range(x_lo, x_hi):
@@ -168,7 +178,10 @@ class Board:
                     pw, ph = ph, pw
                 through = "thru_hole" in fp.text.split(f'(pad "{name}"')[-1][:60]
                 layers = (0, 1) if through else (layer,)
-                m = m_pad(mine, clr(exclude_net, padnet.get((p.ref, name))))
+                clearance = clr(exclude_net, padnet.get((p.ref, name)))
+                if name == "":
+                    clearance = max(clearance, 0.25 + SAFETY)
+                m = m_pad(mine, clearance)
                 for (lx, ly) in pts:
                     x, y = G.xform(lx, ly, p.x, p.y, p.rot)
                     for L in layers:
@@ -227,23 +240,43 @@ def via_mask(board: "Board") -> bytearray:
     return bytearray(1 if (fa[i] or fb[i]) else 0 for i in range(len(fa)))
 
 
+def exact_via_mask(v, placed, padnet, net, tracks, vias):
+    board = Board(v, placed)
+    # Initial board mask has edge and thermal/RF keepouts, no copper. Inflate
+    # only these geometry boundaries by via radius before adding copper once.
+    for L in (0, 1):
+        board.blocked[L] = _erode(board.blocked[L], board.w, board.h,
+                                  math.ceil((VIA_SIZE/2 + SAFETY)/GRID))
+    board.add_pads(net, padnet, VIA_SIZE)
+    for tr in tracks:
+        if tr.net != net:
+            board.add_track(tr, VIA_SIZE, net)
+    for vv in vias:
+        board.add_via(vv, VIA_SIZE, net)
+    return bytearray(1 if (a or b) else 0 for a,b in zip(*board.blocked))
+
+
 DIRS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
 
 def _search(board: Board, sources: set[tuple[int, int, int]],
             targets: set[tuple[int, int, int]], allow_vias: bool,
-            vmask: bytearray | None = None):
+            vmask: bytearray | None = None, max_steps: int | None = None):
     """Multi-source Dijkstra. Returns a path (list of (ix,iy,layer)) or None."""
     best: dict[tuple[int, int, int, int], float] = {}
     prev: dict = {}
     pq = []
+    def heuristic(x, y, layer):
+        return min(abs(x - tx) + abs(y - ty) +
+                   (VIA_PENALTY if layer != tl else 0)
+                   for tx, ty, tl in targets)
     for (x, y, L) in sources:
         st = (x, y, L, -1)
         best[st] = 0.0
-        heapq.heappush(pq, (0.0, x, y, L, -1))
+        heapq.heappush(pq, (heuristic(x, y, L), 0.0, x, y, L, -1))
     goal = None
     while pq:
-        cost, x, y, L, d = heapq.heappop(pq)
+        _estimate, cost, x, y, L, d = heapq.heappop(pq)
         st = (x, y, L, d)
         if best.get(st, 1e18) < cost:
             continue
@@ -256,12 +289,14 @@ def _search(board: Board, sources: set[tuple[int, int, int]],
                 continue
             if not board.free(nx, ny, L) and (nx, ny, L) not in targets:
                 continue
+            if max_steps is not None and min(abs(nx-sx)+abs(ny-sy) for sx,sy,_ in sources) > max_steps:
+                continue
             nc = cost + 1 + (TURN_PENALTY if d != -1 and nd != d else 0)
             ns = (nx, ny, L, nd)
             if nc < best.get(ns, 1e18):
                 best[ns] = nc
                 prev[ns] = st
-                heapq.heappush(pq, (nc, nx, ny, L, nd))
+                heapq.heappush(pq, (nc + heuristic(nx, ny, L), nc, nx, ny, L, nd))
         if allow_vias and vmask is not None and not vmask[y * board.w + x]:
             nl = 1 - L
             if board.free(x, y, nl) or (x, y, nl) in targets:
@@ -270,7 +305,7 @@ def _search(board: Board, sources: set[tuple[int, int, int]],
                 if nc < best.get(ns, 1e18):
                     best[ns] = nc
                     prev[ns] = st
-                    heapq.heappush(pq, (nc, x, y, nl, -1))
+                    heapq.heappush(pq, (nc + heuristic(x, y, nl), nc, x, y, nl, -1))
     if goal is None:
         return None
     out = []
@@ -330,15 +365,45 @@ def route_rest(v: Variant, placed: list[Placement],
     def snap(t: Term):
         return (int(round(t.x / GRID)), int(round(t.y / GRID)), t.layer)
 
+    # Explicit fine-pitch power escape; wide trunks start on the back layer.
+    for net in sorted(POWER_NETS):
+        for i, t in enumerate(terms.get(net, [])):
+            if t.ref not in ("U3", "U4"):
+                continue
+            board = Board(v, placed)
+            board.add_pads(net, padnet, SIGNAL_W)
+            for tr in island_tracks + tracks:
+                if tr.net != net:
+                    board.add_track(tr, SIGNAL_W, net)
+            for vv in island_vias + vias:
+                if vv.net != net:
+                    board.add_via(vv, SIGNAL_W, net)
+            vmask = exact_via_mask(v, placed, padnet, net, island_tracks + tracks, island_vias + vias)
+            src = snap(t)
+            for vx, vy in _via_spots(board, t, vmask, limit=80):
+                if abs(vx * GRID - t.x) + abs(vy * GRID - t.y) > 2.5:
+                    continue
+                path = _search(board, {src}, {(vx, vy, t.layer)}, allow_vias=False, max_steps=25)
+                if path is None or (len(path)-1)*GRID > 2.5:
+                    continue
+                trs, _ = _to_geometry(path, SIGNAL_W, net)
+                vv = Via(net, round(vx*GRID,3), round(vy*GRID,3), VIA_SIZE, VIA_DRILL)
+                for tr in trs:
+                    tr.purpose = "power-neckdown"
+                tracks.extend(trs)
+                vias.append(vv)
+                terms[net][i] = Term(vv.x, vv.y, 1, t.ref, t.pad)
+                break
+
     # --- 1. plane nets: a via beside each pad, not a route -----------------
     for net, _layer in PLANE_NETS.items():
         board = Board(v, placed)
-        board.add_pads(net, padnet, POWER_W)
+        board.add_pads(net, padnet, SIGNAL_W)
         for t in island_tracks + tracks:
-            board.add_track(t, POWER_W, net)
+            board.add_track(t, SIGNAL_W, net)
         for vv in island_vias + vias:
-            board.add_via(vv, POWER_W, net)
-        vmask = via_mask(board)
+            board.add_via(vv, SIGNAL_W, net)
+        vmask = exact_via_mask(v, placed, padnet, net, island_tracks + tracks, island_vias + vias)
         for t in terms.get(net, []):
             if net == "GND" and t.layer == 0:
                 continue          # the F.Cu pour already covers these
@@ -350,18 +415,22 @@ def route_rest(v: Variant, placed: list[Placement],
             done = False
             for (vx, vy) in _via_spots(board, t, vmask):
                 path = _search(board, {src}, {(vx, vy, t.layer)},
-                               allow_vias=False)
+                               allow_vias=False, max_steps=25)
                 if path is None:
                     continue
-                trs, _unused = _to_geometry(path, POWER_W, net)
+                if (len(path)-1)*GRID > 2.5:
+                    continue
+                trs, _unused = _to_geometry(path, SIGNAL_W, net)
+                for tr in trs:
+                    tr.purpose = "plane-neckdown"
                 vv = Via(net, round(vx * GRID, 3), round(vy * GRID, 3),
                          VIA_SIZE, VIA_DRILL)
                 vias.append(vv)
                 for tr in trs:
                     tracks.append(tr)
-                    board.add_track(tr, POWER_W, net)
-                board.add_via(vv, POWER_W, net)
-                vmask = via_mask(board)
+                    board.add_track(tr, SIGNAL_W, net)
+                board.add_via(vv, SIGNAL_W, net)
+                vmask = exact_via_mask(v, placed, padnet, net, island_tracks + tracks, island_vias + vias)
                 done = True
                 break
             if not done:
@@ -384,18 +453,23 @@ def route_rest(v: Variant, placed: list[Placement],
     todo.sort(key=difficulty)
 
     for net, ts in todo:
+        if net in {"USB_D_P", "USB_D_N"}:
+            failed.append(f"{net}: dedicated differential routing remains open")
+            continue
         # Island routes already join U2 to the pull-ups. Finish only the
         # main-board MCU/test-pad branches; never re-enter the thermal area.
         if net in ISLAND_NETS:
             ts = [t for t in ts if t.ref != "U2"]
-        width = .15 if net in ISLAND_NETS else POWER_W if net in POWER_NETS else SIGNAL_W
+        width = .6 if net == "SW_L" else .15 if net in ISLAND_NETS else POWER_W if net in POWER_NETS else SIGNAL_W
         board = Board(v, placed)
         board.add_pads(net, padnet, width)
         for t in island_tracks + tracks:
-            board.add_track(t, width, net)
+            if t.net != net:
+                board.add_track(t, width, net)
         for vv in island_vias + vias:
-            board.add_via(vv, width, net)
-        vmask = via_mask(board)
+            if vv.net != net:
+                board.add_via(vv, width, net)
+        vmask = exact_via_mask(v, placed, padnet, net, island_tracks + tracks, island_vias + vias)
 
         # Seed from a terminal that can actually leave its pad. A pad on a
         # 0.5 mm-pitch part can be sealed by its neighbours' clearance, and
@@ -409,7 +483,11 @@ def route_rest(v: Variant, placed: list[Placement],
         connected = {cells[seed_i]}
         remaining = [c for i, c in enumerate(cells) if i != seed_i]
         while remaining:
-            path = _search(board, connected, set(remaining), allow_vias=True,
+            sources = {node for node in connected if all(
+                (node[0], node[1]) == (round(vv.x/GRID), round(vv.y/GRID))
+                or math.hypot(node[0]*GRID-vv.x, node[1]*GRID-vv.y) > (vv.size+width)/2
+                for vv in vias if vv.net == net)}
+            path = _search(board, sources, set(remaining), allow_vias=(net != "SW_L"),
                            vmask=vmask)
             if path is None:
                 # Nothing left is reachable from what we have. Report the pads,
@@ -434,6 +512,25 @@ def route_rest(v: Variant, placed: list[Placement],
                 connected.add(node)
             remaining = [r for r in remaining if r not in connected]
 
+    retained = []
+    for via in vias:
+        if via.net in PLANE_NETS:
+            retained.append(via)
+            continue
+        touching_layers = set()
+        for tr in tracks:
+            if tr.net != via.net:
+                continue
+            for (ax, ay), (bx, by) in zip(tr.pts, tr.pts[1:]):
+                length2 = (bx-ax)**2 + (by-ay)**2
+                frac = max(0, min(1, ((via.x-ax)*(bx-ax)+(via.y-ay)*(by-ay))/length2)) if length2 else 0
+                px, py = ax + frac*(bx-ax), ay + frac*(by-ay)
+                if math.hypot(via.x-px,via.y-py) <= (via.size+tr.width)/2 + 1e-9:
+                    touching_layers.add(tr.layer)
+        if len(touching_layers) >= 2:
+            retained.append(via)
+    vias = retained
+    tracks, vias = _prune_dead_branches(placed, padnet, tracks, vias, island_tracks, island_vias)
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 
@@ -461,3 +558,72 @@ def _spread(ts: list[Term]) -> float:
     xs = [t.x for t in ts]
     ys = [t.y for t in ts]
     return math.hypot(max(xs) - min(xs), max(ys) - min(ys))
+
+
+def _prune_dead_branches(placed, padnet, tracks, vias, fixed_tracks=(), fixed_vias=()):
+    """Discard unfinished maze branches without removing pad-to-pad paths.
+
+    Each copper segment needs an anchor at both ends. Iterating removes a
+    failed branch back to its last junction; immutable island routes remain
+    anchors. Plane vias terminate through the intended internal copper plane.
+    """
+    pads = []
+    for p in placed:
+        fp = G.get(p.footprint)
+        for name, points in fp.pads.items():
+            net = padnet.get((p.ref, name))
+            if net is None:
+                continue
+            w, h = fp.pad_size.get(name, (.6, .6))
+            if p.rot % 180:
+                w, h = h, w
+            layers = ("F.Cu", "B.Cu") if 'thru_hole' in fp.text.split(f'(pad "{name}"')[-1][:60] else (("B.Cu" if fp.bottom else "F.Cu"),)
+            for lx, ly in points:
+                x, y = G.xform(lx, ly, p.x, p.y, p.rot)
+                pads.append((net, layers, x-w/2, x+w/2, y-h/2, y+h/2))
+    original_tracks = tracks
+    tracks = []
+    origins = {}
+    for i, t in enumerate(original_tracks):
+        for a,b in zip(t.pts,t.pts[1:]):
+            segment = Track(t.net,t.width,t.layer,[a,b],t.purpose)
+            origins[id(segment)] = i
+            tracks.append(segment)
+    def distance(point, a, b):
+        x,y = point
+        dx,dy = b[0]-a[0],b[1]-a[1]
+        denom = dx*dx+dy*dy
+        f = max(0,min(1,((x-a[0])*dx+(y-a[1])*dy)/denom)) if denom else 0
+        return math.hypot(x-a[0]-f*dx,y-a[1]-f*dy)
+    while True:
+        old = len(tracks),len(vias)
+        all_tracks = list(fixed_tracks)+tracks
+        vias = [v for v in vias if v.net in PLANE_NETS or len({
+            t.layer for t in all_tracks if t.net == v.net and any(
+                distance((v.x,v.y),a,b) <= 1e-7
+                for a,b in zip(t.pts,t.pts[1:]))}) >= 2]
+        all_vias = list(fixed_vias)+vias
+        def anchored(t, point):
+            x,y = point
+            if any(net == t.net and t.layer in layers and x0-1e-7<=x<=x1+1e-7 and y0-1e-7<=y<=y1+1e-7
+                   for net,layers,x0,x1,y0,y1 in pads):
+                return True
+            if any(v.net == t.net and math.hypot(x-v.x,y-v.y)<=1e-7 for v in all_vias):
+                return True
+            return any(other is not t and other.net == t.net and other.layer == t.layer and any(
+                distance(point,a,b)<=1e-7 for a,b in zip(other.pts,other.pts[1:]))
+                for other in all_tracks)
+        tracks = [t for t in tracks if all(anchored(t,p) for p in (t.pts[0],t.pts[-1]))]
+        if old == (len(tracks),len(vias)):
+            # Retain contiguous runs as polylines. Splitting a run changes the
+            # later via-centering operation and can introduce diagonal cuts.
+            result = []
+            last_origin = None
+            for t in tracks:
+                origin = origins[id(t)]
+                if result and origin == last_origin and result[-1].pts[-1] == t.pts[0]:
+                    result[-1].pts.extend(t.pts[1:])
+                else:
+                    result.append(Track(t.net,t.width,t.layer,list(t.pts),t.purpose))
+                last_origin = origin
+            return result,vias

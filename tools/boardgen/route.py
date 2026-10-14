@@ -34,6 +34,7 @@ class Track:
     width: float
     layer: str
     pts: list[tuple[float, float]]
+    purpose: str = ""
 
 
 @dataclass
@@ -92,7 +93,7 @@ def center_track_ends(tracks: list[Track], vias: list[Via]) -> list[Track]:
             i += 2 if inserted else 1
         pts = [p for j, p in enumerate(pts) if j == 0 or p != pts[j - 1]]
         if any(a != b for a, b in zip(pts, pts[1:])):
-            result.append(Track(track.net, track.width, track.layer, pts))
+            result.append(Track(track.net, track.width, track.layer, pts, track.purpose))
     return result
 
 
@@ -249,7 +250,7 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         start = pads[("U2", pad)]
         outward = -1 if start[0] < v.sensor_xy[0] else 1
         end = (v.sensor_xy[0] + outward * 1.3, start[1])
-        tracks.append(Track(net, ISLAND_WIDTH, "F.Cu", [start, end]))
+        tracks.append(Track(net, ISLAND_WIDTH, "F.Cu", [start, end], "island-feed"))
         pads[("U2", pad)] = end
         margin = ISLAND_WIDTH / 2
         extra_blocked.append((net, (min(start[0], end[0])-margin, start[1]-margin,
@@ -316,7 +317,7 @@ def route_island(v: Variant, placed: list[Placement], netlist) -> list[Track]:
         if path is None:
             raise RuntimeError(f"island route failed for {net} from {src}")
         pts = _simplify(path)
-        tracks.append(Track(net, ISLAND_WIDTH, "F.Cu", pts))
+        tracks.append(Track(net, ISLAND_WIDTH, "F.Cu", pts, "island-feed"))
         cells = set()
         for i in range(len(path)):
             cells.add((int(round(path[i][0] / GRID)),

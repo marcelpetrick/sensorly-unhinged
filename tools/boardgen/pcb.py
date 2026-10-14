@@ -241,7 +241,7 @@ KO_RF = dict(tracks="not_allowed", vias="not_allowed", pads="not_allowed",
              copperpour="not_allowed", footprints="allowed")
 
 
-def _zones(v: Variant, netidx) -> str:
+def _zones(v: Variant, netidx, tracks=()) -> str:
     out = []
     # Preserve the upstream SHT4x no-under-package routing polygon explicitly
     # on the board. Embedded footprint zones cause library-parity warnings in
@@ -288,6 +288,25 @@ def _zones(v: Variant, netidx) -> str:
                          ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"],
                          _rect(sx0, sy0, sx1, sy1),
                          f"zone/quiet/{v.key}", keepout=KO_NO_POUR))
+    power_nets = {"GND", "+3V0", "VBUS", "VBAT", "VSYS"}
+    for i, track in enumerate(tracks):
+        if track.net not in power_nets or track.width >= 0.4:
+            continue
+        if track.purpose not in {"island-feed", "power-neckdown", "plane-neckdown"}:
+            raise ValueError(f"unclassified narrow power track: {track.net}")
+        if track.purpose in {"island-feed", "plane-neckdown"} and track.net not in {"GND", "+3V0"}:
+            raise ValueError(f"non-plane net marked as sensor/plane feed: {track.net}")
+        length = sum(abs(bx-ax)+abs(by-ay) for (ax,ay),(bx,by) in zip(track.pts,track.pts[1:]))
+        if track.purpose != "island-feed" and length > 2.5 + 1e-9:
+            raise ValueError(f"power neckdown exceeds 2.5 mm: {track.net}")
+        for j, ((ax, ay), (bx, by)) in enumerate(zip(track.pts, track.pts[1:])):
+            margin = track.width/2 + 0.025
+            out.append(_zone(f"Power escape {track.net} {i} {j}", "", netidx,
+                [track.layer], _rect(min(ax,bx)-margin,min(ay,by)-margin,
+                                    max(ax,bx)+margin,max(ay,by)+margin),
+                f"zone/power-escape/{v.key}/{i}/{j}",
+                keepout=dict(tracks="allowed",vias="allowed",pads="allowed",
+                             copperpour="allowed",footprints="allowed")))
     return "".join(out)
 
 
@@ -401,7 +420,7 @@ def emit(v: Variant, placed: list[Placement], tracks, vias) -> str:
     parts.append(_outline(v))
     parts.append(_silk(v, placed))
     parts.append(_tracks(tracks, vias, netidx))
-    parts.append(_zones(v, netidx))
+    parts.append(_zones(v, netidx, tracks))
     parts.append(")\n")
     return "".join(parts)
 

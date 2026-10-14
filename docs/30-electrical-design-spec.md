@@ -193,6 +193,12 @@ no convection along the neck — to be validated by Test 1–4.)
 
 ### 3.2 Main-board power widths and bounded pad escapes
 
+The provisional router uses 0.15 mm for low-current signal tracks, an engineering
+geometry choice above the existing 0.127 mm fabrication minimum. Net-class
+clearances still apply. The switch node remains a 0.60 mm top-layer-only route;
+it is left unconnected if that geometry cannot escape the regulator. The USB
+pair is left explicitly unrouted until dedicated coupled geometry is reviewed.
+
 Main-board Power-class trunks are at least **0.4 mm** wide. General fabrication
 minimum rules precede the specific power rule: KiCad resolves matching width
 rules in reverse order, so the former later 0.127 mm default could override the
@@ -205,6 +211,12 @@ The corridor is emitted from tagged, reviewed generator tracks; it is not a
 blanket exception for an IC, net or board region. The sensor's four 0.15 mm
 feeders retain their separate thermal allowance and forbidden-via rules.
 Negative controls reject a thin track extending outside its corridor.
+
+The Switch class also enforces its 0.6 mm trunk width. The checkpoint router
+leaves the USB differential pair unrouted until a coupled path passes its actual
+KiCad constraints. Failed maze branches are removed back to their last anchored
+junction; cleanup retains complete paths and fixed sensor-island routing. These
+rules improve layout validation, but remaining airwires still block fabrication.
 
 For a screening calculation, assume copper resistivity **1.8 ×10⁻⁸ Ω·m**
 (an explicit engineering assumption, not a laminate or temperature measurement),

@@ -108,6 +108,13 @@ The island-only layouts pass actual KiCad DRC on both variants. Full-board
 errors, warnings, connectivity and schematic parity must be checked again after
 regeneration; this source correction alone does not complete the layouts.
 
+The cleanup checkpoint enforces Power-class width rules after the general
+fabrication minimum, uses bounded tagged pad-escape corridors, and takes the
+larger interacting net-class clearance for obstacles. Failed construction
+branches and unused signal vias are pruned without removing connected trunks
+or the immutable sensor paths. USB maze routing is disabled pending a dedicated
+coupled route. Switch-node routes stay on the top layer. Routing remains open.
+
 ## Prior expectation, to be falsified
 
 75 % on B. The number is a prior, not a result. `50-thermal-ab-test-plan.md`
