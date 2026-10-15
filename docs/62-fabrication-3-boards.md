@@ -1,5 +1,9 @@
 # 62 — Fabricating Three Boards
 
+**2026-10-15:** Supplier and assembly recommendations below are historical.
+The [current manufacturer review](../manufacturer_review20261015.md) supersedes
+them with current public rates, assembly-MOQ qualifications and batching analysis.
+
 The question: **who will make just three of these, and what does the antenna
 need from them?**
 
@@ -22,7 +26,7 @@ three as their standard product, and three German fabs have no minimum at all.
 
 ### What three boards actually costs, bare
 
-Historical sizing estimate using the previously recorded $5/in² three-copy
+Sizing calculation using the published $10/in² three-copy
 4-layer rate; this is not a current supplier quote. Areas below use outline
 bounding rectangles (B has milled cutouts). Obtain a current quote before ordering:
 
@@ -139,7 +143,8 @@ hardware/outputs/rev-b/gerber/
 hardware/outputs/rev-b/drill/
 ```
 
-Both variants are 4-layer FR-4, 1.6 mm, and both fit inside 50 × 50 mm. `make
+Both variants are 4-layer FR-4, 1.6 mm. A is 30 × 34 mm; B is 30 × 51 mm
+and does not fit inside 50 × 50 mm. `make
 outputs` and the Hardware Quality workflow deliberately mark these files as
 **draft, not for fabrication**. Timestamp-bearing outputs are built by CI and
 are not committed.
