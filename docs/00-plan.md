@@ -18,7 +18,7 @@ finished product in its case** — not as a datasheet number.
 > One electrical platform. Two physical implementations. Decide by measurement.
 
 **Variant A — Compact.** Everything on ~30 × 34 mm. Smallest possible node.
-**Variant B — Thermally isolated.** 28 × 51 mm in the current generated model
+**Variant B — Thermally isolated.** 30 × 51 mm in the current generated model
 (original target ~28 × 48 mm), the sensor sits on a milled
 tongue joined by a narrow FR-4 neck with four thin traces and *no* inner-layer
 copper; the enclosure splits into a sensor chamber and an electronics chamber.
@@ -37,9 +37,9 @@ side, measure the systematic offset, then pick. Prior expectation: B wins with
 | **3** | Schematic (shared) | `hardware/schematic/` | ERC clean, review checklist signed |
 | **4** | Libraries | verified symbols/footprints | pin-1, rotation, land pattern checked vs datasheet |
 | **5** | Floorplans A + B | `40-floorplans.md`, `boardgen` model | envelopes fit the enclosure concept |
-| **6** | Layout A ∥ Layout B | two `.kicad_pcb` | DRC clean, RF + thermal keepouts honoured |
+| **6** | Layout A ∥ Layout B | two `.kicad_pcb` | zero errors, warnings, unconnected items and parity differences; reviewed power/return paths and RF/thermal keepouts |
 | **7** | Enclosures A + B | `mechanical/` OpenSCAD | vents at the sensor, 15 mm antenna clearance |
-| **8** | Production package | `hardware/outputs/rev-a`, `rev-b`; tagged archives in `_build/release` | gerber/drill/BOM/CPL/STEP, DFM reviewed |
+| **8** | Prototype manufacturing package | reviewed prototype archives; draft exports in `hardware/outputs/rev-a`, `rev-b` | complete gerber/drill/BOM/CPL/STEP, accepted DFM/CPL/stackup and genuine prototype-order reviews |
 | **9** | Prototype order | 5 × A + 5 × B PCBA | quotes compared, boards on order |
 | **10** | Firmware bring-up | ESP-IDF app + factory test | self-test PASS on every board |
 | **11** | **A/B thermal experiment** | `50-thermal-ab-test-plan.md` + data | **the decision gate** |
@@ -51,6 +51,9 @@ parametric generator in `tools/boardgen/`: both boards are emitted from one
 model, so a rule change cannot silently apply to only one variant.
 
 ## Schedule (focused part-time)
+
+This is the original planning sequence, not a current delivery commitment.
+Use the work packages and evidence states in the execution plan for current work.
 
 W1 requirements + parts · W2 schematic + libraries · W3 layout A∥B + enclosure
 concept · W4 DRC/DFM + order prototypes · W5–6 firmware, backend, fixture,

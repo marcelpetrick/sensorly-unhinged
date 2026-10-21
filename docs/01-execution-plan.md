@@ -46,7 +46,73 @@ signed OTA are still unimplemented. Boards remain at 59/60 unrouted connections.
 All five prototype review slots and all seven product qualification slots remain
 open. A public engineering source prerelease does not authorize fabrication.
 
-## Active prototype completion plan — 2026-10-14
+## Active prototype completion plan — 2026-10-21
+
+### Execution order and review gates for the resumed work
+
+The starting revision is `507ca93`, with a clean working tree. The October 15
+manufacturer review is committed; its public prices are dated research, not
+received quotations or supplier acceptance. The last verified electrical state
+is zero ERC/DRC errors, warnings and parity differences, with **59 A / 52 B
+unconnected items**. The following work packages replace an undifferentiated
+"finish everything" task. The historical checkpoints below remain evidence of
+what was checked then, rather than current fabrication approval.
+
+| Work package | Owner / allowed edits | Concrete result and acceptance | Dependency / state |
+|---|---|---|---|
+| W0 — Reconcile the plan and establish the baseline | Coordinator; plan and review record | Map each ordered gate to existing source, executable checks or missing external evidence; run current checks and record the integration branch and merge base. | Complete: baseline pipeline and pinned SDK build pass; review recorded below |
+| W1 — Correct misleading generated cost/quantity claims | Cost maintainer; cost generator, its tests and generated cost reports | Count fitted parts/joints/MPNs with R21 excluded; derive A/B envelopes and area comparison; stop presenting unsupported panel/setup savings, historical rates or vendor ranking as current quotes. Add focused regressions and regenerate from `make cost`. | Independent of routing; ready |
+| W2a — Finish deliberate power, ground and fine-pitch fanout | PCB maintainer; isolated scratch model first | Route regulator/charger supply and returns deliberately, including required ground stitching; preserve power widths, bounded escapes and keepouts. Integrate only changes validated on **both** filled boards, with reviewed remaining connectivity. | Starts after W0; first routing stream |
+| W2b — Finish native USB pair and fixture branches | PCB maintainer; separate scratch model first | A coupled U1/U5/J1 route plus reversible contacts and test-pad branches; actual differential DRC remains active. Any placement change must pass both board and enclosure checks and retain documented pin numbering. | Starts after W0; independent experiment, coordinated integration with W2a |
+| W2c — Close every remaining connection | Coordinator + PCB maintainers; shared generator | Finish control/test-pad branches, then require **zero unconnected items**, errors, warnings and parity differences on A and B. Review power loops, sense points and return paths separately from DRC. | Depends on accepted W2a/W2b; fabrication blocker |
+| W3 — Verify the complete source checkpoint | Coordinator + independent reviewer | Byte-identical generation, host and actual KiCad controls, ERC/DRC/parity, enclosure meshes/interference, pinned firmware build and full local pipeline. Review the branch and current uncommitted files; fix confirmed findings before atomic commits/push. | After each accepted source checkpoint and finally after W2c |
+| W4 — Obtain fabrication and order acceptance | Hardware maintainer, supplier, assembler and named order reviewer | Exact available BOM/attrition quote, pack/harness/NTC confirmation, accepted stackup/panel/CPL/DFM and sensor handling, then genuine prototype-review evidence and checksum-verified order archive. | Requires completed layouts; external records absent |
+| W5 — Build and qualify the experiment | Hardware/test maintainer with physical samples | Receive the controlled 5 A + 5 B lot, inspect and execute staged power/wake/fit/RF/thermal/RH tests with serial-linked raw records. The researched 3 + 3 pricing option does not change the locked sample plan. | Requires W4 and physical boards; cannot be replaced by simulation |
+| W6 — Finish product behavior and the controlled series | Firmware/test/hardware maintainers | Implement and test journal/provisioning/MQTT/TLS/signed OTA and protected charge supervision against docs 71; execute the A/B decision, Rev 2 and the 20-unit acceptance gates. | Preserve the ordered gates below; do not silently enable charging or USB500 |
+
+**Integration discipline.** Keep hardware experiments isolated until their exact
+source has passed fresh KiCad checks; do not merge competing placement/router
+changes concurrently. Both layouts retain one electrical model and firmware.
+Never relax clearances, differential-pair checks, thermal/RF exclusions or
+manufacturing evidence gates to obtain a passing result. An unrouted development
+checkpoint may be committed with its exact count documented, but W2c remains
+open until both counts are zero. Physical safety and measurement gates remain
+open until actual evidence is supplied.
+
+**Review cadence.** Apply `reviewBranch` at the initial baseline, after an
+accepted routing/integration checkpoint, and before the final push. Resolve
+`master`/`main`/`develop` from Git refs and record the merge base. In addition to
+the committed three-dot branch diff, inspect the current working-tree diff and
+new files, as requested. Each checkpoint records confirmed Code/Architecture
+findings with actual file/line locations; check removed or bypassed guards and
+trace their replacement invariants. Treat DRC as one check, alongside explicit
+pin/polarity, power-loop, sensor-process, mechanics and firmware-policy review.
+
+**Progress reporting.** Report completed work, new evidence, remaining blockers
+and the next concrete action while work runs. Do not report tasks or checks as
+running between sessions, or assign completion percentages from partially
+implemented gates. W4/W5 require outside records and hardware; continue all
+independent source work while those inputs are unavailable.
+
+### Fresh baseline verification — 2026-10-21
+
+At `507ca93`, an isolated clean worktree passed all 15 local pipeline stages,
+90 host regressions and 14 actual KiCad controls. Both filled boards have zero
+errors, warnings and parity differences, with 59 A / 52 B unconnected items.
+The pinned ESP-IDF v5.5.4 build passed (application size `0x2d5f0` bytes).
+Logs are local diagnostics at `/tmp/sensorly-baseline-20261021.log` and
+`/tmp/sensorly-firmware-20261021.log`, not physical qualification records.
+
+The initial `reviewBranch` checkpoint resolves `master` at merge base
+`d50053b`. It includes current edits and new files. A confirmed new issue at
+`tools/boardgen/project.py:160` applies the 0.6 mm Switch trunk minimum at U3's
+0.5 mm-pitch pads, preventing a clearance-compliant escape. W2a must replace
+that impossible constraint with a reviewed, bounded pad escape and actual
+positive/negative KiCad controls while retaining the trunk minimum. The cost
+corrections in W1 address DNP counting and unsupported panel/vendor claims.
+The charger bypass placement concern predates this branch and is treated as
+layout completion work, rather than a branch regression. All external evidence
+and physical qualification states remain open.
 
 ### Immediate source cleanup and atomic commit plan
 
