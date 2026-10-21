@@ -61,7 +61,7 @@ what was checked then, rather than current fabrication approval.
 | Work package | Owner / allowed edits | Concrete result and acceptance | Dependency / state |
 |---|---|---|---|
 | W0 — Reconcile the plan and establish the baseline | Coordinator; plan and review record | Map each ordered gate to existing source, executable checks or missing external evidence; run current checks and record the integration branch and merge base. | Complete: baseline pipeline and pinned SDK build pass; review recorded below |
-| W1 — Correct misleading generated cost/quantity claims | Cost maintainer; cost generator, its tests and generated cost reports | Count fitted parts/joints/MPNs with R21 excluded; derive A/B envelopes and area comparison; stop presenting unsupported panel/setup savings, historical rates or vendor ranking as current quotes. Add focused regressions and regenerate from `make cost`. | Independent of routing; ready |
+| W1 — Correct misleading generated cost/quantity claims | Cost maintainer; cost generator, its tests and generated cost reports | Count fitted parts/joints/MPNs with R21 excluded; derive A/B envelopes and area comparison; stop presenting unsupported panel/setup savings, historical rates or vendor ranking as current quotes. Add focused regressions and regenerate from `make cost`. | Complete: `681f69b` source/tests, `6447fe7` generated reports; full pipeline passes |
 | W2a — Finish deliberate power, ground and fine-pitch fanout | PCB maintainer; isolated scratch model first | Route regulator/charger supply and returns deliberately, including required ground stitching; preserve power widths, bounded escapes and keepouts. Integrate only changes validated on **both** filled boards, with reviewed remaining connectivity. | Starts after W0; first routing stream |
 | W2b — Finish native USB pair and fixture branches | PCB maintainer; separate scratch model first | A coupled U1/U5/J1 route plus reversible contacts and test-pad branches; actual differential DRC remains active. Any placement change must pass both board and enclosure checks and retain documented pin numbering. | Starts after W0; independent experiment, coordinated integration with W2a |
 | W2c — Close every remaining connection | Coordinator + PCB maintainers; shared generator | Finish control/test-pad branches, then require **zero unconnected items**, errors, warnings and parity differences on A and B. Review power loops, sense points and return paths separately from DRC. | Depends on accepted W2a/W2b; fabrication blocker |
@@ -102,6 +102,13 @@ errors, warnings and parity differences, with 59 A / 52 B unconnected items.
 The pinned ESP-IDF v5.5.4 build passed (application size `0x2d5f0` bytes).
 Logs are local diagnostics at `/tmp/sensorly-baseline-20261021.log` and
 `/tmp/sensorly-firmware-20261021.log`, not physical qualification records.
+
+The cost checkpoint at `6447fe7` also passes all 15 pipeline stages, now
+with 96 host regressions; KiCad's 14 controls, enclosure checks and deterministic
+regeneration pass. Fitted costing excludes R21 and reports 46 parts, 198 SMT
+joints and 26 exact MPNs. The September rates remain historical illustrations;
+no panel acceptance or fresh quote is implied. Log:
+`/tmp/sensorly-cost-checkpoint-20261021.log`.
 
 The initial `reviewBranch` checkpoint resolves `master` at merge base
 `d50053b`. It includes current edits and new files. A confirmed new issue at
