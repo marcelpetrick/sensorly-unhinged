@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2026 Marcel Petrick <mail@marcelpetrick.it>
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Manufacturing cost estimate, computed from the actual design.
+"""Historical manufacturing-cost illustration with current design quantities.
 
 Joint counts, component counts and board areas come from the board model, so
 this cannot drift away from what would actually be ordered. The *rates* are
@@ -20,13 +20,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .boardgen import geometry as G
-from .boardgen.design import PARTS, PART_BY_REF
+from .boardgen.design import PARTS
 from .boardgen.variants import VARIANTS
 
 ROOT = Path(__file__).resolve().parents[1]
 RESEARCHED = "2026-09-09"
-USD_EUR = 0.92           # planning rate only
-VAT_DE = 0.19            # German import VAT on goods + freight
+USD_EUR = 0.92           # historical planning conversion, not current FX
+VAT_DE = 0.19            # historical arithmetic assumption; excludes duty/clearance
 
 # --------------------------------------------------------------------------
 # Rates. Every line carries where it came from.
@@ -39,9 +39,9 @@ RATES = {
     "manual_joint_usd": (0.0164, "JLCPCB manual assembly, per joint"),
     "hand_solder_order_usd": (3.58, "JLCPCB hand-soldering labour, per order"),
     "extended_part_usd": (3.00, "JLCPCB fee per unique extended-library part"),
-    # PCB fabrication, 4-layer FR-4, both boards are under 50 x 50 mm
+    # Historical sub-50 mm fabrication allowances; NOT quotes for current B (51 mm).
     "fab_5pcs_usd": ((2.00, 9.00), "JLCPCB 4-layer, <50x50 mm, 5 pcs "
-                     "(promotional floor to realistic with options)"),
+                     "(historical allowance; not a quote for this design)"),
     "fab_20pcs_usd": ((11.00, 32.00), "JLCPCB 4-layer, <50x50 mm, 20 pcs"),
     "freight_usd": ((14.00, 28.00), "JLCPCB express to Germany, small parcel"),
 }
@@ -60,7 +60,7 @@ BOM_PRICES = {
     "J1": ((0.08, 0.20), "HRO TYPE-C-31-M-12, commodity 16P receptacle"),
     "J2": ((0.50, 0.60), "Molex 53261-0371; Mouser Germany EUR 0.542@1 / "
            "0.464@10 on 2026-09-09, converted with the report planning rate"),
-    "L1": ((0.25, 0.55), "Murata DFE201612E-2R2M shielded inductor"),
+    "L1": ((0.25, 0.55), "historical Murata DFE201612E family allowance; exact =P2 quote TBC"),
     "SW1": ((0.12, 0.35), "SMD tactile switch"),
     "D1": ((0.01, 0.04), "0603 green LED"),
 }
@@ -77,7 +77,7 @@ SWAPS = {
     "mcu": ("U1", (1.40, 2.20), "ESP32-C3-MINI-1-N4",
             "loses 802.15.4 (Thread/Zigbee/Matter) and Wi-Fi 6 TWT. Same "
             "module outline and land pattern, but a different pin map - a "
-            "netlist change in design.py, not a board respin."),
+            "netlist, board and firmware redesign; unqualified candidate."),
     "charger": ("U4", (0.20, 0.45), "MCP73831",
                 "loses the power path, so the load hangs off the cell while "
                 "charging, and loses the NTC input. Different footprint."),
@@ -107,38 +107,53 @@ class Design:
     extended: int
     area_a: float
     area_b: float
+    material_area_a: float
+    material_area_b: float
+
+
+def fitted_parts():
+    """The same population excluded from BOM/CPL exports, including DNP."""
+    return [p for p in PARTS if not p.dnp and not p.exclude_from_bom
+            and not p.ref.startswith("TP")]
+
+
+def material_area(outline):
+    """Shoelace polygon area, mm²; independent of the fab billing rectangle."""
+    pairs = zip(outline, outline[1:] + outline[:1])
+    return abs(sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in pairs)) / 2
 
 
 def measure() -> Design:
-    smt = tht = comps = passives = 0
-    for p in PARTS:
-        if p.ref.startswith("TP") or p.exclude_from_bom:
-            continue
+    smt = tht = passives = 0
+    fitted = fitted_parts()
+    for p in fitted:
         fp = G.get(p.footprint)
         n = sum(len(v) for v in fp.pads.values())
         n_tht = len(re.findall(r'\(pad "[^"]*" thru_hole ', fp.text))
         n_np = len(re.findall(r'\(pad "[^"]*" np_thru_hole ', fp.text))
-        comps += 1
         tht += n_tht
         smt += n - n_tht - n_np
         if p.ref[0] in "RCL" and p.ref not in BOM_PRICES:
             passives += 1
     a, b = VARIANTS["a"], VARIANTS["b"]
-    return Design(smt, tht, comps, len({p.value for p in PARTS
-                                        if not p.exclude_from_bom}),
-                  passives, len(EXTENDED_REFS),
-                  a.width * a.height / 100.0, b.width * b.height / 100.0)
+    return Design(smt, tht, len(fitted), len({p.mpn for p in fitted}),
+                  passives, len(EXTENDED_REFS & {p.ref for p in fitted}),
+                  a.width * a.height / 100.0, b.width * b.height / 100.0,
+                  material_area(a.outline) / 100.0, material_area(b.outline) / 100.0)
 
 
 def bom_cost(d: Design, swaps: tuple[str, ...] = ()) -> tuple[float, float]:
     replaced = {SWAPS[k][0]: SWAPS[k][1] for k in swaps}
     lo = hi = 0.0
-    for ref, ((l, h), _src) in BOM_PRICES.items():
-        l, h = replaced.get(ref, (l, h))
+    for part in fitted_parts():
+        if part.ref in BOM_PRICES:
+            l, h = replaced.get(part.ref, BOM_PRICES[part.ref][0])
+        elif part.ref[0] in "RCL":
+            l, h = PASSIVE_USD
+        else:
+            raise ValueError(f"No historical price allowance for fitted {part.ref}")
         lo += l
         hi += h
-    lo += d.passives * PASSIVE_USD[0]
-    hi += d.passives * PASSIVE_USD[1]
     return lo, hi
 
 
@@ -164,7 +179,8 @@ def assembly_cost(d: Design, qty: int, *, extended: int | None = None,
 def scenario(d: Design, name: str, groups: list[tuple[str, int]],
              fab_key: str, enclosure: str, *, panelized: bool = False,
              swaps: tuple[str, ...] = (), extended: int | None = None,
-             hand_solder: bool = True) -> dict:
+             hand_solder: bool = True, panel_setup_shared: bool = False,
+             panel_fab_usd: tuple[float, float] | None = None) -> dict:
     parts_lo, parts_hi = bom_cost(d, swaps)
     total_units = sum(q for _v, q in groups)
 
@@ -172,13 +188,15 @@ def scenario(d: Design, name: str, groups: list[tuple[str, int]],
     fab = (fab_lo * len(groups), fab_hi * len(groups))
 
     if panelized:
-        # A and B carry the identical BOM, so one panel means one setup, one
-        # stencil and one feeder load for both variants.
+        # Shared BOM does not establish vendor acceptance, setup sharing or
+        # panel fabrication price. Callers must explicitly supply both.
+        if not panel_setup_shared or panel_fab_usd is None:
+            raise ValueError("panel scenario needs accepted shared setup and a panel fabrication allowance")
         asm_lo, asm_hi = assembly_cost(d, total_units, extended=extended,
                                        hand_solder=hand_solder)
         asm_lo += PANEL_FEE_USD
         asm_hi += PANEL_FEE_USD
-        fab = (fab_lo, fab_hi)          # one panel, one fabrication order
+        fab = panel_fab_usd
     else:
         asm_lo = asm_hi = 0.0
         for _variant, q in groups:
@@ -223,217 +241,163 @@ def eur(lo, hi, dp=0):
 
 def report() -> str:
     d = measure()
-    protos = scenario(d, "Rev 1 prototypes — 5 × A + 5 × B",
+    a, b = VARIANTS["a"], VARIANTS["b"]
+    protos = scenario(d, "Historical 5 × A + 5 × B illustration",
                       [("a", 5), ("b", 5)], "fab_5pcs_usd", "enclosure_self")
-    series = scenario(d, "Rev 2 series — 20 × the chosen variant",
+    series = scenario(d, "Historical 20 × chosen variant illustration",
                       [("b", 20)], "fab_20pcs_usd", "enclosure_self")
+    o = [f"""# 60 — Historical Manufacturing Cost Illustration (generated)
 
-    o = [f"""# 60 — Manufacturing Cost Estimate (generated)
+<!-- Generated by `make cost` from tools/cost.py. Do not edit: change the model,
+     re-run, commit both. -->
 
-<!-- Generated by `make cost` from tools/cost.py. Do not edit: change the rate
-     table, re-run, commit both. -->
+**Historical arithmetic only: these are not current quotes or delivered-price
+bounds.** Rates are retained from {RESEARCHED}, using the old planning conversion
+USD→EUR {USD_EUR} and a {VAT_DE:.0%} VAT arithmetic assumption. They have not been
+revalidated for the current footprint/BOM or current taxes. The
+[15 October manufacturer review](../manufacturer_review20261015.md) supersedes
+this document for supplier selection and explains current quote requirements.
+No order or release is authorized by this report.
 
-**These are planning estimates, not quotes.** The quantities below come from the
-real board model — joints, components and areas are counted from the generated
-files — but every *rate* is a researched input that goes stale. A real quote
-from the vendor's own uploader replaces this file, it does not agree with it.
+## Current fitted design, counted from the shared model
 
-Rates researched {RESEARCHED}. USD→EUR at {USD_EUR}. German import VAT
-{VAT_DE:.0%} applied to goods + freight.
-
-## What is actually being built
-
-| | |
+| Quantity per board | Count |
 |---|---:|
-| Components per board (excl. test pads) | {d.components} |
-| SMT solder joints | {d.smt_joints} |
-| Through-hole joints (USB-C shield lugs) | {d.tht_joints} |
-| Distinct BOM lines | {d.bom_lines} |
-| Passives (0402/0603/0805) | {d.passives} |
-| Likely extended-library parts | {d.extended} |
-| Variant A area | {d.area_a:.1f} cm² |
-| Variant B area | {d.area_b:.1f} cm² |
+| Fitted components, excluding test pads and DNP | {d.components} |
+| Fitted SMT package joints | {d.smt_joints} |
+| Fitted through-hole joints (USB shield) | {d.tht_joints} |
+| Unique fitted MPNs | {d.bom_lines} |
+| Passives using a generic historical price allowance | {d.passives} |
+| Assumed chargeable Extended types (unverified) | {d.extended} |
+| A bounding rectangle | {a.width:.0f} × {a.height:.0f} mm / {d.area_a:.2f} cm² |
+| B bounding rectangle | {b.width:.0f} × {b.height:.0f} mm / {d.area_b:.2f} cm² |
+| A actual outline material | {d.material_area_a:.2f} cm² |
+| B actual outline material | {d.material_area_b:.2f} cm² |
 
-Both boards fit inside 50 × 50 mm, which is the size band where 4-layer
-fabrication is cheapest — that is not an accident of the floorplan.
+R21 is DNP and contributes neither a placement, joints nor component cost.
+Distinct MPNs are counted independently of equal value labels. The Extended
+count is a historical assumption, not a checked assembly-library classification.
+
+B has {(d.material_area_b / d.material_area_a - 1) * 100:.1f}% more actual material,
+but {(d.area_b / d.area_a - 1) * 100:.1f}% more bounding-rectangle area than A.
+**B exceeds 50 mm in one dimension.** Neither material area nor a shared BOM
+establishes a fab price band; irregular routing, rails, finish and the accepted
+stackup must be quoted. The old sub-50 mm fab allowances below are retained only
+to expose the historical calculation and are not applicable quotes for B.
 """]
-
-    for s in (protos, series):
+    for row in (protos, series):
         o.append(f"""
-## {s['name']}
+## {row['name']}
 
-| Line | | Cost |
+These totals assume one combined shipment, separate setup for each layout,
+{d.extended} chargeable Extended types, generic passive prices and zero customs
+duty/clearance charges. Their low/high columns vary old inputs, not all unknowns.
+
+| Historical allowance | Currency | Range |
 |---|---|---:|
-| PCB fabrication | USD, pre-VAT | ${s['fab'][0]:,.0f}–{s['fab'][1]:,.0f} |
-| Assembly — setup, stencil, feeders, {d.smt_joints} joints × {s['units']} | USD, pre-VAT | ${s['asm'][0]:,.0f}–{s['asm'][1]:,.0f} |
-| Components — {s['units']} × board BOM | USD, pre-VAT | ${s['comps'][0]:,.0f}–{s['comps'][1]:,.0f} |
-| Freight to Germany | USD | ${s['freight'][0]:,.0f}–{s['freight'][1]:,.0f} |
-| **Landed PCBA, incl. {VAT_DE:.0%} import VAT** | EUR | **{eur(*s['landed_pcba'])}** |
-| Batteries, printed cases, labels — bought in the EU | EUR | {eur(*s['finishing'])} |
-| **Total programme** | EUR | **{eur(*s['total'])}** |
-| **Per finished unit** | EUR | **{eur(*s['per_unit'], dp=2)}** |
+| Bare fabrication (unverified size/options) | USD | ${row['fab'][0]:.0f}–{row['fab'][1]:.0f} |
+| Assembly setup, stencil, feeders and joints | USD | ${row['asm'][0]:.0f}–{row['asm'][1]:.0f} |
+| Fitted components | USD | ${row['comps'][0]:.0f}–{row['comps'][1]:.0f} |
+| Freight | USD | ${row['freight'][0]:.0f}–{row['freight'][1]:.0f} |
+| PCBA arithmetic with assumed 19% VAT, before duty/clearance | EUR | {eur(*row['landed_pcba'])} |
+| Pack, in-house case and miscellaneous allowances | EUR | {eur(*row['finishing'])} |
+| Partial project arithmetic | EUR | {eur(*row['total'])} |
+| Partial arithmetic per unit | EUR | {eur(*row['per_unit'], dp=2)} |
 """)
+    o.append("""
+## Missing quote inputs and vendor comparison
 
-    o.append(f"""
-## Where the money goes
+Obtain dated exact-MPN availability, minimum purchases, attrition and surplus
+terms, actual stackup, array/depanelization acceptance, inspection, firmware and
+functional-test scope, rework terms and freight/Incoterms. The pack/NTC/harness,
+case service, fixture, reference instruments, engineering, failed units and
+formal qualification are not fully priced. Generic allowances do not qualify
+any alternate component. This is not an all-in landed or finished-product cost.
 
-At these quantities the **components dominate**, and inside the components two
-parts dominate: the ESP32-C6 module (${BOM_PRICES['U1'][0][0]:.2f}–{BOM_PRICES['U1'][0][1]:.2f})
-and the SHT45-AD1F (${BOM_PRICES['U2'][0][0]:.2f}–{BOM_PRICES['U2'][0][1]:.2f}).
-Together they are roughly two thirds of the bill of materials. Everything else —
-charger, regulator, connectors, {d.passives} passives — is about a dollar and a half.
+There is no demonstrated China/EU price or schedule ranking. Compare accepted
+quotations for the same deliverable, including recoverable VAT where applicable;
+see the manufacturer review for process eligibility and import-cost treatment.
 
-That has a direct consequence for the A/B decision: **variant B's extra 28 % of
-board area is nearly free.** Fabrication is a small fraction of the total and
-both boards sit in the same sub-50 mm price band. If B wins the thermal test, it
-does not lose on cost.
+## Historical input record
 
-The one lever that would move the number is the sensor. Dropping to SHT40-AD1B
-saves roughly $1.50–2.50 per unit — about 8 % of the finished cost — at the price
-of ±1.8 %RH instead of ±1.0 %RH and no filter membrane. That trade is open item
-CS-1 and it should be decided on the Rev 1 humidity data, not on this table.
+JLC assembly fee source: https://jlcpcb.com/help/article/pcb-assembly-price .
+The source links and exact supplier questions were revisited in the October
+manufacturer review; the values below deliberately preserve the September model.
 
-## Route comparison
-
-| | China turnkey (JLCPCB-class) | EU (Aisler / Eurocircuits) |
-|---|---|---|
-| Boards + assembly | cheapest by a wide margin at these volumes | ~2–3× on the PCBA line |
-| Lead time | 1–3 weeks incl. freight | days to ~1 week |
-| VAT / customs | 19 % import VAT, paperwork, occasional delays | VAT handled domestically |
-| Part sourcing | LCSC library, extended-part fees | you often supply or they source at distributor prices |
-| When it wins | prototypes and small series like this one | when transit time, documentation or IPC class matter |
-
-For 5 + 5 prototypes and a 20-unit series the China route is the obvious choice
-on cost. The EU route becomes interesting the moment schedule matters more than
-€200, or if the boards ever need IPC Class 2/3 documentation.
-
-## What this estimate deliberately excludes
-
-Engineering time. Test equipment and the reference hygrometer. The pogo fixture.
-Failed prints and scrapped boards — budget one full spare set. Formal RED/EMC
-testing, which is a five-figure line item and is why Rev 1 uses a pre-certified
-module and stays a personal project.
-
-## Sources
-
-| Rate | Source |
+| Input | Historical source or assumption |
 |---|---|""")
-    for _k, (_v, src) in RATES.items():
-        o.append(f"| {_k} | {src} |")
-    for ref, (_p, src) in BOM_PRICES.items():
-        o.append(f"| {ref} | {src} |")
-    for k, (_p, src) in EXTRAS_EUR.items():
-        o.append(f"| {k} | {src} |")
+    for key, (_value, source) in RATES.items():
+        o.append(f"| {key} | {source} |")
+    for ref, (_price, source) in BOM_PRICES.items():
+        o.append(f"| {ref} | {source} |")
+    for key, (_price, source) in EXTRAS_EUR.items():
+        o.append(f"| {key} | {source} |")
     return "\n".join(o) + "\n"
 
 
-# --------------------------------------------------------------------------
-# Cost reduction
-# --------------------------------------------------------------------------
 def reduction_report() -> str:
     d = measure()
-    base = scenario(d, "baseline", [("a", 5), ("b", 5)], "fab_5pcs_usd",
-                    "enclosure_self")
-    steps = [
-        ("Baseline — two separate orders", base,
-         "5 × A and 5 × B ordered as two jobs, as costed in `60-manufacturing-cost.md`."),
-        ("Panelise A and B on one panel",
-         scenario(d, "panel", [("a", 5), ("b", 5)], "fab_5pcs_usd",
-                  "enclosure_self", panelized=True),
-         "A and B carry the **identical BOM**, so one panel means one setup, one "
-         "stencil and one feeder load instead of two. Costs one panel fee "
-         f"(${PANEL_FEE_USD:.2f}) and buys back everything else."),
-        ("+ all-SMD USB-C, fewer extended parts",
-         scenario(d, "smd", [("a", 5), ("b", 5)], "fab_5pcs_usd",
-                  "enclosure_self", panelized=True, hand_solder=False,
-                  extended=4),
-         "A fully-SMD USB-C receptacle removes the 4 through-hole shield lugs, "
-         "and with them the hand-soldering line entirely. Sourcing the "
-         "connector, inductor, button and battery header from the basic library "
-         "halves the per-part feeder fees."),
-        ("+ SHT40-AD1F instead of SHT45-AD1F",
-         scenario(d, "sensor", [("a", 5), ("b", 5)], "fab_5pcs_usd",
-                  "enclosure_self", panelized=True, hand_solder=False,
-                  extended=4, swaps=("sensor_mid",)),
-         "Keeps the polyimide membrane — the part that protects the multi-year "
-         "measurement — and drops only the accuracy bin, ±0.2 °C / ±1.8 %RH "
-         "instead of ±0.1 / ±1.0. Same footprint, same I²C address, same driver."),
-    ]
-
-    o = [f"""# 61 — Cost Reduction (generated)
+    one_job = assembly_cost(d, 5)
+    both_jobs = tuple(2 * v for v in one_job)
+    shared_job = tuple(v + PANEL_FEE_USD for v in assembly_cost(d, 10))
+    saving = tuple(a - b for a, b in zip(both_jobs, shared_job))
+    return f"""# 61 — Historical Cost-Reduction Sensitivities (generated)
 
 <!-- Generated by `make cost` from tools/cost.py. Do not edit. -->
 
-`60-manufacturing-cost.md` costs the design as drawn and stays as it is. This
-file asks the separate question: **what would actually make it cheaper, and what
-does each saving cost us?**
+**Historical {RESEARCHED} input model, not quotations or vendor recommendations.**
+[The manufacturer review](../manufacturer_review20261015.md) supersedes this
+report for purchasing. [The cost illustration](60-manufacturing-cost.md) records
+current fitted counts and the limitations of the old rates.
 
-Same rate table, same researched sources, same caveat — planning estimates, not
-quotes.
+## Pool purchasing and shipping before assuming shared assembly setup
 
-## The ladder
+One procurement pool and one parcel may avoid duplicate handling while keeping
+two fabrication/placement jobs. A and B share {d.bom_lines} fitted MPNs, but have
+separate placement files and different sensor-bypass capacitor C6 rotations.
+A shared electrical BOM
+therefore does not establish one stencil, one setup or vendor panel acceptance.
+AISLER excludes standard mixed-design panels; other vendors impose eligibility,
+size, spacing or job-charge conditions. See the dated manufacturer review.
 
-Each row includes the ones above it.
+The following **assembly-only conditional arithmetic** assumes acceptance of one
+shared setup and all historical fee inputs, including {d.extended} chargeable
+Extended types. It excludes the panel fabrication price and every additional
+engineering/support/depanelization/inspection charge.
 
-| Change | Assembly (USD) | Per finished unit | Saved |
-|---|---:|---:|---:|"""]
-    base_unit = base["per_unit"]
-    for name, s_, _why in steps:
-        saved = ((base_unit[0] - s_["per_unit"][0]) / base_unit[0] * 100,
-                 (base_unit[1] - s_["per_unit"][1]) / base_unit[1] * 100)
-        sv = "—" if s_ is base else f"{saved[0]:.0f}–{saved[1]:.0f} %"
-        o.append(f"| {name} | ${s_['asm'][0]:,.0f}–{s_['asm'][1]:,.0f} | "
-                 f"{eur(*s_['per_unit'], dp=2)} | {sv} |")
+| Historical assembly scenario, 5 A + 5 B | USD |
+|---|---:|
+| Two independent setup/stencil/feeder jobs | ${both_jobs[0]:.2f}–{both_jobs[1]:.2f} |
+| One accepted shared job plus historical ${PANEL_FEE_USD:.2f} panel fee | ${shared_job[0]:.2f}–{shared_job[1]:.2f} |
+| Conditional avoided assembly fees | ${saving[0]:.2f}–{saving[1]:.2f} |
 
-    o.append("\n## Why each one works\n")
-    for name, _s, why in steps[1:]:
-        o.append(f"**{name}.** {why}\n")
+This is not a project saving. Subtract extra panel fabrication, engineering,
+handling, inspection and transport costs first; the result may be negative.
+No panel total is calculated without an explicit panel fabrication allowance
+and accepted setup sharing. Actual fees and Economic/Standard eligibility need
+fresh quotations. Tabs/supports must avoid the B neck, sensor island and antenna
+strip, and depanelization must be reviewed with the assembler.
 
-    o.append(f"""
-## The single biggest lever is free
+## Changes that require engineering qualification
 
-Panelising A and B together saves roughly
-${base['asm'][0] - steps[1][1]['asm'][0]:,.0f} on the assembly line and costs
-nothing in the design. It works only because of the decision made at the very
-start — *one electrical platform, two physical implementations*. Two genuinely
-different boards could not share a feeder setup.
+An all-SMD USB connector, different library passives, another sensor bin, another
+MCU or another charger are **unqualified redesign candidates**, not discounts on
+the fitted BOM. Recheck footprints, pin maps, capacitor behavior, mechanical
+retention, firmware and measurement requirements before costing any accepted
+change. The current A and B electrical platforms must continue to match.
 
-There is one condition, and it belongs on the order: **the panel rails and
-break-off tabs must not sit in the antenna keep-out or across Variant B's
-3.5 mm neck.** A tab in the neck puts a stress riser at the weakest point of
-the board. See `62-fabrication-3-boards.md`.
+## Quantity is a cash-versus-evidence decision
 
-## What we are deliberately not doing
+Reducing 5 + 5 to 3 + 3 removes four fitted BOMs: **${4 * bom_cost(d)[0]:.2f}–
+${4 * bom_cost(d)[1]:.2f}** under the old component allowances. It does not
+necessarily remove setup or minimum fabrication costs. More units may lower
+unit price while increasing total cash, and supplier attrition is additional.
 
-| Change | Saves | Why not |
-|---|---:|---|
-| ESP32-C3-MINI-1 instead of C6 | ~$1.60–1.70/board | Loses 802.15.4 and TWT — that is Thread, Zigbee and Matter gone, which is most of what `70-what-the-board-can-do.md` promises. One euro is the cheapest option this project buys. |
-| MCP73831 instead of BQ24074 | ~$0.30/board | Loses the power path, so the load hangs off the cell while charging, and loses the NTC input. Different footprint too. Bad trade at any price. |
-| SHT40-AD1B (no membrane) | ~$1.20/board more than the -AD1F | Contamination is the dominant multi-year failure mode. Removing the filter to save a euro is exactly the saving that costs you the product in year three. |
-| Drop the LED and button | ~$0.30/board | Provisioning and status would move to USB-only. Not worth it. |
-| 3 + 3 prototypes instead of 5 + 5 | ~4 × board BOM | Statistically, this is the expensive one. See below. |
-
-## About building fewer prototypes
-
-Cutting 5 + 5 to 3 + 3 saves roughly
-${4 * bom_cost(d)[0]:,.0f}–{4 * bom_cost(d)[1]:,.0f} of components — real money,
-but the smallest lever on this page, and it is the only one that costs
-*information* rather than features.
-
-`50-thermal-ab-test-plan.md` already says five samples support a difference with
-a range, not a p-value. With three, the within-group range is estimated from
-three numbers, and a single outlier — one bad solder joint on one sensor, one
-unit sitting nearer a radiator — moves the group mean enough to flip the
-decision gate. The gate's 0.15 °C and 0.3 °C thresholds were chosen assuming
-n = 5.
-
-If budget forces it: **build 3 + 3, but treat the result as a screen rather than
-a decision.** If A and B separate by more than a degree it will be obvious with
-three. If they separate by two tenths, three units cannot tell you that, and the
-honest response is to build more before choosing — which costs more than doing
-it once with five.
-""")
-    return "\n".join(o) + "\n"
+The A/B plan in [docs/50](50-thermal-ab-test-plan.md) calls for five samples per
+variant. Three per variant are an initial screen; agree how to replace failed
+units and obtain the remaining data before treating that screen as the planned
+thermal qualification. A quoted 3 + 3 option does not silently change that gate.
+"""
 
 
 # --------------------------------------------------------------------------
