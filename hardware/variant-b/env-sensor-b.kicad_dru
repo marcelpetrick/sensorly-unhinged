@@ -47,6 +47,21 @@
 	(condition "A.Type == 'Track' && A.NetClass == 'Switch'")
 )
 
+(rule "bounded switch escape width"
+	(constraint track_width (min 0.15mm))
+	(condition "A.Type == 'Track' && A.NetClass == 'Switch' && A.enclosedByArea('Switch escape *')")
+)
+
+(rule "switch stays on top"
+	(constraint disallow track)
+	(condition "A.NetClass == 'Switch' && A.Layer != 'F.Cu'")
+)
+
+(rule "no switch vias"
+	(constraint disallow via)
+	(condition "A.NetClass == 'Switch'")
+)
+
 (rule "bounded power escape width"
 	(constraint track_width (min 0.15mm))
 	(condition "A.Type == 'Track' && A.NetClass == 'Power' && A.enclosedByArea('Power escape *')")

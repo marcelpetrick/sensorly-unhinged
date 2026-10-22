@@ -72,7 +72,7 @@ there is no top button opening. Refit the lid before thermal tests.
 | Selected pack | LP702040, 550 mAh | LP702040, 550 mAh |
 | Selected pack fits modeled bay | yes | yes |
 | Vent slots over the sensor | 1 in the lid + 4 in the wall | 2 in the lid + 4 in the wall |
-| Lid edge clamps / matching supports | 3 | 3 |
+| Lid edge clamps / matching supports | 4 | 4 |
 | Chambers | 1 | 2, divided at the neck |
 | Solid material beyond the antenna | 2.6 mm | 2.6 mm |
 
