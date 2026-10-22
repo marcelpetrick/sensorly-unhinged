@@ -162,6 +162,20 @@ def dru(v: Variant) -> str:
         ')', '',
     ]
     rules += [
+        '(rule "bounded switch escape width"',
+        '\t(constraint track_width (min 0.15mm))',
+        "\t(condition \"A.Type == 'Track' && A.NetClass == 'Switch' && A.enclosedByArea('Switch escape *')\")",
+        ')', '',
+        '(rule "switch stays on top"',
+        '\t(constraint disallow track)',
+        "\t(condition \"A.NetClass == 'Switch' && A.Layer != 'F.Cu'\")",
+        ')', '',
+        '(rule "no switch vias"',
+        '\t(constraint disallow via)',
+        "\t(condition \"A.NetClass == 'Switch'\")",
+        ')', '',
+    ]
+    rules += [
         '(rule "bounded power escape width"',
         '\t(constraint track_width (min 0.15mm))',
         "\t(condition \"A.Type == 'Track' && A.NetClass == 'Power' && "

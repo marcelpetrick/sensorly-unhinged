@@ -37,8 +37,8 @@ ANCHORED = {
     "J2":  (24.8, 24.5, 90),      # PicoBlade 3P, mouth at the right edge
     # 3. heat sources, as far from the sensor end as the outline allows
     "U4":  (24.4, 10.5, 0),      # charger - 0.40 W worst case, the hot part
-    "U3":  (3.4, 10.0, 0),       # buck regulator
-    "L1":  (3.4, 13.2, 0),
+    "U3":  (3.4, 10.0, 270),       # buck regulator
+    "L1":  (3.4, 13.2, 180),
     # 4. the rest
     "U5":  (15.5, 22.0, 0),      # USB ESD array
     "SW1": (13.7, 28.0, 0),      # provisioning button
@@ -68,6 +68,10 @@ NEAR = {
     # Prototype controls go after all existing bypass/measurement components.
     "R19": ("SW1", 0), "R20": ("U4", 90), "R21": ("J2", 90), "R22": ("U1", 0),
 }
+
+# Controlled local power placement, before small-signal auto-packing.
+# These geometry choices reserve short U1/U3/U4 power/return loops.
+POWER_LOCAL = {"C1": (4.9, 7.1, 180), "C7": (1.25, 7.7, 270), "C8": (2.8, 15.8, 180), "C9": (24.4, 7.1, 0), "C10": (28.2, 10.5, 90), "C11": (24.0, 14.0, 0), "Q1": (27.8, 17.1, 90)}
 
 # Pogo field: 2.54 mm grid on the bottom side, one contiguous rectangle.
 TESTPAD_ORIGIN = (9.0, 19.5)

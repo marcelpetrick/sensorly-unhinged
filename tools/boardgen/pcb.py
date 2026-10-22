@@ -215,7 +215,7 @@ def _free_label(v: Variant, placed, w: float, h: float, prefer):
     # overlaps a courtyard.
     boxes = [p.box for p in placed]
     cands = [prefer]
-    for r in range(1, 24):
+    for r in range(1, 80):
         for dy in range(-r, r + 1):
             for dx in range(-r, r + 1):
                 if max(abs(dx), abs(dy)) != r:
@@ -288,6 +288,18 @@ def _zones(v: Variant, netidx, tracks=()) -> str:
                          ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"],
                          _rect(sx0, sy0, sx1, sy1),
                          f"zone/quiet/{v.key}", keepout=KO_NO_POUR))
+    for i, track in enumerate(tracks):
+        if track.net != "SW_L" or track.width >= .6:
+            continue
+        length = sum(abs(bx-ax)+abs(by-ay) for (ax,ay),(bx,by) in zip(track.pts,track.pts[1:]))
+        if track.purpose != "switch-neckdown" or track.layer != "F.Cu" or length > 1.2 + 1e-9:
+            raise ValueError("invalid bounded Switch escape")
+        for j, ((ax,ay),(bx,by)) in enumerate(zip(track.pts,track.pts[1:])):
+            margin = track.width/2 + .025
+            out.append(_zone(f"Switch escape {i} {j}", "", netidx, [track.layer],
+                _rect(min(ax,bx)-margin,min(ay,by)-margin,max(ax,bx)+margin,max(ay,by)+margin),
+                f"zone/switch-escape/{v.key}/{i}/{j}",
+                keepout=dict(tracks="allowed",vias="allowed",pads="allowed",copperpour="allowed",footprints="allowed")))
     power_nets = {"GND", "+3V0", "VBUS", "VBAT", "VSYS"}
     for i, track in enumerate(tracks):
         if track.net not in power_nets or track.width >= 0.4:
@@ -388,6 +400,8 @@ def _stackup() -> str:
 
 
 def emit(v: Variant, placed: list[Placement], tracks, vias) -> str:
+    from .power import validate_switch_routes
+    validate_switch_routes(placed, tracks, vias)
     netidx = _net_index()
     padnet = _pad_net_map()
     parts = ["(kicad_pcb\n\t(version 20260206)\n"

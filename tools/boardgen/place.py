@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 from . import geometry as G
 from .design import PART_BY_REF, TESTPADS
-from .variants import (ANCHORED, B_NECK_RECT, NEAR, TESTPAD_COLS,
+from .variants import (ANCHORED, B_NECK_RECT, NEAR, POWER_LOCAL, TESTPAD_COLS,
                        TESTPAD_ORIGIN, TESTPAD_PITCH, Variant, antenna_keepout,
                        sensor_keepout)
 
@@ -91,13 +91,21 @@ def place(v: Variant) -> list[Placement]:
         add(ref, tp_origin[0] + col * TESTPAD_PITCH,
             tp_origin[1] + row * TESTPAD_PITCH, 0)
 
+
+    for ref, coords in POWER_LOCAL.items():
+        add(ref, *coords)
+
     # 4. passives: search outward from the anchor
     forbidden = [ako_box, sko_box]
     if v.key == 'b':
         nx0, ny0, nx1, ny1 = B_NECK_RECT
         forbidden.append((nx0 - 1.0, nx1 + 1.0, ny0 - 1.0, ny1))
     unplaced = []
-    for ref, (anchor, rot) in NEAR.items():
+    priority = ("C12",)
+    ordered = [(ref, NEAR[ref]) for ref in priority] + [(ref, item) for ref,item in NEAR.items() if ref not in priority]
+    for ref, (anchor, rot) in ordered:
+        if ref in POWER_LOCAL:
+            continue
         ap = next(p for p in placed if p.ref == anchor)
         fp = G.get(PART_BY_REF[ref].footprint)
         # start just outside the anchor's courtyard

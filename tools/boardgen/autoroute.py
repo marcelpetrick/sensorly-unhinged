@@ -358,8 +358,9 @@ def route_rest(v: Variant, placed: list[Placement],
             padnet[(ref, pad)] = net
     terms = _terminals(placed)
 
-    tracks: list[Track] = []
-    vias: list[Via] = []
+    from .power import route_local_power
+    tracks, vias = route_local_power(v, placed)
+    terms['VSYS'] = [t for t in terms['VSYS'] if t.ref != 'U3']
     failed: list[str] = []
 
     def snap(t: Term):
@@ -368,7 +369,7 @@ def route_rest(v: Variant, placed: list[Placement],
     # Explicit fine-pitch power escape; wide trunks start on the back layer.
     for net in sorted(POWER_NETS):
         for i, t in enumerate(terms.get(net, [])):
-            if t.ref not in ("U3", "U4"):
+            if t.ref not in ("U4",):
                 continue
             board = Board(v, placed)
             board.add_pads(net, padnet, SIGNAL_W)
@@ -405,6 +406,8 @@ def route_rest(v: Variant, placed: list[Placement],
             board.add_via(vv, SIGNAL_W, net)
         vmask = exact_via_mask(v, placed, padnet, net, island_tracks + tracks, island_vias + vias)
         for t in terms.get(net, []):
+            if net == "+3V0" and t.ref in {"U3", "L1", "C8"}:
+                continue  # local output/VOS loop already joins the plane
             if net == "GND" and t.layer == 0:
                 continue          # the F.Cu pour already covers these
             if t.ref in ("U2", "C6"):
@@ -453,6 +456,8 @@ def route_rest(v: Variant, placed: list[Placement],
     todo.sort(key=difficulty)
 
     for net, ts in todo:
+        if net == "SW_L":
+            continue  # complete reviewed local top-layer switching loop
         if net in {"USB_D_P", "USB_D_N"}:
             failed.append(f"{net}: dedicated differential routing remains open")
             continue

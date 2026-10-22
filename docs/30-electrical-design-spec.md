@@ -159,7 +159,9 @@ supply feed and searches for plane access just above the neck, always excluding
 the neck from via placement. These search seeds are geometry assumptions, not
 fixed electrical values. The generator reserves all four outward horizontal U2 pad exits before routing
 longer paths and blocks the exact shared package-body polygon plus half trace
-width. A routes right-side supplies before left-side buses. B routes outer-left
+width. A routes its supply first, then SDA/SCL, then ground and the C6 taps;
+this prevents ground wrapping around the left sensor-pad escape after local
+power placement changes. B routes outer-left
 SCL before inner-left SDA, then inner-right GND and outer-right supply. Both
 main-board plane-access search seeds lie to the right of the neck centre; these
 are geometry assumptions, not fixed electrical values. B rotates the nonpolar
@@ -195,8 +197,9 @@ no convection along the neck — to be validated by Test 1–4.)
 
 The provisional router uses 0.15 mm for low-current signal tracks, an engineering
 geometry choice above the existing 0.127 mm fabrication minimum. Net-class
-clearances still apply. The switch node remains a 0.60 mm top-layer-only route;
-it is left unconnected if that geometry cannot escape the regulator. The USB
+clearances still apply. The switch node uses a 0.60 mm top-layer trunk and one
+bounded 0.15 mm pin-7 escape; every switch segment stays on F.Cu and no switch
+via is allowed. The USB
 pair is left explicitly unrouted until dedicated coupled geometry is reviewed.
 
 Main-board Power-class trunks are at least **0.4 mm** wide. General fabrication
@@ -226,6 +229,44 @@ For a screening calculation, assume copper resistivity **1.8 ×10⁻⁸ Ω·m**
 actual supply path. These figures do not qualify temperature rise, fabrication
 thickness tolerance, current transients, via losses or regulator-loop inductance;
 those remain layout review and rail/thermal bench gates before unrestricted use.
+
+
+### 3.3 Reviewed local power loops and ground access, 2026-10-21
+
+The shared placement reserves C1/C7/C8/C9/C10/C11 and Q1 before small-signal
+packing. U3 rotates 270° and L1 180°, without changing their centres or the
+netlist: pin 7 now faces L1; the VOS pin 8 runs directly to C8's output pad on
+F.Cu rather than depending on a distant plane connection. C7 returns locally
+to the regulator ground region; C8 and charger bypass capacitors have local
+return vias. U4 OUT/BAT bypass capacitors no longer land near the remote body
+end. Full power routing and physical startup/load-step review remain open.
+
+The 0.5 mm U3 pad pitch and 0.25 mm Switch clearance prevent a 0.6 mm
+trace escaping pin 7 between its neighboring pads. One explicitly tagged
+`switch-neckdown` may be 0.15 mm wide, must start on U3.7 and end on its 0.6 mm
+trunk, and has a **1.2 mm maximum path**; the reviewed route is **1.15 mm**.
+These are engineering geometry choices, not TI recommended dimensions.
+Additional/chained narrow tracks, displaced escapes, other layers and Switch
+vias fail generator validation; actual KiCad controls enforce the fully
+contained `Switch escape *` area and reject thin tracks partly outside it.
+The 0.6 mm trunk, 0.25 mm clearance and four-layer stackup remain unchanged.
+
+Using the stated resistivity assumption of 1.8×10⁻⁸ Ω·m and 35 µm copper,
+a worst-permitted 1.2×0.15 mm escape has R=4.11 mΩ. At the TPS62840's
+750 mA output capability this screens as 3.09 mV /2.31 mW DC; the output
+rating is not the peak switch current. Ripple/peak current, parasitic
+inductance, copper tolerance and switching stability still require review and
+measurement against [TI TPS62840 §§7.5,9.2,10](https://www.ti.com/lit/ds/symlink/tps62840.pdf).
+
+U1 has four ground vias between the nine centre-land tiles, derived from the
+vendored primary land-pattern geometry; their drill holes avoid the paste
+lands. U4 has four 0.6/0.3 mm GND vias at local (±0.55,±0.55), plus a direct
+VSS8-to-EP link per [SLUS810N §12.3](https://www.ti.com/lit/ds/symlink/bq24074.pdf).
+TI RGT0016B drawing 4219033/A08/2016 supplies those via centres and a 0.2 mm
+example bore; use of the project's 0.3 mm bore is an explicit engineering
+choice. Under-EP vias require accepted filled/capped/planarized processing
+and reflow/paste review before ordering; generic front/back tent flags do not
+prove a seal inside the exposed-pad mask opening. See docs/63 and EDS-17.
 
 ---
 
@@ -558,6 +599,8 @@ width/length and the shared electrical platform remain as specified.
 | EDS-15 | Protected PACK_TS sensing, open-NTC and unpowered-MCU fault bounds; R21 remains DNP | hardware/firmware maintainer | protected interface ADR before charge-enabled build, then bench qualification |
 | EDS-12 | Prove the maximum CE/USB_ISEL deassertion latency on a hung CPU and before sleep; a pull-down cannot override an actively driven GPIO | firmware/hardware maintainer | watchdog/reset design review, then fault-injection qualification before charging |
 | EDS-16 | Bound effective C7 input and total +3V0 capacitance C1/C2/C3/C6/C8 including zero-bias startup, tolerance, temperature and aging; 21.2 µF nominal /26.818 µF positive-tolerance/temperature upper envelope; C8 minimum uses stated typical bias assumptions, not a guaranteed3–40 µF effective envelope | hardware maintainer | before controlled prototype order: desk review of stated component bounds/derating assumptions; before unrestricted operation: accepted part-specific effective bounds and measured startup/TX/load-step stability (docs/63) |
+| EDS-17 | Qualify U4 under-EP via fill/cap/planarity, stencil/paste and hidden-joint inspection; repriced manufacturer acceptance | hardware maintainer and assembler | before controlled prototype order; source/drawing/CPL review and accepted filled/capped/planarized fabrication + paste/reflow process |
+
 
 ## 11. Review checklist for this spec
 

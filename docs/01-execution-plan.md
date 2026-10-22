@@ -121,6 +121,30 @@ The charger bypass placement concern predates this branch and is treated as
 layout completion work, rather than a branch regression. All external evidence
 and physical qualification states remain open.
 
+### Integrated local-power checkpoint — 2026-10-22
+
+The shared generator now reserves the regulator/charger bypass placement before
+small-signal packing, routes U3's local switching/input/output/VOS paths, and
+adds U1 centre-ground access plus U4's exposed-pad array/direct VSS link.
+A single reviewed 1.15 mm Switch escape has a 1.2 mm maximum; the 0.6 mm
+trunk and top-layer/no-via policy are enforced by source and actual KiCad
+controls. Independent review also tested chained escapes and live placement
+drift; those attempts now fail closed.
+
+Fresh root `make erc drc` reports zero errors, warnings and parity differences
+on both boards, with **56 A / 49 B unconnected items**. The development count
+fell from 59/52 and is still not a manufacturing approval. All four enclosure
+mesh extents and both lid/base and cable/case-plus-pack intersections pass.
+EDS-17 keeps the under-EP via sealing, paste/reflow/inspection process and
+repriced supplier acceptance open; generic tent flags do not close it.
+The next W2a work is charger supply fanout/trunks. W2b USB and W2c remaining
+connections are still open, as are all physical qualification gates.
+
+Local diagnostics: `/tmp/sensorly-power-drc-20261022.log`,
+`/tmp/sensorly-power-controls-20261022.log`, and
+`/tmp/sensorly-power-mech-20261022.log`. These are executable design checks,
+not measurements or assembler acceptance.
+
 ### Immediate source cleanup and atomic commit plan
 
 The current work order is to finish and verify the existing changed files before

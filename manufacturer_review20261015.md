@@ -112,3 +112,14 @@ The earlier [cost report](docs/60-manufacturing-cost.md) and [reduction report](
 Retained research notes provide the underlying findings and unresolved questions: [European vendors](<research_notes/Prototype manufacturer review October 2026/europe.md>), [global vendors](<research_notes/Prototype manufacturer review October 2026/global.md>) and [pooling, economics and selection](<research_notes/Prototype manufacturer review October 2026/economics.md>).
 
 The useful decision is therefore to buy **an accepted process and three good samples of each layout**, with price attached to the same scope. If an EU premium buys explicit sensor handling, matched stackup and first-article corrections, it can protect more value than the small bare-board difference. If an overseas assembler accepts those same conditions and its itemized landed total remains lower, it is a credible choice. Actual quotations—not promotional floors or this sensitivity example—must settle that comparison before fabrication approval.
+
+## Implementation process follow-up — 22 October 2026
+
+The integrated local-power design now includes four under-exposed-pad U4 ground
+vias. [EDS-17 and the assembly review](docs/63-assembly-qualification.md#u4-under-ep-vias-and-assembly-process-2026-10-21)
+require explicit acceptance of a filled/capped/planarized via-in-pad process,
+stencil/reflow and hidden-joint inspection before ordering. The standard-process
+public prices and service eligibility researched above do not quote or approve
+this changed fabrication requirement. Reconfirm vendor eligibility, price and
+lead time against the completed layout; no new quotation or acceptance has been
+received.

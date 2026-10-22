@@ -17,13 +17,13 @@ KiCad renders of the same two files: `img/render-a.png`, `img/render-b.png`.
 |---|---|---|
 | PCB | 30 × 34 mm (1020 mm²) | 30 × 51 mm (1210 mm² incl. neck and island) |
 | Layers | 4, FR-4, 1.6 mm | identical |
-| Parts | 47 SMT placements (R21 DNP) plus 17 test pads | identical |
+| Parts | 47 component footprints (46 fitted; R21 DNP) plus 17 test pads | identical |
 | Sensor position | bottom edge, board centre | on a 18 × 9 mm island |
 | Neck | — | 3.5 × 8.0 mm FR-4, 4 × 0.15 mm traces |
-| Nearest heat source to the sensor | **11.3 mm** (D1) | **24.3 mm** (J1) |
+| Nearest heat source to the sensor | **11.3 mm** (D1) | **22.7 mm** (R13) |
 | Idealized slab / neck conductance (not actual A/B coupling) | **70 mW/K** | **1.2 mW/K** |
 | Hypothetical slab / neck ratio | — | **57×**, not a performance claim |
-| Assembly difficulty | identical (single-sided SMT, same stencil apertures) | identical |
+| Assembly difficulty | single-sided SMT; separate placement/stencil jobs | identical |
 | Panel area / PCB cost | lower | ~19 % more area |
 | Mechanical risk | none | the neck: 3.5 mm of FR-4 carrying an island |
 | Enclosure | one chamber, vents at the sensor edge | two chambers with a dividing wall at the neck |
@@ -166,3 +166,24 @@ P/N or +/− suffixes to recognize a differential pair. The earlier P/M naming
 could leave pair constraints inactive. An actual KiCad negative control now
 rejects an uncoupled pair; this is separate from completing and reviewing the
 board routes.
+
+## Shared local power placement review, 2026-10-21
+
+The same explicit electronics placement is used in A and B. U3/L1 remain at
+(3.4,10.0)/(3.4,13.2) mm and rotate to 270°/180° so SW points toward the
+inductor. Local reservations are C1(4.9,7.1,180°), C7(1.25,7.7,270°),
+C8(2.8,15.8,180°), C9(24.4,7.1,0°), C10(28.2,10.5,90°),
+C11(24.0,14.0,0°), Q1(27.8,17.1,90°). These are geometry decisions, not
+datasheet dimensions. C1 remains at U1's pin3 supply entrance; C7/C8 have
+explicit regulator loops, while C10/C11 move from approximately y31 mm to
+U4's neighborhood. Other passives repack around these reservations. The
+routing function validates against its reviewed placement snapshot so later
+anchor movement cannot silently leave fixed routes on old pad positions.
+
+U1 centre-ground vias occupy the four gaps between the primary nine-pad
+array. U4 uses four under-EP ground vias and a direct VSS/EP link; these
+require the explicit assembler process acceptance in EDS-17. Neither thermal
+sensor region nor B's four-trace neck receives a via. USB silk placement
+searches the complete board body instead of silently falling back onto a
+crowded connector-side area. Actual A/B DRC and enclosure proof accompany
+source integration; airwire counts from earlier checkpoints remain historical.

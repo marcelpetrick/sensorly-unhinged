@@ -1,13 +1,13 @@
 {
-  "_comment": "Development-only checkpoint reviewed with fresh KiCad 10.0.6 reports on 2026-10-14. Zero ERC/DRC errors, zero warnings and zero schematic parity differences; no ignored checks or warning allowances. Routing remains incomplete and manufacturing gates require zero unconnected items.",
+  "_comment": "Development-only local-power checkpoint; require fresh KiCad reports on both variants. Zero ERC/DRC errors, warnings and schematic parity differences; no ignored checks or warning allowances. Manufacturing gates still require zero unconnected items.",
   "a": {
-    "unconnected": 59,
-    "note": "Controlled prototype shared model and strict power rules are present; USB pair, regulator/power connections, ground returns and remaining control/test-pad branches need deliberate routing. This exact development count is not fabrication approval.",
+    "unconnected": 56,
+    "note": "Reviewed local U3 switching/input/output/VOS paths, U1 ground access and U4 exposed-pad ground array are present. USB, charger supply trunks and remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
     "warnings": []
   },
   "b": {
-    "unconnected": 52,
-    "note": "Controlled prototype shared model and strict power rules are present; USB pair, regulator/power connections, ground returns and remaining control/test-pad branches need deliberate routing. This exact development count is not fabrication approval.",
+    "unconnected": 49,
+    "note": "Reviewed local U3 switching/input/output/VOS paths, U1 ground access and U4 exposed-pad ground array are present. USB, charger supply trunks and remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
     "warnings": []
   }
 }

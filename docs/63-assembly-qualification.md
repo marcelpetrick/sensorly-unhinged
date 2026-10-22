@@ -209,3 +209,33 @@ The bottom silkscreen identifies the battery housing cavities explicitly as
 `J2 1- 2T 3+`. The old horizontal, unnumbered `- T +` legend was ambiguous
 with J2's vertically rotated row. Cavity numbers refer to the manufacturer's
 drawing; the printed legend never substitutes for pack continuity inspection.
+
+## U4 under-EP vias and assembly process, 2026-10-21
+
+The four U4 ground vias use the exact example centre locations (±0.55 mm)
+from **TI RGT0016B drawing4219033/A08/2016**, reproduced in
+[TI CDCLVP2102 pp29–30 package drawings](https://www.ti.com/lit/ds/symlink/cdclvp2102.pdf).
+The drawing shows a 0.2 mm bore, a 1.47 mm square paste aperture (~84%
+coverage of the1.6mm square EP) and0.125mm stencil; the present0.6/0.3mm
+via diameter/bore is an engineering choice using the existing preferred
+process, not a TI-qualified substitution. The pad/rotation identity remains
+RGT0016B; the newer RGT0016C package must not replace it silently.
+
+[TI SLUA271C §3.4.1](https://www.ti.com/lit/an/slua271c/slua271c.pdf) describes
+0.3mm drilled vias as a starting point and explains solder-volume loss and
+plugging/tenting considerations. The package-specific drawing permits filled,
+plugged or tented under-paste vias; **generic KiCad tent flags do not prove
+that an open EP mask aperture seals the holes**. This design therefore holds
+prototype ordering pending a written accepted filled/capped/planarized via-in-pad
+process, reviewed paste/stencil/reflow and hidden-joint inspection. A different
+explicitly engineered sealing process requires a recorded review, not merely
+a checkbox change. Vendor eligibility, lead time and the complete assembled
+price must be reconfirmed with this fabrication requirement; existing public
+pricing is not a quote for it. This is open gate **EDS-17**, owner hardware
+maintainer and assembler; no acceptance evidence has been supplied.
+
+U4 VSS8 has a direct local connection to EP as required by
+[BQ2407x SLUS810N §12.3](https://www.ti.com/lit/ds/symlink/bq24074.pdf),
+while the local bypass returns and four vias provide plane access.
+Nominal DRC clearance is design verification; it does not qualify via fill,
+cap planarity, paste volume, solder voiding, heat transfer or assembled yield.

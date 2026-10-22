@@ -25,7 +25,7 @@ ISLAND_WIDTH = 0.15          # EDS S3.1 - the dominant thermal term
 ISLAND_CLEAR = 0.15
 EDGE_CLEAR = 0.50      # 0.3 mm copper-to-edge + half the widest track
 TURN_PENALTY = 12
-ISLAND_ROUTING_ORDER = {"a": (4, 2, 5, 3, 0, 1), "b": (1, 0, 2, 3, 4, 5)}
+ISLAND_ROUTING_ORDER = {"a": (4, 0, 1, 2, 5, 3), "b": (1, 0, 2, 3, 4, 5)}
 
 
 @dataclass
