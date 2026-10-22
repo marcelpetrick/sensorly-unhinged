@@ -239,7 +239,16 @@ netlist: pin 7 now faces L1; the VOS pin 8 runs directly to C8's output pad on
 F.Cu rather than depending on a distant plane connection. C7 returns locally
 to the regulator ground region; C8 and charger bypass capacitors have local
 return vias. U4 OUT/BAT bypass capacitors no longer land near the remote body
-end. Full power routing and physical startup/load-step review remain open.
+end. The local U4 paths now explicitly join IN13→C9.1, OUT10/11→C10.1 and
+BAT2/3→C11.1 on F.Cu. Each 0.5 mm-pitch pad has a 0.8 mm-long, 0.15 mm-wide
+escape followed by a 0.4 mm trunk to its bypass capacitor. These geometry
+choices preserve Power-class 0.20 mm clearances and the existing bounded
+escape rule; they are not datasheet dimensional recommendations. Exact
+manufacturer-transformed pad connectivity is checked for both variants.
+The former generic IC-power-via search is removed because these pads already
+have reviewed local paths; generic routing still completes their remote
+connector/test-point branches. Full power routing and physical
+startup/load-step review remain open.
 
 The 0.5 mm U3 pad pitch and 0.25 mm Switch clearance prevent a 0.6 mm
 trace escaping pin 7 between its neighboring pads. One explicitly tagged

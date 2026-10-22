@@ -44,6 +44,18 @@ def route_local_power(v, placed):
         Track('GND', .4, 'F.Cu', [(28.2,9.55),(28.8,9.55)]),
         Track('GND', .4, 'F.Cu', [(24.95,14.0),(24.95,15.1)]),
     ]
+    # U4 bypass loops: each .5mm-pitch power pad escapes narrowly, then
+    # immediately joins .4mm trunks and its local capacitor on F.Cu.
+    tracks += [
+        Track('VBUS',.15,'F.Cu',[(25.15,9.1),(25.15,8.3)],'power-neckdown'),
+        Track('VBUS',.4,'F.Cu',[(25.15,8.3),(23.45,8.3),(23.45,7.1)]),
+        Track('VSYS',.15,'F.Cu',[(25.8,10.25),(26.6,10.25)],'power-neckdown'),
+        Track('VSYS',.15,'F.Cu',[(25.8,10.75),(26.6,10.75)],'power-neckdown'),
+        Track('VSYS',.4,'F.Cu',[(26.6,10.25),(26.6,10.75),(28.2,10.75),(28.2,11.45)]),
+        Track('VBAT',.15,'F.Cu',[(23.0,10.25),(22.2,10.25)],'power-neckdown'),
+        Track('VBAT',.15,'F.Cu',[(23.0,10.75),(22.2,10.75)],'power-neckdown'),
+        Track('VBAT',.4,'F.Cu',[(22.2,10.25),(22.2,13.2),(23.05,13.2),(23.05,14.0)]),
+    ]
     vias = [Via('GND',4.65,8.5), Via('GND',2.3,11.6),
             Via('+3V0',5.1,15.8), Via('GND',1.0,9.4), Via('GND',1.0,15.8),
             Via('GND',25.35,6.3), Via('GND',28.8,9.55), Via('GND',24.95,15.1)]

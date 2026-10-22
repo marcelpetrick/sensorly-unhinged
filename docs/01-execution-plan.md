@@ -145,6 +145,18 @@ Local diagnostics: `/tmp/sensorly-power-drc-20261022.log`,
 `/tmp/sensorly-power-mech-20261022.log`. These are executable design checks,
 not measurements or assembler acceptance.
 
+### Integrated charger-bypass checkpoint — 2026-10-22
+
+U4 IN13 now reaches C9, OUT10/11 reaches C10, and BAT2/3 reaches C11 via
+five explicit 0.8 mm pad escapes and 0.4 mm same-face trunks. Independent
+review checked the removed generic IC-via search against its local replacement.
+Nine focused host tests pass, including transformed manufacturer-pad connectivity
+for both variants. Fresh root ERC/DRC reports zero errors, warnings and parity
+with **47 A / 45 B unconnected items**; diagnostics are retained at
+`/tmp/sensorly-charger-drc-20261022.log`. Placement, enclosure, BOM, stackup
+and process requirements are unchanged from the preceding checkpoint.
+Remote supplies, controls, USB and genuine manufacturing acceptance remain open.
+
 ### Immediate source cleanup and atomic commit plan
 
 The current work order is to finish and verify the existing changed files before

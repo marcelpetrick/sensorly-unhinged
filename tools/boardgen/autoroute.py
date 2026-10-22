@@ -360,41 +360,17 @@ def route_rest(v: Variant, placed: list[Placement],
 
     from .power import route_local_power
     tracks, vias = route_local_power(v, placed)
-    terms['VSYS'] = [t for t in terms['VSYS'] if t.ref != 'U3']
+    terms['VSYS'] = [t for t in terms['VSYS'] if t.ref not in {'U3','U4'}]
+    for net in ('VBUS','VBAT'):
+        terms[net] = [t for t in terms[net] if t.ref != 'U4']
     failed: list[str] = []
 
     def snap(t: Term):
         return (int(round(t.x / GRID)), int(round(t.y / GRID)), t.layer)
 
-    # Explicit fine-pitch power escape; wide trunks start on the back layer.
-    for net in sorted(POWER_NETS):
-        for i, t in enumerate(terms.get(net, [])):
-            if t.ref not in ("U4",):
-                continue
-            board = Board(v, placed)
-            board.add_pads(net, padnet, SIGNAL_W)
-            for tr in island_tracks + tracks:
-                if tr.net != net:
-                    board.add_track(tr, SIGNAL_W, net)
-            for vv in island_vias + vias:
-                if vv.net != net:
-                    board.add_via(vv, SIGNAL_W, net)
-            vmask = exact_via_mask(v, placed, padnet, net, island_tracks + tracks, island_vias + vias)
-            src = snap(t)
-            for vx, vy in _via_spots(board, t, vmask, limit=80):
-                if abs(vx * GRID - t.x) + abs(vy * GRID - t.y) > 2.5:
-                    continue
-                path = _search(board, {src}, {(vx, vy, t.layer)}, allow_vias=False, max_steps=25)
-                if path is None or (len(path)-1)*GRID > 2.5:
-                    continue
-                trs, _ = _to_geometry(path, SIGNAL_W, net)
-                vv = Via(net, round(vx*GRID,3), round(vy*GRID,3), VIA_SIZE, VIA_DRILL)
-                for tr in trs:
-                    tr.purpose = "power-neckdown"
-                tracks.extend(trs)
-                vias.append(vv)
-                terms[net][i] = Term(vv.x, vv.y, 1, t.ref, t.pad)
-                break
+    # U3/U4 power pads already join their local bypass capacitors through
+    # reviewed exact-coordinate escapes. Do not replace these with grid/via
+    # guesses: a .05mm snap can close a .5mm-pitch pad's legal exit.
 
     # --- 1. plane nets: a via beside each pad, not a route -----------------
     for net, _layer in PLANE_NETS.items():

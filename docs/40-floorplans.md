@@ -187,3 +187,14 @@ sensor region nor B's four-trace neck receives a via. USB silk placement
 searches the complete board body instead of silently falling back onto a
 crowded connector-side area. Actual A/B DRC and enclosure proof accompany
 source integration; airwire counts from earlier checkpoints remain historical.
+
+### Charger local power paths, 2026-10-22
+
+Both boards now explicitly route U4 IN13 to C9.1, OUT10/11 to C10.1, and
+BAT2/3 to C11.1. Five same-face 0.8 mm ×0.15 mm pad escapes join 0.4 mm trunks
+without adding vias or changing placement, footprint, schematic, BOM, stackup
+or clearance. This removes speculative grid/via escape choices for the
+already-routed IC power pads. The full isolated-board verification reported
+A47/B45 unconnected items with zero DRC errors, warnings and parity differences;
+these are a development checkpoint, and fabrication still requires zero
+unconnected items. Remote power branches and charger control nets remain open.
