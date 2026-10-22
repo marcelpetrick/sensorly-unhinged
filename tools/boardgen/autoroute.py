@@ -248,12 +248,34 @@ def exact_via_mask(v, placed, padnet, net, tracks, vias):
         board.blocked[L] = _erode(board.blocked[L], board.w, board.h,
                                   math.ceil((VIA_SIZE/2 + SAFETY)/GRID))
     board.add_pads(net, padnet, VIA_SIZE)
+    # Ordinary through drills must avoid paste, even on their own net.
+    drill_reserve = VIA_DRILL/2 + G.VIA_PASTE_RESERVE
+    for _ref, _pad, x0, x1, y0, y1 in G.paste_lands(placed):
+        for layer in (0, 1):
+            board.block(layer, x0-drill_reserve, y0-drill_reserve,
+                        x1+drill_reserve, y1+drill_reserve)
+
     for tr in tracks:
         if tr.net != net:
             board.add_track(tr, VIA_SIZE, net)
     for vv in vias:
         board.add_via(vv, VIA_SIZE, net)
-    return bytearray(1 if (a or b) else 0 for a,b in zip(*board.blocked))
+    mask = bytearray(1 if (a or b) else 0 for a,b in zip(*board.blocked))
+    # A new via may land exactly on an existing corner, but grazing its
+    # endpoint creates an off-centre connection even on the same net.
+    for track in tracks:
+        if track.net != net:
+            continue
+        radius = (VIA_SIZE + track.width)/2 + 1e-6
+        for x, y in track.pts:
+            for iy in range(max(0, math.ceil((y-radius)/GRID)),
+                            min(board.h, math.floor((y+radius)/GRID)+1)):
+                for ix in range(max(0, math.ceil((x-radius)/GRID)),
+                                min(board.w, math.floor((x+radius)/GRID)+1)):
+                    distance = math.hypot(ix*GRID-x, iy*GRID-y)
+                    if 1e-7 < distance <= radius:
+                        mask[iy*board.w+ix] = 1
+    return mask
 
 
 DIRS = [(1, 0), (-1, 0), (0, 1), (0, -1)]
@@ -496,6 +518,9 @@ def route_rest(v: Variant, placed: list[Placement],
             for node in path:
                 connected.add(node)
             remaining = [r for r in remaining if r not in connected]
+            # Later branches must also see this branch's vias and corners.
+            vmask = exact_via_mask(v, placed, padnet, net,
+                                   island_tracks + tracks, island_vias + vias)
 
     retained = []
     for via in vias:

@@ -297,6 +297,25 @@ review with the accepted stackup before ordering and measured startup/output
 selection on the first boards. No capacitance extraction or measured margin is
 claimed by this routing checkpoint.
 
+### 3.5 Through drills and solder-paste clearance, 2026-10-22
+
+Ordinary through-via drill edges must stay at least **0.10 mm** outside the
+conservative paste-land envelopes on both board faces. This is an explicit
+registration/layout reserve, not a fabrication tolerance guarantee. The maze
+router masks those drill positions even on the same net; PCB emission rejects
+violations independently. Same-net copper DRC alone does not detect solder
+wicking from an open hole under paste.
+
+Only the four exact 0.6/0.3 mm U4 EP ground vias retain their reviewed EDS-17
+process exception. That exception does not authorize other holes under paste.
+The router also refreshes via obstacles after each branch and rejects a new
+via grazing an existing same-net track vertex; landing exactly at its centre
+remains allowed only when all other obstacles permit it. This preserves
+KiCad's centred-connection requirement after the paste-safe reroute.
+The local C9/C10 ground returns move beyond their paste lands without changing
+capacitor placement, values or nets. The actual assembler must still accept
+via registration, solder-mask and stencil/reflow details. See docs/63.
+
 ## 4. U3 — TPS62840DLC (system regulator)
 
 SON-8 (DLC), 1.5 × 2.0 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq**

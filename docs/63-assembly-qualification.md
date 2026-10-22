@@ -251,3 +251,16 @@ metadata. Actual filled-board connectivity must reach both lands. They are
 mechanical retention features, not additional rated pack-current contacts.
 This resolves the artificial shared-NC mounting-pad airwire without concealing
 an unconnected ground pad or changing the pack cavity order.
+
+## Ordinary via/paste separation — 22 October 2026
+
+The fresh layout audit found ordinary same-net vias with drill holes inside
+capacitor/module/control paste lands, despite clean electrical DRC. These are
+not covered by the explicit U4 EP sealing process. The routing mask and emitter
+now require a 0.10 mm drill-edge reserve outside conservative paste envelopes;
+this reserve is an engineering assumption to reconcile with actual fabrication
+registration tolerances. C9/C10 local return holes are moved outside paste.
+[TI SLUA271C §3.4.1](https://www.ti.com/lit/an/slua271c/slua271c.pdf) explains
+the solder-loss/process issue for under-paste vias. Only the four reviewed
+U4 EP positions retain the explicit filled/capped/planarized acceptance gate.
+No general via-in-pad assembly allowance is implied by same-net connectivity.

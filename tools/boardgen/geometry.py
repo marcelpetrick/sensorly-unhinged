@@ -193,3 +193,49 @@ def distance_to_segment(point, a, b):
     length2 = dx * dx + dy * dy
     u = max(0.0, min(1.0, ((point[0]-a[0])*dx + (point[1]-a[1])*dy) / length2)) if length2 else 0.0
     return math.hypot(point[0] - a[0] - u * dx, point[1] - a[1] - u * dy)
+
+
+VIA_PASTE_RESERVE = 0.10  # mm, engineering drill-to-paste registration allowance
+
+
+def paste_lands(placed):
+    """Conservative board-coordinate paste envelopes, including same-net lands.
+
+    Copper rectangles contain the current zero/negative-margin paste apertures;
+    rounded corners are conservatively included. Through drills cross both sides.
+    """
+    lands = []
+    for part in placed:
+        fp = get(part.footprint)
+        numbers = {block.split('"', 2)[1] for block in _blocks(fp.text, 'pad ')
+                   if 'F.Paste' in block or 'B.Paste' in block}
+        for number in numbers:
+            width, height = fp.pad_size[number]
+            if part.rot % 180:
+                width, height = height, width
+            for x, y in fp.pads[number]:
+                x, y = xform(x, y, part.x, part.y, part.rot)
+                lands.append((part.ref, number, x-width/2, x+width/2,
+                              y-height/2, y+height/2))
+    return lands
+
+
+def validate_via_paste(placed, vias):
+    """Only the reviewed U4 EP array may put a through drill under paste."""
+    parts = {p.ref: p for p in placed}
+    u4 = parts.get('U4')
+    ep = ({xform(dx, dy, u4.x, u4.y, u4.rot)
+           for dx in (-.55, .55) for dy in (-.55, .55)} if u4 else set())
+    lands = paste_lands(placed)
+    for via in vias:
+        for ref, pad, x0, x1, y0, y1 in lands:
+            clearance = math.hypot(max(x0-via.x, 0, via.x-x1),
+                                   max(y0-via.y, 0, via.y-y1)) - via.drill/2
+            if clearance >= VIA_PASTE_RESERVE-1e-7:
+                continue
+            accepted_ep = (ref == 'U4' and pad == '17' and via.net == 'GND'
+                           and abs(via.size-.6) < 1e-7 and abs(via.drill-.3) < 1e-7
+                           and any(math.hypot(via.x-x, via.y-y) < 1e-7 for x, y in ep))
+            if not accepted_ep:
+                raise ValueError(f'{via.net} via ({via.x},{via.y}) drill approaches '
+                                 f'{ref}.{pad} paste land: {clearance:.3f} mm')

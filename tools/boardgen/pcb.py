@@ -402,6 +402,7 @@ def _stackup() -> str:
 def emit(v: Variant, placed: list[Placement], tracks, vias) -> str:
     from .power import validate_switch_routes
     validate_switch_routes(placed, tracks, vias)
+    G.validate_via_paste(placed, vias)
     netidx = _net_index()
     padnet = _pad_net_map()
     parts = ["(kicad_pcb\n\t(version 20260206)\n"

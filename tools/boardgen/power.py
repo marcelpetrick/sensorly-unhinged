@@ -40,8 +40,8 @@ def route_local_power(v, placed):
         Track('GND', .15, 'F.Cu', [(25.15,11.9),(25.15,11.4),(24.95,11.05)], 'plane-neckdown'),
         Track('GND', .4, 'F.Cu', [(1.25,8.475),(1.0,8.475),(1.0,9.4)]),
         Track('GND', .4, 'F.Cu', [(1.85,15.8),(1.0,15.8)]),
-        Track('GND', .4, 'F.Cu', [(25.35,7.1),(25.35,6.3)]),
-        Track('GND', .4, 'F.Cu', [(28.2,9.55),(28.8,9.55)]),
+        Track('GND', .4, 'F.Cu', [(25.35,7.1),(26.4,7.1),(26.4,6.4)]),
+        Track('GND', .4, 'F.Cu', [(28.2,9.55),(29.25,9.55)]),
         Track('GND', .4, 'F.Cu', [(24.95,14.0),(24.95,15.1)]),
     ]
     # U4 bypass loops: each .5mm-pitch power pad escapes narrowly, then
@@ -58,7 +58,7 @@ def route_local_power(v, placed):
     ]
     vias = [Via('GND',4.65,8.5), Via('GND',2.3,11.6),
             Via('+3V0',5.1,15.8), Via('GND',1.0,9.4), Via('GND',1.0,15.8),
-            Via('GND',25.35,6.3), Via('GND',28.8,9.55), Via('GND',24.95,15.1)]
+            Via('GND',26.4,6.4), Via('GND',29.25,9.55), Via('GND',24.95,15.1)]
     # Exact TI RGT0016B example (4219033/A08/2016) centres +/-0.55.
     # .6/.3 is the project's standard via, NOT TI's illustrated .2 bore.
     # Under-paste vias require explicitly approved filled/capped/planarized

@@ -365,3 +365,20 @@ zero parity differences. Fewer airwires alone do not make acceptable copper.
 Neither experiment was adopted or added to the release inputs; the committed
 boards retain their zero-error baseline. Main-board fine-pitch escape, power-loop
 and USB routing need deliberate layout work after the architecture decisions.
+
+### Via/paste review correction — 2026-10-22
+
+Review of the current files found ordinary through drills under same-net paste
+lands, which electrical DRC alone permits. Generator emission now independently
+rejects these holes, and generic routing masks paste even on its own net, with
+an explicit 0.10 mm engineering drill-edge reserve. Only U4's exact four reviewed
+EP vias retain the EDS-17 process exception. C9/C10 ground returns move outside
+paste. Updated branch obstacles also prevent off-centre corner connections.
+
+Fresh filled-board checks give **42 A / 34 B unconnected items**, with zero
+ERC/DRC errors, warnings and parity differences. Six focused regressions pass,
+including same-net paste rejection, the narrowly defined EP exception and
+centred-via corner handling. An independent drill/paste audit finds only the
+four specified U4 EP holes on each board. These are development counts; W2a,
+W2b and W2c remain open, as do all external manufacturing and physical gates.
+Full pipeline validation is required before pushing this checkpoint.
