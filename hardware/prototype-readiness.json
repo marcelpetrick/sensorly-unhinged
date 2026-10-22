@@ -12,7 +12,7 @@
       "id": "assembly",
       "owner": "hardware maintainer and assembler",
       "evidence": null,
-      "requirement": "U1-U5, Q1, J1/J2 and D1 pin-1/rotation against manufacturer drawings; exact CPL/top-bottom assembly review; stackup and DFM acceptance; return paths and USB geometry review; EDS-17 U4 under-EP vias: written accepted filled/capped/planarized process, reviewed stencil/paste/reflow/hidden-joint inspection, and repriced fabrication/assembly acceptance; generic tent flags are insufficient"
+      "requirement": "U1-U5, Q1, J1/J2 and D1 pin-1/rotation against manufacturer drawings; exact CPL/top-bottom assembly review; stackup and DFM acceptance; return paths and USB geometry review; EDS-17 U4 under-EP vias: written accepted filled/capped/planarized process, reviewed stencil/paste/reflow/hidden-joint inspection, and repriced fabrication/assembly acceptance; generic tent flags are insufficient; EDS-20 retained U4 small-signal/power-ground current-path and single-point joining review against TI SLUS810N section 12.1 before ordering"
     },
     {
       "id": "procurement",

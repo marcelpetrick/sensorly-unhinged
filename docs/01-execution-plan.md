@@ -402,3 +402,20 @@ access and remaining charger fanout; W2b remains open. Relevant diagnostics:
 `/tmp/sensorly-charger-programming-drc-20261022.log`,
 `/tmp/sensorly-charger-programming-tests-20261022.log` and
 `/tmp/sensorly-charger-programming-mech-20261022.log`.
+
+### Filled ground-connectivity checkpoint — 2026-10-22
+
+Pad-derived returns now connect U1.11/14/51/52, C5.2, J2.1 and the current
+U5.2 ground region to the inner plane. The J2/U5 additions were required by
+fresh integration: charger repacking created extra islands that standalone
+checks did not expose. The new CLI regression requires **zero GND airwires on
+both actual filled boards**; it passes, alongside four focused host controls.
+Fresh root reports have **39 A / 35 B unconnected items**, zero ERC violations,
+DRC errors, warnings or parity differences. Extra fixed copper changes generic
+routing outcomes; a total airwire count alone is not a ground-connectivity test.
+
+The U5 placement guard requires its current return to be replaced explicitly
+when USB moves it. EDS-20 now records the separate U4 low-current/power-ground
+review required before ordering; the prototype assembly manifest references it.
+No assembled or manufacturer approval is inferred. Logs:
+`/tmp/sensorly-ground-integration-{drc,kicad,tests}-20261022.log`.

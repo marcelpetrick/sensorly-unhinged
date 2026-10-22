@@ -386,6 +386,10 @@ def route_rest(v: Variant, placed: list[Placement],
     control_tracks, control_vias = route_local_controls(placed)
     tracks += control_tracks
     vias += control_vias
+    from .ground import route_ground_returns
+    ground_tracks, ground_vias = route_ground_returns(v, placed)
+    tracks += ground_tracks
+    vias += ground_vias
     terms['VSYS'] = [t for t in terms['VSYS'] if t.ref not in {'U3','U4'}]
     for net in ('VBUS','VBAT'):
         terms[net] = [t for t in terms[net] if t.ref != 'U4']

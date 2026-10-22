@@ -71,7 +71,7 @@ test:
 	$(PY) -m unittest discover -s tools/tests -v
 
 .PHONY: test-kicad
-test-kicad: $(BUILD)/b/env-sensor-b.kicad_pcb
+test-kicad: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	KICAD_CLI=$(KICAD_CLI) $(PY) -m unittest discover -s tools/tests_kicad -v
 
 license:

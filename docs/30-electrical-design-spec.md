@@ -342,6 +342,22 @@ regressions check transformed pad-to-pad and ground-via connectivity. Both
 variants keep their common electrical design and all existing clearances,
 keepouts, pin-1 markings and charging restrictions.
 
+### 3.7 Pad-derived body ground returns, 2026-10-22
+
+Both variants add short 0.40 mm F.Cu ground paths from U1 pins 11, 14, 51,
+52, C5 pad 2, J2 pad 1 and U5 pad 2 to ordinary 0.6/0.3 mm through vias.
+These layout choices
+join body copper regions missed by the coarse ground-stitch grid to the
+continuous In1.Cu GND plane. Paths derive from actual footprint pad centres;
+the generator rejects an anchor that is no longer GND and checks via/paste,
+protected-region and edge clearances. U1.14 exits upward to preserve space
+for the pending USB route below it. No electrical net or sensor-neck copper
+changes. The J2 return via sits at (21.1, 25.75). The current U5 return
+uses an L-shaped path to (13.15, 20.8), avoiding the bottom pogo pads; its
+placement guard requires explicit replacement when the dedicated USB layout
+moves U5. Filled-board DRC checks actual connections; this checkpoint does not
+qualify RF impedance or physical assembly.
+
 ## 4. U3 — TPS62840DLC (system regulator)
 
 SON-8 (DLC), 1.5 × 2.0 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq**
@@ -679,9 +695,8 @@ width/length and the shared electrical platform remain as specified.
 | EDS-12 | Prove the maximum CE/USB_ISEL deassertion latency on a hung CPU and before sleep; a pull-down cannot override an actively driven GPIO | firmware/hardware maintainer | watchdog/reset design review, then fault-injection qualification before charging |
 | EDS-16 | Bound effective C7 input and total +3V0 capacitance C1/C2/C3/C6/C8 including zero-bias startup, tolerance, temperature and aging; 21.2 µF nominal /26.818 µF positive-tolerance/temperature upper envelope; C8 minimum uses stated typical bias assumptions, not a guaranteed3–40 µF effective envelope | hardware maintainer | before controlled prototype order: desk review of stated component bounds/derating assumptions; before unrestricted operation: accepted part-specific effective bounds and measured startup/TX/load-step stability (docs/63) |
 | EDS-17 | Qualify U4 under-EP via fill/cap/planarity, stencil/paste and hidden-joint inspection; repriced manufacturer acceptance | hardware maintainer and assembler | before controlled prototype order; source/drawing/CPL review and accepted filled/capped/planarized fabrication + paste/reflow process |
-
-
 | EDS-18 | Bound VSET parasitic capacitance to the TI 100 pF maximum and review leakage/noise on the routed R6 connection | hardware maintainer | retained stackup/parasitic review before controlled order; measured startup and correct output selection before unrestricted operation |
+| EDS-20 | Review U4 small-signal versus charge/discharge ground-return paths and single-point joining against TI SLUS810N §12.1; local plane vias alone do not establish compliance | hardware maintainer | retained filled-copper/current-path review before controlled prototype order; assembled charge accuracy, supply noise and thermal qualification before enabling charging |
 
 ## 11. Review checklist for this spec
 

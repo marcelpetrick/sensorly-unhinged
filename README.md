@@ -52,8 +52,9 @@ review files. `make release-check` requires complete routing, clean DRC/parity
 and the evidence listed in `hardware/release-readiness.json`. A development
 pipeline pass does not imply a working sensor or safe battery charging.
 
-**Partially routed:** 42 unconnected items on A and 34 on B at the verified
-2026-10-22 checkpoint. Sensor routes, local power/ground paths and regulator
+**Partially routed:** the current exact counts are recorded in
+[`hardware/drc-budget.json`](hardware/drc-budget.json), with verification history
+in the [execution plan](docs/01-execution-plan.md). Sensor routes, local power/ground paths and regulator
 controls are generated; USB and remaining main-board branches are incomplete.
 Development DRC has zero errors, warnings and schematic/PCB parity differences;
 manufacturing also requires zero unconnected items.
@@ -71,7 +72,7 @@ series are in [`docs/01-execution-plan.md`](docs/01-execution-plan.md).
 KiCad ERC      0 violations
 KiCad DRC      0 errors, 0 warnings on both boards (KiCad 10.0.6)
 Sch/PCB parity 0 differences  (both are generated from one model)
-Ratsnest       A: 42 remaining; B: 34 remaining (see hardware/drc-budget.json)
+Ratsnest       Incomplete on both boards (exact counts: hardware/drc-budget.json)
 Outputs        4-layer gerbers, drill, CPL, assembly PDF, STEP, schematic PDF, BOM
 ```
 
