@@ -10470,6 +10470,16 @@
 	)
 	(wire
 		(pts
+			(xy 309.88 443.23) (xy 309.88 447.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "826c54f7-8375-56d9-83c9-9da55812585e")
+	)
+	(wire
+		(pts
 			(xy 372.11 431.8) (xy 372.11 427.99)
 		)
 		(stroke
@@ -12756,6 +12766,18 @@
 		)
 		(uuid "6abc871d-fc04-5cbe-b61b-95741ab36ff0")
 	)
+	(global_label "GND"
+		(shape bidirectional)
+		(at 309.88 447.04 270.0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e9d21b8e-d355-581e-b4fc-3a4ebb482f1b")
+	)
 	(global_label "VBAT"
 		(shape bidirectional)
 		(at 372.11 427.99 90.0)
@@ -13123,10 +13145,6 @@
 	(no_connect
 		(at 81.28 280.67)
 		(uuid "364fbf7e-188a-506e-ae3f-e2e89cd9f3af")
-	)
-	(no_connect
-		(at 309.88 443.23)
-		(uuid "e2c3def9-8424-5366-9674-c23ff9f2aed9")
 	)
 	(sheet_instances
 		(path "/"
