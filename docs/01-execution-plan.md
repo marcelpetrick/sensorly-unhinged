@@ -419,3 +419,10 @@ when USB moves it. EDS-20 now records the separate U4 low-current/power-ground
 review required before ordering; the prototype assembly manifest references it.
 No assembled or manufacturer approval is inferred. Logs:
 `/tmp/sensorly-ground-integration-{drc,kicad,tests}-20261022.log`.
+
+The combined ground/CI checkpoint at `7e75b86` passes all 15 local pipeline
+stages with 117 host regressions and 23 actual KiCad tests. The exact pinned
+container also passes firmware-host/provenance smoke checks after the CI setup
+fix, and passes the new ground-connectivity regression under KiCad 10.0.5.
+See [the checkpoint review](94-ground-and-ci-checkpoint-review.md); GitHub CI
+will rerun on push. All physical/ordering evidence remains open.
