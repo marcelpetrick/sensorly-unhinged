@@ -1,8 +1,8 @@
 # sensorly-unhinged
 
 [![Hardware Quality (master)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml/badge.svg?branch=master)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml)
-[![Release workflow: manual](https://img.shields.io/badge/release%20workflow-manual-lightgrey.svg)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml)
-[![Manufacturing: not released](https://img.shields.io/badge/manufacturing-not%20released-orange.svg)](https://github.com/marcelpetrick/sensorly-unhinged/releases)
+[![Release workflow: manual](docs/img/badges/release-workflow.svg)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml)
+[![Manufacturing: not released](docs/img/badges/manufacturing.svg)](https://github.com/marcelpetrick/sensorly-unhinged/releases)
 [![License: GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![KiCad 10](https://img.shields.io/badge/KiCad-10-314cb0.svg)](https://www.kicad.org/)
 [![Status: engineering prototype](https://img.shields.io/badge/status-engineering%20prototype-orange.svg)](#status)
@@ -118,7 +118,9 @@ require OpenSCAD. Offline checks alone cannot establish hardware readiness.
 The quality badge reports the latest **master** workflow result. The release
 workflow badge links to a manual process, rather than displaying an empty run
 status. No manufacturing release has been published; the manufacturing badge
-records that state without querying a nonexistent latest release.
+records that state without querying a nonexistent latest release. Both release
+labels are repository-owned SVGs; update the manufacturing label when a qualified
+release is actually published.
 
 GitHub's **Hardware Quality** workflow runs the same `localPipeline.sh` gate and
 retains draft Gerbers, reports and enclosure meshes for 14 days. The separate,
