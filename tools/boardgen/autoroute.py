@@ -458,7 +458,7 @@ def route_rest(v: Variant, placed: list[Placement],
     todo.sort(key=difficulty)
 
     for net, ts in todo:
-        if net in {"SW_L", "EN_REG", "VSET"}:
+        if net in {"SW_L", "EN_REG", "VSET", "ISET", "ITERM"}:
             continue  # complete reviewed local routes
         if net in {"USB_D_P", "USB_D_N"}:
             failed.append(f"{net}: dedicated differential routing remains open")

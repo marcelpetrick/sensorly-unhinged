@@ -17,8 +17,8 @@ def route_local_power(v, placed):
     reviewed = {
         'U3':(3.4,10.0,270),'L1':(3.4,13.2,180),'U4':(24.4,10.5,0),
         'C1':(4.9,7.1,180),'C7':(1.25,7.7,270),'C8':(2.8,15.8,180),
-        'C9':(24.4,7.1,0),'C10':(28.2,10.5,90),'C11':(24.0,14.0,0),
-        'Q1':(27.8,17.1,90),
+        'C9':(24.4,7.1,180),'C10':(28.2,10.5,90),'C11':(24.0,14.0,0),
+        'Q1':(27.8,17.1,90),'R12':(21.55,7.2,90),'R13':(21.45,10.3,270),
     }
     by_ref = {p.ref:p for p in placed}
     for ref, coords in reviewed.items():
@@ -40,7 +40,7 @@ def route_local_power(v, placed):
         Track('GND', .15, 'F.Cu', [(25.15,11.9),(25.15,11.4),(24.95,11.05)], 'plane-neckdown'),
         Track('GND', .4, 'F.Cu', [(1.25,8.475),(1.0,8.475),(1.0,9.4)]),
         Track('GND', .4, 'F.Cu', [(1.85,15.8),(1.0,15.8)]),
-        Track('GND', .4, 'F.Cu', [(25.35,7.1),(26.4,7.1),(26.4,6.4)]),
+        Track('GND', .4, 'F.Cu', [(23.45,7.1),(22.4,7.1),(22.4,6.4)]),
         Track('GND', .4, 'F.Cu', [(28.2,9.55),(29.25,9.55)]),
         Track('GND', .4, 'F.Cu', [(24.95,14.0),(24.95,15.1)]),
     ]
@@ -48,7 +48,7 @@ def route_local_power(v, placed):
     # immediately joins .4mm trunks and its local capacitor on F.Cu.
     tracks += [
         Track('VBUS',.15,'F.Cu',[(25.15,9.1),(25.15,8.3)],'power-neckdown'),
-        Track('VBUS',.4,'F.Cu',[(25.15,8.3),(23.45,8.3),(23.45,7.1)]),
+        Track('VBUS',.4,'F.Cu',[(25.15,8.3),(25.35,8.3),(25.35,7.1)]),
         Track('VSYS',.15,'F.Cu',[(25.8,10.25),(26.6,10.25)],'power-neckdown'),
         Track('VSYS',.15,'F.Cu',[(25.8,10.75),(26.6,10.75)],'power-neckdown'),
         Track('VSYS',.4,'F.Cu',[(26.6,10.25),(26.6,10.75),(28.2,10.75),(28.2,11.45)]),
@@ -56,9 +56,15 @@ def route_local_power(v, placed):
         Track('VBAT',.15,'F.Cu',[(23.0,10.75),(22.2,10.75)],'power-neckdown'),
         Track('VBAT',.4,'F.Cu',[(22.2,10.25),(22.2,13.2),(23.05,13.2),(23.05,14.0)]),
     ]
+    tracks += [
+        Track('ISET',.15,'F.Cu',[(23.65,9.1),(23.65,8.5),(21.45,8.5),(21.45,9.79)]),
+        Track('ITERM',.15,'F.Cu',[(24.15,9.1),(24.15,8.15),(21.55,8.15),(21.55,7.71)]),
+        Track('GND',.4,'F.Cu',[(21.55,6.69),(21.55,6.3),(20.9,6.3)]),
+        Track('GND',.4,'F.Cu',[(21.45,10.81),(21.4,10.81),(21.4,11.8)]),
+    ]
     vias = [Via('GND',4.65,8.5), Via('GND',2.3,11.6),
             Via('+3V0',5.1,15.8), Via('GND',1.0,9.4), Via('GND',1.0,15.8),
-            Via('GND',26.4,6.4), Via('GND',29.25,9.55), Via('GND',24.95,15.1)]
+            Via('GND',22.4,6.4), Via('GND',29.25,9.55), Via('GND',24.95,15.1), Via('GND',20.9,6.3), Via('GND',21.4,11.8)]
     # Exact TI RGT0016B example (4219033/A08/2016) centres +/-0.55.
     # .6/.3 is the project's standard via, NOT TI's illustrated .2 bore.
     # Under-paste vias require explicitly approved filled/capped/planarized

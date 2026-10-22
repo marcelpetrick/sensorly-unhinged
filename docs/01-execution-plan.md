@@ -385,3 +385,20 @@ At `28bcb50`, all 15 full-pipeline stages pass without skips, including 112
 host regressions, 22 actual KiCad controls, byte-identical generation, enclosure
 checks and draft exports. Log: `/tmp/sensorly-paste-checkpoint-pipeline-20261022.log`.
 No physical measurements or supplier approval are implied.
+
+### Local charger programming checkpoint — 2026-10-22
+
+C9 now faces U4 IN13 directly, and R12/R13 sit beside U4 with explicit
+ITERM/ISET paths and off-paste ground returns on both boards. No netlist,
+component value, firmware policy or electrical rule is changed. Fresh ERC/DRC
+reports retain zero violations, warnings and parity differences, with **42 A /
+34 B unconnected items**; ISET and ITERM have no remaining airwires. Seventeen
+focused regressions pass, as do docs consistency and the four enclosure mesh
+bounds plus both lid/base and cable/case-plus-pack intersection checks.
+
+This checkpoint improves the local loops without claiming complete routing or
+assembled analog/ground performance. W2a continues with actual ground-plane
+access and remaining charger fanout; W2b remains open. Relevant diagnostics:
+`/tmp/sensorly-charger-programming-drc-20261022.log`,
+`/tmp/sensorly-charger-programming-tests-20261022.log` and
+`/tmp/sensorly-charger-programming-mech-20261022.log`.

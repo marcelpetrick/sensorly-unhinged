@@ -24,7 +24,7 @@ class ViaPasteTests(unittest.TestCase):
             emit(self.variant, [part], [], [Via('GND', x, y)])
 
     def test_outside_paste_return_is_accepted(self):
-        G.validate_via_paste([self.parts['C9']], [Via('GND', 26.4, 6.4)])
+        G.validate_via_paste([self.parts['C9']], [Via('GND', 22.4, 6.4)])
 
     def test_reviewed_ep_array_is_the_only_process_exception(self):
         part = self.parts['U4']
@@ -49,7 +49,7 @@ class ViaPasteTests(unittest.TestCase):
             return mask[round(y/GRID)*board.w+round(x/GRID)]
         x,y = G.xform(*G.get(part.footprint).pads['2'][0],part.x,part.y,part.rot)
         self.assertTrue(blocked(x,y))
-        self.assertFalse(blocked(26.4,6.4))
+        self.assertFalse(blocked(22.4,6.4))
 
     def test_same_net_corner_requires_centred_via(self):
         from tools.boardgen.autoroute import Board

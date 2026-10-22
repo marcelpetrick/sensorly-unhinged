@@ -71,7 +71,7 @@ NEAR = {
 
 # Controlled local power placement, before small-signal auto-packing.
 # These geometry choices reserve short U1/U3/U4 power/return loops.
-POWER_LOCAL = {"C1": (4.9, 7.1, 180), "C7": (1.25, 7.7, 270), "C8": (2.8, 15.8, 180), "C9": (24.4, 7.1, 0), "C10": (28.2, 10.5, 90), "C11": (24.0, 14.0, 0), "Q1": (27.8, 17.1, 90)}
+POWER_LOCAL = {"C1": (4.9, 7.1, 180), "C7": (1.25, 7.7, 270), "C8": (2.8, 15.8, 180), "C9": (24.4, 7.1, 180), "C10": (28.2, 10.5, 90), "C11": (24.0, 14.0, 0), "Q1": (27.8, 17.1, 90), "R12": (21.55, 7.2, 90), "R13": (21.45, 10.3, 270)}
 
 # Pogo field: 2.54 mm grid on the bottom side, one contiguous rectangle.
 TESTPAD_ORIGIN = (9.0, 19.5)

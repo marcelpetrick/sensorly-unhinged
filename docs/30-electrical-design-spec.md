@@ -316,6 +316,32 @@ The local C9/C10 ground returns move beyond their paste lands without changing
 capacitor placement, values or nets. The actual assembler must still accept
 via registration, solder-mask and stencil/reflow details. See docs/63.
 
+### 3.6 Local charger programming paths, 2026-10-22
+
+The shared nonpolar C9 rotates 180° at its unchanged (24.4, 7.1) mm
+centre. Its VBUS pad is now (25.35, 7.1), directly above U4 IN13;
+the GND pad is (23.45, 7.1) with a return via at (22.4, 6.4).
+The existing 0.8 mm, 0.15 mm-wide IN escape still joins a 0.4 mm
+F.Cu trunk. This shortens the input bypass path and removes the former VBUS
+bar across the ISET/ITERM exits. No value, net or stackup changes.
+
+R12 is reserved at (21.55, 7.2, 90°), R13 at (21.45, 10.3, 270°),
+replacing their remote sensor-end placements on both layouts. Explicit
+0.15 mm F.Cu paths connect U4 ITERM15 to R12.1 and ISET16 to R13.1.
+Their ground pads reach separate local return vias at (20.9, 6.3) and
+(21.4, 11.8); all ordinary drills retain the paste reserve in §3.5.
+[TI BQ2407x SLUS810N §§7/12.1](https://www.ti.com/lit/ds/symlink/bq24074.pdf)
+supplies the pin identities and local-layout/low-current-ground guidance.
+These coordinates are engineering geometry choices; filled-ground continuity,
+assembled startup, charge accuracy and thermal behavior still need review and
+measurement. Short local ground access alone does not prove the manufacturer's
+single-point small-signal/power-ground guidance is satisfied.
+
+The generator checks a literal placement snapshot before emitting these paths;
+regressions check transformed pad-to-pad and ground-via connectivity. Both
+variants keep their common electrical design and all existing clearances,
+keepouts, pin-1 markings and charging restrictions.
+
 ## 4. U3 — TPS62840DLC (system regulator)
 
 SON-8 (DLC), 1.5 × 2.0 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq**

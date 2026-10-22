@@ -20,7 +20,7 @@ KiCad renders of the same two files: `img/render-a.png`, `img/render-b.png`.
 | Parts | 47 component footprints (46 fitted; R21 DNP) plus 17 test pads | identical |
 | Sensor position | bottom edge, board centre | on a 18 × 9 mm island |
 | Neck | — | 3.5 × 8.0 mm FR-4, 4 × 0.15 mm traces |
-| Nearest heat source to the sensor | **11.3 mm** (D1) | **22.7 mm** (R13) |
+| Nearest heat source to the sensor | **11.3 mm** (D1) | **24.3 mm** (D1) |
 | Idealized slab / neck conductance (not actual A/B coupling) | **70 mW/K** | **1.2 mW/K** |
 | Hypothetical slab / neck ratio | — | **57×**, not a performance claim |
 | Assembly difficulty | single-sided SMT; separate placement/stencil jobs | identical |
@@ -172,7 +172,7 @@ board routes.
 The same explicit electronics placement is used in A and B. U3/L1 remain at
 (3.4,10.0)/(3.4,13.2) mm and rotate to 270°/180° so SW points toward the
 inductor. Local reservations are C1(4.9,7.1,180°), C7(1.25,7.7,270°),
-C8(2.8,15.8,180°), C9(24.4,7.1,0°), C10(28.2,10.5,90°),
+C8(2.8,15.8,180°), C9(24.4,7.1,180°), C10(28.2,10.5,90°),
 C11(24.0,14.0,0°), Q1(27.8,17.1,90°). These are geometry decisions, not
 datasheet dimensions. C1 remains at U1's pin3 supply entrance; C7/C8 have
 explicit regulator loops, while C10/C11 move from approximately y31 mm to
@@ -206,3 +206,13 @@ standard vias and short B.Cu paths, with literal placement guards. Component
 positions and enclosure geometry are unchanged. Via holes avoid solder-paste
 lands, the VSET path avoids the regulator ground stitch, and the analog
 parasitic/startup qualification in EDS-18 remains open.
+
+### Local charger programming layout — 2026-10-22
+
+C9 rotates 180° at its unchanged centre/courtyard; its nonpolar VBUS/GND
+pads and actual routes move together. R12 (21.55, 7.2, 90°) and R13
+(21.45, 10.3, 270°) now sit beside U4 instead of near the sensor end.
+Both boards share these reservations before automatic small-signal placement.
+This removes long programming loops without changing the common netlist or
+values. B's nearest modeled heat source becomes D1 at 24.3 mm; this is a
+geometrical distance, not measured self-heating or thermal performance.
