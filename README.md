@@ -111,6 +111,10 @@ make prototype-package PROTOTYPE_VARIANT=a # gated 5-unit engineering order pack
 make all
 ```
 
+Host firmware tests also require a C compiler and standard C development
+headers (`gcc` and `libc6-dev` on the Debian CI image). Container workflows
+explicitly trust their checked-out workspace for Git provenance checks.
+
 Python-only checks include `check`, `test`, `bom`, `thermal`, `cost`, and `power`.
 ERC/DRC, board renders and exports require KiCad 10 (`kicad-cli`); mesh checks
 require OpenSCAD. Offline checks alone cannot establish hardware readiness.
