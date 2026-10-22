@@ -1,13 +1,14 @@
 # sensorly-unhinged
 
-[![Hardware Quality](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml/badge.svg?branch=master)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml)
-[![Hardware Release](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml/badge.svg)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml)
-[![Engineering prereleases](https://img.shields.io/badge/releases-engineering-orange)](https://github.com/marcelpetrick/sensorly-unhinged/releases)
+[![Hardware Quality (master)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml/badge.svg?branch=master)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/hardware.yml)
+[![Release workflow: manual](https://img.shields.io/badge/release%20workflow-manual-lightgrey.svg)](https://github.com/marcelpetrick/sensorly-unhinged/actions/workflows/release.yml)
+[![Manufacturing: not released](https://img.shields.io/badge/manufacturing-not%20released-orange.svg)](https://github.com/marcelpetrick/sensorly-unhinged/releases)
 [![License: GPL v3 or later](https://img.shields.io/badge/license-GPLv3%20or%20later-blue.svg)](LICENSE)
 [![KiCad 10](https://img.shields.io/badge/KiCad-10-314cb0.svg)](https://www.kicad.org/)
 [![Status: engineering prototype](https://img.shields.io/badge/status-engineering%20prototype-orange.svg)](#status)
 
-A battery-powered indoor temperature and humidity node, developed as **one
+**My very first PCB project:** a battery-powered indoor temperature and humidity
+node, developed as **one
 electrical platform in two physical implementations** so that the cost of
 compactness can be measured instead of guessed.
 
@@ -26,7 +27,7 @@ compactness can be measured instead of guessed.
          Variant A - Compact                        Variant B - Thermally isolated
          30 × 34 mm, one rectangle                  30 × 51 mm, milled sensor island
          sensor 11.3 mm from the                    on a 3.5 x 8 mm FR-4 neck,
-         nearest heat source                        sensor 16.5 mm away;
+         nearest heat source                        sensor 22.7 mm away;
                                                     thermal benefit unmeasured
 ```
 
@@ -35,7 +36,7 @@ compactness can be measured instead of guessed.
 | ![Variant A](docs/img/render-a.png) | ![Variant B](docs/img/render-b.png) |
 | **A — Compact** (HW A1) | **B — Thermally isolated** (HW B1) |
 | ![Case A](docs/img/case-a-base.png) | ![Case B](docs/img/case-b-base.png) |
-| 47.0 × 39.2 × 18.8 mm, one chamber | 47.0 × 56.2 × 18.8 mm, two chambers, wall at the neck |
+| 47.0 × 39.2 × 19.6 mm, one chamber | 47.0 × 56.2 × 19.6 mm, two chambers, wall at the neck |
 
 Build 5 of each, put them next to a reference instrument, and let the data pick
 the design. The decision gate is written down in
@@ -51,10 +52,11 @@ review files. `make release-check` requires complete routing, clean DRC/parity
 and the evidence listed in `hardware/release-readiness.json`. A development
 pipeline pass does not imply a working sensor or safe battery charging.
 
-**Partially routed:** 59 unconnected items on A and 60 on B. The sensor routes
-and some power/ground fan-out are generated; the fine-pitch escapes and other
-main-board connections remain incomplete. Development DRC has zero errors,
-with explicitly limited warnings; it is not a clean manufacturing DRC.
+**Partially routed:** 42 unconnected items on A and 34 on B at the verified
+2026-10-22 checkpoint. Sensor routes, local power/ground paths and regulator
+controls are generated; USB and remaining main-board branches are incomplete.
+Development DRC has zero errors, warnings and schematic/PCB parity differences;
+manufacturing also requires zero unconnected items.
 Phase 6 of 14 — see [`docs/00-plan.md`](docs/00-plan.md).
 
 A compiled, radio-disabled [bring-up application and fixture capture](docs/72-firmware-bringup.md)
@@ -67,9 +69,9 @@ series are in [`docs/01-execution-plan.md`](docs/01-execution-plan.md).
 
 ```
 KiCad ERC      0 violations
-KiCad DRC      0 errors, 7 / 17 development warnings on A / B (KiCad 10.0.6)
+KiCad DRC      0 errors, 0 warnings on both boards (KiCad 10.0.6)
 Sch/PCB parity 0 differences  (both are generated from one model)
-Ratsnest       A: 59 remaining; B: 60 remaining (see hardware/drc-budget.json)
+Ratsnest       A: 42 remaining; B: 34 remaining (see hardware/drc-budget.json)
 Outputs        4-layer gerbers, drill, CPL, assembly PDF, STEP, schematic PDF, BOM
 ```
 
@@ -112,6 +114,11 @@ make all
 Python-only checks include `check`, `test`, `bom`, `thermal`, `cost`, and `power`.
 ERC/DRC, board renders and exports require KiCad 10 (`kicad-cli`); mesh checks
 require OpenSCAD. Offline checks alone cannot establish hardware readiness.
+
+The quality badge reports the latest **master** workflow result. The release
+workflow badge links to a manual process, rather than displaying an empty run
+status. No manufacturing release has been published; the manufacturing badge
+records that state without querying a nonexistent latest release.
 
 GitHub's **Hardware Quality** workflow runs the same `localPipeline.sh` gate and
 retains draft Gerbers, reports and enclosure meshes for 14 days. The separate,
