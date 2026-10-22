@@ -381,4 +381,7 @@ including same-net paste rejection, the narrowly defined EP exception and
 centred-via corner handling. An independent drill/paste audit finds only the
 four specified U4 EP holes on each board. These are development counts; W2a,
 W2b and W2c remain open, as do all external manufacturing and physical gates.
-Full pipeline validation is required before pushing this checkpoint.
+At `28bcb50`, all 15 full-pipeline stages pass without skips, including 112
+host regressions, 22 actual KiCad controls, byte-identical generation, enclosure
+checks and draft exports. Log: `/tmp/sensorly-paste-checkpoint-pipeline-20261022.log`.
+No physical measurements or supplier approval are implied.

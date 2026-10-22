@@ -1,5 +1,5 @@
-Base: master @ d50053b   Head: d11624e
-Files changed: 106   +20125 / -6915 lines
+Base: master @ d50053b   Head: 28bcb50
+Files changed: 111   +21710 / -6906 lines
 
 **Findings**
 
@@ -22,15 +22,24 @@ SDK/build entry points, manufacturing package/evidence checks, library/polarity
 changes, spatial copper restrictions, mechanical registration/intersections and
 fitted cost quantities. Removed guards and routing skips were checked against
 their replacements. Historical cost rates, conditional panel arithmetic and
-unqualified alternates remain explicitly limited. USB and regulator-control
-experiments outside the committed tree are not accepted by this review.
+unqualified alternates remain explicitly limited. The integrated U3 enable/VSET paths and separately grounded J2 mounting nails
+were also reviewed. USB and charger-programming experiments outside the
+committed tree are not accepted by this review.
+
+The subsequent via/paste review found ordinary drill holes under same-net paste
+lands. `ce3b101` corrects this confirmed issue with both router masking and an
+independent emission guard, off-paste C9/C10 returns and exact U4 EP exceptions
+under the existing EDS-17 process gate. Six regressions exercise paste, exception
+and centred-via invariants. Fresh generated drill coordinates were checked against
+conservative paste envelopes: only the four specified U4 EP holes remain on each
+board. No electrical clearance or warning allowance was relaxed.
 
 **Validation**
 
-- Full `./localPipeline.sh`: all 15 stages pass, without skips; 105 host tests
-  and 21 actual KiCad controls pass. Generated sources reproduce byte-identically.
+- Full `./localPipeline.sh`: all 15 stages pass, without skips; 112 host tests
+  and 22 actual KiCad controls pass. Generated sources reproduce byte-identically.
 - ERC: zero violations. Both filled boards: zero DRC errors, warnings and parity
-  differences; A has 47 unconnected items and B has 45.
+  differences; A has 42 unconnected items and B has 34.
 - Four enclosure mesh extents match; both seated lid/base and cable/case-plus-pack
   intersections are empty. Physical fit remains untested.
 - Pinned ESP-IDF v5.5.4 build passed at the resumed baseline; these changes affect
@@ -39,7 +48,7 @@ experiments outside the committed tree are not accepted by this review.
   acceptance remain open in EDS-17. All five prototype reviews and seven product
   qualification records still have null evidence.
 
-Local pipeline diagnostics: `/tmp/sensorly-power-checkpoint-pipeline-20261022.log`.
+Local pipeline diagnostics: `/tmp/sensorly-paste-checkpoint-pipeline-20261022.log`.
 They are design-check output, not supplier acceptance or physical measurements.
 
 **Verdict**
