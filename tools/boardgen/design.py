@@ -183,6 +183,9 @@ NETS = {
            ("U5", "2"),
            ("J1", "A1"), ("J1", "A12"), ("J1", "B1"), ("J1", "B12"), ("J1", "SH"),
            ("J2", "1"),
+           # Separate mechanical nails: the PCB bonds both MP lands to GND.
+           # No internal-jumper assumption; these are not battery contacts.
+           ("J2", "MP"),
            ("C1", "2"), ("C2", "2"), ("C3", "2"), ("C4", "2"), ("C5", "2"),
            ("C6", "2"), ("C7", "2"), ("C8", "2"), ("C9", "2"), ("C10", "2"),
            ("C11", "2"), ("C12", "2"), ("C13", "2"), ("C14", "2"),

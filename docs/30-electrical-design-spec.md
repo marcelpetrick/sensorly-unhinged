@@ -547,6 +547,13 @@ imply a horizontal viewing order. Its footprint is verified against
 Molex drawing 532610271-SD; incoming inspection must continuity-check every pack
 before mating because reverse polarity can destroy the charger and vent a cell.
 
+Both J2 mounting-nail pads (`MP`) are explicitly connected to `GND` on both
+boards. This is an engineering grounding choice, not an assertion that the two
+nails are internally common or rated battery-current contacts. The unchanged
+footprint retains separate physical lands and no internal-jumper exception;
+actual PCB copper must connect each to ground. Signal cavities 1/2/3 and the
+mandatory pack continuity inspection remain unchanged.
+
 The supplier webpage establishes that this configuration can be purchased in
 five-piece prototype quantity and the dated drawing defines the assembly.
 Procurement must obtain written lot confirmation, reconcile the page's 225 mA

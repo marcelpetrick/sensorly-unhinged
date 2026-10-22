@@ -239,3 +239,15 @@ U4 VSS8 has a direct local connection to EP as required by
 while the local bypass returns and four vias provide plane access.
 Nominal DRC clearance is design verification; it does not qualify via fill,
 cap planarity, paste volume, solder voiding, heat transfer or assembled yield.
+
+## Connector mounting-nail grounding — 22 October 2026
+
+The [Molex 53261 family drawing](https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/532/53261/532610001_sd.pdf)
+identifies the mechanical nails separately from the three signal contacts. No
+internal-common electrical connection is established by that drawing. Both
+existing MP solder lands are now deliberately assigned to GND in the common
+schematic/netlist, with unchanged land pattern and no fake internal-jumper
+metadata. Actual filled-board connectivity must reach both lands. They are
+mechanical retention features, not additional rated pack-current contacts.
+This resolves the artificial shared-NC mounting-pad airwire without concealing
+an unconnected ground pad or changing the pack cavity order.

@@ -170,6 +170,15 @@ mechanical geometry are unchanged. Diagnostics:
 EDS-18 retains the TI 100 pF VSET parasitic limit and startup/output-selection
 qualification; no extracted or measured parasitic bound is asserted.
 
+### Connector mounting-ground checkpoint — 2026-10-22
+
+Both independent J2 mounting nails now belong to GND in the one shared model.
+The original footprint retains its real separate lands and no internal-jumper
+exception. Independent scratch review and fresh root ERC/DRC both verify actual
+copper connectivity: zero violations/parity, **44 A / 43 B unconnected items**.
+The three battery contacts, BOM, footprint geometry and enclosure are unchanged.
+Diagnostics: `/tmp/sensorly-mount-ground-drc-20261022.log`.
+
 ### Immediate source cleanup and atomic commit plan
 
 The current work order is to finish and verify the existing changed files before
