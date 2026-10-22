@@ -198,3 +198,11 @@ already-routed IC power pads. The full isolated-board verification reported
 A47/B45 unconnected items with zero DRC errors, warnings and parity differences;
 these are a development checkpoint, and fabrication still requires zero
 unconnected items. Remote power branches and charger control nets remain open.
+
+### Regulator controls, 2026-10-22
+
+The shared U3 EN_REG/VSET pad escapes and R5/R6 connections now route through
+standard vias and short B.Cu paths, with literal placement guards. Component
+positions and enclosure geometry are unchanged. Via holes avoid solder-paste
+lands, the VSET path avoids the regulator ground stitch, and the analog
+parasitic/startup qualification in EDS-18 remains open.

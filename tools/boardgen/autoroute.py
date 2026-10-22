@@ -360,6 +360,10 @@ def route_rest(v: Variant, placed: list[Placement],
 
     from .power import route_local_power
     tracks, vias = route_local_power(v, placed)
+    from .control import route_local_controls
+    control_tracks, control_vias = route_local_controls(placed)
+    tracks += control_tracks
+    vias += control_vias
     terms['VSYS'] = [t for t in terms['VSYS'] if t.ref not in {'U3','U4'}]
     for net in ('VBUS','VBAT'):
         terms[net] = [t for t in terms[net] if t.ref != 'U4']
@@ -432,8 +436,8 @@ def route_rest(v: Variant, placed: list[Placement],
     todo.sort(key=difficulty)
 
     for net, ts in todo:
-        if net == "SW_L":
-            continue  # complete reviewed local top-layer switching loop
+        if net in {"SW_L", "EN_REG", "VSET"}:
+            continue  # complete reviewed local routes
         if net in {"USB_D_P", "USB_D_N"}:
             failed.append(f"{net}: dedicated differential routing remains open")
             continue

@@ -6,7 +6,7 @@
       "id": "electrical",
       "owner": "hardware/firmware maintainer",
       "evidence": null,
-      "requirement": "Reviewed ADR-001 controlled prototype: mandatory DNP R21 isolates TS/ADC; IO1 wake/independent IO9 download; EN1/EN2 standby while MCU rail valid; startup/rail-loss restrictions, protected VBAT fixture, no USB500 or charging authorization; EDS-9Q/10Q/11/12/13/14/15 physical/product gates remain open; EDS-16 component capacitance bounds and explicit derating assumptions reviewed before controlled order"
+      "requirement": "Reviewed ADR-001 controlled prototype: mandatory DNP R21 isolates TS/ADC; IO1 wake/independent IO9 download; EN1/EN2 standby while MCU rail valid; startup/rail-loss restrictions, protected VBAT fixture, no USB500 or charging authorization; EDS-9Q/10Q/11/12/13/14/15 physical/product gates remain open; EDS-16 component capacitance bounds and explicit derating assumptions reviewed before controlled order; EDS-18 retained VSET parasitic/leakage review against TI 100 pF maximum before order"
     },
     {
       "id": "assembly",

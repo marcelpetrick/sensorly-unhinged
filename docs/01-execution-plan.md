@@ -157,6 +157,19 @@ with **47 A / 45 B unconnected items**; diagnostics are retained at
 and process requirements are unchanged from the preceding checkpoint.
 Remote supplies, controls, USB and genuine manufacturing acceptance remain open.
 
+### Integrated regulator-control checkpoint — 2026-10-22
+
+Explicit EN_REG/VSET paths connect U3 to R5/R6 through standard signal vias,
+with fail-closed placement snapshots. Both actual KiCad positive controls
+require no violations and no airwires on those two nets; placement-mutation
+negative controls also pass. Fresh root ERC/DRC reports zero errors, warnings
+and parity differences with **45 A / 44 B unconnected items**. Placement and
+mechanical geometry are unchanged. Diagnostics:
+`/tmp/sensorly-controls-tests-20261022.log` and
+`/tmp/sensorly-controls-drc-20261022.log`.
+EDS-18 retains the TI 100 pF VSET parasitic limit and startup/output-selection
+qualification; no extracted or measured parasitic bound is asserted.
+
 ### Immediate source cleanup and atomic commit plan
 
 The current work order is to finish and verify the existing changed files before

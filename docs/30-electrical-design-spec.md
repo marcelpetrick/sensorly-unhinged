@@ -279,6 +279,24 @@ prove a seal inside the exposed-pad mask opening. See docs/63 and EDS-17.
 
 ---
 
+### 3.4 Regulator control routing, 2026-10-22
+
+EN_REG (U3.4→R5.2) and VSET (U3.5→R6.1) now have explicit 0.15 mm
+main-board paths with standard 0.6/0.3 mm vias to short B.Cu runs. The common
+U3/R5/R6 placement snapshot is checked before emitting those fixed paths.
+Via drills stay outside paste lands; the B.Cu VSET detour avoids the existing
+regulator ground via. Actual filled KiCad controls require zero violations and
+no remaining EN_REG/VSET airwires on either variant. No sensor-region copper,
+component value, netlist or firmware policy changes.
+
+[TI SLVSEC6D §§7.3/8.3.4](https://www.ti.com/lit/ds/symlink/tps62840.pdf)
+limits VSET external parasitic capacitance to **100 pF**; leakage and excess
+capacitance can select the wrong output voltage at startup. Connectivity/DRC
+cannot qualify that analog constraint. EDS-18 requires a retained parasitic
+review with the accepted stackup before ordering and measured startup/output
+selection on the first boards. No capacitance extraction or measured margin is
+claimed by this routing checkpoint.
+
 ## 4. U3 — TPS62840DLC (system regulator)
 
 SON-8 (DLC), 1.5 × 2.0 mm. 1.8–6.5 V in, 750 mA, **60 nA typical operating Iq**
@@ -610,6 +628,8 @@ width/length and the shared electrical platform remain as specified.
 | EDS-16 | Bound effective C7 input and total +3V0 capacitance C1/C2/C3/C6/C8 including zero-bias startup, tolerance, temperature and aging; 21.2 µF nominal /26.818 µF positive-tolerance/temperature upper envelope; C8 minimum uses stated typical bias assumptions, not a guaranteed3–40 µF effective envelope | hardware maintainer | before controlled prototype order: desk review of stated component bounds/derating assumptions; before unrestricted operation: accepted part-specific effective bounds and measured startup/TX/load-step stability (docs/63) |
 | EDS-17 | Qualify U4 under-EP via fill/cap/planarity, stencil/paste and hidden-joint inspection; repriced manufacturer acceptance | hardware maintainer and assembler | before controlled prototype order; source/drawing/CPL review and accepted filled/capped/planarized fabrication + paste/reflow process |
 
+
+| EDS-18 | Bound VSET parasitic capacitance to the TI 100 pF maximum and review leakage/noise on the routed R6 connection | hardware maintainer | retained stackup/parasitic review before controlled order; measured startup and correct output selection before unrestricted operation |
 
 ## 11. Review checklist for this spec
 
