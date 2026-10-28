@@ -447,14 +447,23 @@ will rerun on push. All physical/ordering evidence remains open.
    No source-only check substitutes for those records or physical tests.
 
 The previous GitHub Hardware Quality and Firmware Bring-up runs passed at
-`147d0f5`. The USB candidate is currently uncommitted; a fresh filled-board
-check reports A31/B27 unconnected and zero ERC/DRC errors, warnings and parity
-differences. On 2026-10-28, regeneration, 11 focused host tests, four actual KiCad USB/ground
-controls, 19/19 documentation checks and both enclosure interference checks
-passed. Neither USB data net nor GND has a remaining airwire on either board.
-A full pipeline remains required before pushing the accepted checkpoint.
+`147d0f5`. The USB candidate was subsequently committed as `3e8f16d` and
+`e70a517`; fresh filled-board checks reported A31/B27 unconnected and zero
+ERC/DRC errors, warnings and parity differences. On 2026-10-28, regeneration,
+11 focused host tests, four actual KiCad USB/ground controls, 19/19 documentation
+checks and both enclosure interference checks passed. Neither USB data net nor
+GND has a remaining airwire on either board.
 
 The USB checkpoint at `9648db3` passes all 15 local pipeline stages with 124
 host and 27 actual KiCad tests, including the overlapping-rule precedence
 control. Review: [USB checkpoint](95-usb-checkpoint-review.md). A31/B27 remain
 unconnected; stackup, fixture, supplier and physical qualification stay open.
+
+### Continuation — 2026-10-28
+
+At `46c6fbd` the working tree was clean and matched `origin/master`. The next
+source task is the charger-control fanout in step 2 above. Both filled DRC
+reports still show the safety-critical `CHARGE_EN_N`, `CHARGE_ENABLE` and
+`PACK_TS` connections among the remaining airwires. Keep those nets explicitly
+visible until their actual connectivity and clearances are checked on both
+variants. Prototype and product qualification still require external evidence.
