@@ -17,6 +17,11 @@ available for review; it is not an order authorization. The next order is 5 A +
 | Controlled prototype package | `make prototype-package PROTOTYPE_VARIANT=a` and `b` | Clean layout, reviewed electrical/sourcing/assembly/mechanical/order records; fabricate only the reviewed engineering batch. |
 | Qualified product package | `make release-package RELEASE_TAG=hw-a1` (actual printed revision) | All product qualification evidence, complete routing and final manufacturing review; use the revised tag for the eventual series. |
 
+For a product package, the hardware tag must exist in Git and resolve to the
+exact clean source commit being packaged. Both lightweight and annotated tags
+are accepted. Create the tag only after the relevant release review and gates
+are complete; the package command does not create or move it.
+
 The prototype gate is intentionally independent of measurement evidence that
 requires first boards. It still requires **zero DRC warnings/errors, zero
 unconnected items and zero schematic/PCB parity differences on both layouts**,

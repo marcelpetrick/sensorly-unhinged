@@ -66,6 +66,22 @@ def source_commit(root: Path, requested: str | None) -> str:
     return head
 
 
+def verify_tag_commit(root: Path, tag: str, commit: str) -> None:
+    """Require the exact hardware tag to identify the packaged commit.
+
+    Peeling accepts annotated as well as lightweight tags. Resolve only the
+    tags namespace so a same-named branch cannot impersonate the revision.
+    """
+    variant_for_tag(tag)
+    result = subprocess.run(
+        ["git", "rev-parse", "--verify", f"refs/tags/{tag}^{{commit}}"],
+        cwd=root, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        raise ValueError(f"hardware tag {tag} does not exist or does not point to a commit")
+    if result.stdout.strip() != commit:
+        raise ValueError(f"hardware tag {tag} does not point to source commit {commit}")
+
+
 def release_inputs(root: Path, variant: str) -> list[Path]:
     fixed = [
         root / "LICENSE",
@@ -110,6 +126,7 @@ def build_archive(tag: str, commit: str, output_dir: Path,
     problems = blockers(root)
     if problems:
         raise ValueError("release qualification failed: " + "; ".join(problems))
+    verify_tag_commit(root, tag, commit)
     files = release_inputs(root, variant)
     output_dir.mkdir(parents=True, exist_ok=True)
     archive = output_dir / f"sensorly-unhinged-{tag}.zip"
@@ -145,12 +162,14 @@ def main() -> int:
             print(f"{args.tag} matches {VARIANTS[variant].revision}")
             return 0
         commit = source_commit(ROOT, args.commit)
+        verify_tag_commit(ROOT, args.tag, commit)
         # The module is also a public entry point: re-run live rules and exports
         # instead of trusting reports/markers from an earlier successful build.
         subprocess.run(["make", "release", "mech", "REQUIRE_OPENSCAD=1",
                         f"RELEASE_TAG={args.tag}"],
                        cwd=ROOT, check=True)
         source_commit(ROOT, commit)
+        verify_tag_commit(ROOT, args.tag, commit)
         archive, checksum = build_archive(args.tag, commit, args.output_dir)
     except (OSError, ValueError, subprocess.CalledProcessError) as exc:
         parser.error(str(exc))

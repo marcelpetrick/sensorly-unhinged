@@ -9,7 +9,8 @@ import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
-from tools.package_release import build_archive, manufacturing_paths, source_commit, variant_for_tag
+from tools.package_release import (build_archive, manufacturing_paths, source_commit,
+                                   variant_for_tag, verify_tag_commit)
 from tools.release_gate import REQUIRED
 
 
@@ -35,6 +36,7 @@ class PackageReleaseTests(unittest.TestCase):
         from tools import package_release
         with patch("sys.argv", ["package_release", "--tag", "hw-a1"]), \
                 patch.object(package_release, "source_commit", return_value="abc"), \
+                patch.object(package_release, "verify_tag_commit"), \
                 patch.object(package_release.subprocess, "run",
                              side_effect=subprocess.CalledProcessError(2, "make")) as run, \
                 patch.object(package_release, "build_archive") as archive, \
@@ -48,6 +50,14 @@ class PackageReleaseTests(unittest.TestCase):
             archive.assert_not_called()
 
     def qualified_inputs(self, root):
+        def git(*args):
+            return subprocess.check_output(["git", *args], cwd=root, text=True,
+                                           stderr=subprocess.DEVNULL).strip()
+        git("init")
+        git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+            "-c", "commit.gpgsign=false", "commit", "--allow-empty", "-m", "fixture")
+        commit = git("rev-parse", "HEAD")
+        git("tag", "hw-a1", commit)
         paths = [
             "LICENSE", "README.md", "docs/30-electrical-design-spec.md",
             "docs/51-power-safety-qualification.md",
@@ -72,6 +82,31 @@ class PackageReleaseTests(unittest.TestCase):
                 violations=[], unconnected_items=[], schematic_parity=[],
                 included_severities=["error", "warning"], ignored_checks=[],
                 source=f"env-sensor-{variant}.kicad_pcb")))
+        return commit
+
+    def test_tag_must_exist_in_tag_namespace_and_point_to_commit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            def git(*args):
+                return subprocess.check_output(["git", *args], cwd=root, text=True,
+                                               stderr=subprocess.DEVNULL).strip()
+            git("init")
+            git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                "-c", "commit.gpgsign=false", "commit", "--allow-empty", "-m", "first")
+            first = git("rev-parse", "HEAD")
+            git("branch", "hw-a1", first)
+            with self.assertRaisesRegex(ValueError, "does not exist"):
+                verify_tag_commit(root, "hw-a1", first)
+            git("tag", "hw-a1", first)
+            verify_tag_commit(root, "hw-a1", first)
+            git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                "-c", "commit.gpgsign=false", "commit", "--allow-empty", "-m", "second")
+            second = git("rev-parse", "HEAD")
+            with self.assertRaisesRegex(ValueError, "does not point"):
+                verify_tag_commit(root, "hw-a1", second)
+            git("-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                "tag", "-a", "hw-b1", "-m", "annotated", second)
+            verify_tag_commit(root, "hw-b1", second)
 
     def test_tag_must_match_revision_printed_on_board(self):
         self.assertEqual(variant_for_tag("hw-a1"), "a")
@@ -83,23 +118,23 @@ class PackageReleaseTests(unittest.TestCase):
     def test_missing_manufacturing_inputs_cannot_be_packaged(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.qualified_inputs(root)
+            commit = self.qualified_inputs(root)
             for name in manufacturing_paths("a"):
                 path = root / name
                 original = path.read_bytes()
                 path.unlink()
                 with self.subTest(path=name), self.assertRaisesRegex(
                         ValueError, "release inputs are missing"):
-                    build_archive("hw-a1", "deadbeef", root / "out", root)
+                    build_archive("hw-a1", commit, root / "out", root)
                 path.write_bytes(original)
             self.assertFalse((root / "out").exists())
 
     def test_archive_carries_evidence_and_valid_checksum(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.qualified_inputs(root)
+            commit = self.qualified_inputs(root)
             archive, checksum = build_archive(
-                "hw-a1", "deadbeef", root / "out", root)
+                "hw-a1", commit, root / "out", root)
             self.assertTrue(checksum.is_file())
             with zipfile.ZipFile(archive) as bundle:
                 names = bundle.namelist()
@@ -112,19 +147,33 @@ class PackageReleaseTests(unittest.TestCase):
             self.assertEqual(checksum.read_text().split()[0],
                              hashlib.sha256(archive.read_bytes()).hexdigest())
 
+    def test_archive_rejects_missing_or_wrong_hardware_tag(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            commit = self.qualified_inputs(root)
+            subprocess.run(["git", "tag", "-d", "hw-a1"], cwd=root,
+                           check=True, capture_output=True)
+            with self.assertRaisesRegex(ValueError, "does not exist"):
+                build_archive("hw-a1", commit, root / "out", root)
+            subprocess.run(["git", "tag", "hw-a1", commit], cwd=root,
+                           check=True, capture_output=True)
+            with self.assertRaisesRegex(ValueError, "does not point"):
+                build_archive("hw-a1", "0" * 40, root / "out", root)
+            self.assertFalse((root / "out").exists())
+
     def test_marker_does_not_replace_qualification(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.qualified_inputs(root)
+            commit = self.qualified_inputs(root)
             (root / "measurements/battery/review.md").unlink()
             with self.assertRaisesRegex(ValueError, "qualification failed"):
-                build_archive("hw-a1", "deadbeef", root / "out", root)
+                build_archive("hw-a1", commit, root / "out", root)
             self.assertFalse((root / "out").exists())
 
     def test_mixed_draft_and_release_exports_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            self.qualified_inputs(root)
+            commit = self.qualified_inputs(root)
             (root / "hardware/outputs/rev-a/DRAFT.txt").write_text("incomplete\n")
             with self.assertRaisesRegex(ValueError, "draft outputs"):
-                build_archive("hw-a1", "deadbeef", root / "out", root)
+                build_archive("hw-a1", commit, root / "out", root)
