@@ -67,6 +67,16 @@
 	(condition "A.Type == 'Track' && A.NetClass == 'Power' && A.enclosedByArea('Power escape *')")
 )
 
+(rule "USB classified breakouts uncoupled"
+	(constraint diff_pair_uncoupled (max 10.5mm))
+	(condition "A.NetClass == 'USB' && A.enclosedByArea('USB classified breakout *')")
+)
+
+(rule "USB paired trunk uncoupled"
+	(constraint diff_pair_uncoupled (max 2mm))
+	(condition "A.NetClass == 'USB' && A.enclosedByArea('USB paired trunk *')")
+)
+
 (rule "nothing but the sensor nets crosses the neck"
 	(constraint disallow track via pad)
 	(condition "A.NetName != 'SDA' && A.NetName != 'SCL' && A.NetName != '+3V0' && A.NetName != 'GND' && A.intersectsArea('Sensor island - traces only, no pour')")

@@ -1,13 +1,13 @@
 {
   "_comment": "Development-only local-power checkpoint; require fresh KiCad reports on both variants. Zero ERC/DRC errors, warnings and schematic parity differences; no ignored checks or warning allowances. Manufacturing gates still require zero unconnected items.",
   "a": {
-    "unconnected": 39,
-    "note": "Reviewed local U3 and U4 power/bypass loops and ground returns are present. USB, remote supply branches and remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
+    "unconnected": 31,
+    "note": "Reviewed local U3/U4 power and programming paths, plane-connected body returns and guarded native USB topology are present. Remote supply and remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
     "warnings": []
   },
   "b": {
-    "unconnected": 35,
-    "note": "Reviewed local U3 and U4 power/bypass loops and ground returns are present. USB, remote supply branches and remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
+    "unconnected": 27,
+    "note": "Reviewed local U3/U4 power and programming paths, plane-connected body returns and guarded native USB topology are present. Remote supply and remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
     "warnings": []
   }
 }
