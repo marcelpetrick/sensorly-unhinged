@@ -453,3 +453,8 @@ differences. On 2026-10-28, regeneration, 11 focused host tests, four actual KiC
 controls, 19/19 documentation checks and both enclosure interference checks
 passed. Neither USB data net nor GND has a remaining airwire on either board.
 A full pipeline remains required before pushing the accepted checkpoint.
+
+The USB checkpoint at `9648db3` passes all 15 local pipeline stages with 124
+host and 27 actual KiCad tests, including the overlapping-rule precedence
+control. Review: [USB checkpoint](95-usb-checkpoint-review.md). A31/B27 remain
+unconnected; stackup, fixture, supplier and physical qualification stay open.
