@@ -476,3 +476,12 @@ retries an SHT45 transaction once after a transport or CRC failure (`6f32b71`),
 with host fault-injection tests and a successful pinned ESP-IDF v5.5.4 build.
 This is still bring-up firmware; charging, active USB current modes and radio
 remain disabled, and no device test is claimed.
+
+Scratch routing-priority and partial U4 fanout experiments have not been
+adopted: although some reduced total airwires, they displaced existing USB
+control, sensor or ground connections. A complete placement-guarded charger
+path and its plane returns must be checked together on both filled boards.
+The journal prototype also remains exploratory: a telemetry encoding, actual
+ESP-IDF storage backend, partition sizing, endurance analysis and power-cut
+tests are required before a 500-record persistence claim can be made. Its
+test-only 64-byte records and assumed atomic backend are not product evidence.
