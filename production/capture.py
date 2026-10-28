@@ -19,13 +19,22 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _unique_object(pairs):
+    obj = {}
+    for key, value in pairs:
+        if key in obj:
+            raise ValueError(f"Duplicate JSON field: {key}")
+        obj[key] = value
+    return obj
+
+
 def parse_log(raw: bytes) -> dict:
     records = []
     for line in raw.decode("utf-8", errors="replace").splitlines():
         if not line.startswith('{'):
             continue
         try:
-            row = json.loads(line)
+            row = json.loads(line, object_pairs_hook=_unique_object)
         except ValueError as exc:
             raise ValueError("Malformed JSON in console capture") from exc
         if isinstance(row, dict) and row.get("kind") == "sensorly-bringup":
@@ -35,6 +44,9 @@ def parse_log(raw: bytes) -> dict:
     row = records[0]
     if type(row.get("schema")) is not int or row["schema"] != 1:
         raise ValueError("Unsupported schema")
+    for name in ("reset_reason", "wake_reason", "uptime_us"):
+        if type(row.get(name)) is not int or row[name] < 0:
+            raise ValueError(f"Missing/invalid {name}")
     for name, pattern in (("chip_id", r"[0-9a-f]{12}"), ("firmware_sha256", r"[0-9a-f]{64}")):
         if not isinstance(row.get(name), str) or not re.fullmatch(pattern, row[name]):
             raise ValueError(f"Invalid {name}")

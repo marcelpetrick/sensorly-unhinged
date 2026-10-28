@@ -1,5 +1,9 @@
 # 65 — From repository to physical production
 
+Bring-up capture rejects duplicate JSON fields and requires non-negative integer
+reset cause, wake cause and acquisition uptime. These checks preserve the boot
+context of a record; they do not turn the record into physical qualification.
+
 **Current disposition: hold fabrication.** No boards, packs or bench data exist.
 The public engineering release makes the design history and bring-up implementation
 available for review; it is not an order authorization. The next order is 5 A +

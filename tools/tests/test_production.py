@@ -11,7 +11,7 @@ from production.capture import assess, main, parse_log
 
 def record():
     return dict(schema=1, kind="sensorly-bringup", chip_id="001122334455",
-                firmware_sha256="a" * 64, reset_reason=1, uptime_us=15000,
+                firmware_sha256="a" * 64, reset_reason=1, wake_reason=0, uptime_us=15000,
                 acquired_at_utc=None, clock_valid=False, factory_mode=True,
                 radio_started=False, charge_enabled=False, input_mode="STANDBY",
                 usb_present=True, charging=False, sensor_status="ESP_OK", adc_status="ESP_OK",
@@ -33,6 +33,17 @@ class CaptureTests(unittest.TestCase):
         for raw in (b"boot only", self.wire(record()) * 2, b'{broken'):
             with self.subTest(raw=raw[:20]), self.assertRaises(ValueError):
                 parse_log(raw)
+
+    def test_duplicate_fields_and_invalid_timing_are_rejected(self):
+        raw = self.wire(record()).replace(b'"factory_mode": true',
+                                           b'"factory_mode": true, "factory_mode": false')
+        with self.assertRaises(ValueError):
+            parse_log(raw)
+        for key in ("reset_reason", "wake_reason", "uptime_us"):
+            for value in (None, True, -1, 1.5):
+                row = record(); row[key] = value
+                with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                    parse_log(self.wire(row))
 
     def test_invalid_types_missing_fields_and_nonfinite_are_rejected(self):
         for key, bad in (("factory_mode", "true"), ("battery_mv", True),
