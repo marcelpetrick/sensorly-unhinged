@@ -467,3 +467,12 @@ reports still show the safety-critical `CHARGE_EN_N`, `CHARGE_ENABLE` and
 `PACK_TS` connections among the remaining airwires. Keep those nets explicitly
 visible until their actual connectivity and clearances are checked on both
 variants. Prototype and product qualification still require external evidence.
+
+The continuation also hardened engineering evidence capture: `c6ff4ac` rejects
+ambiguous duplicate JSON fields and missing or invalid boot context. Release
+packaging now verifies that the actual Git hardware tag resolves to the packaged
+commit (`c975a0c`); focused release/prototype tests pass. The bring-up firmware
+retries an SHT45 transaction once after a transport or CRC failure (`6f32b71`),
+with host fault-injection tests and a successful pinned ESP-IDF v5.5.4 build.
+This is still bring-up firmware; charging, active USB current modes and radio
+remain disabled, and no device test is claimed.
