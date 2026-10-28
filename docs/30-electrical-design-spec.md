@@ -215,11 +215,12 @@ blanket exception for an IC, net or board region. The sensor's four 0.15 mm
 feeders retain their separate thermal allowance and forbidden-via rules.
 Negative controls reject a thin track extending outside its corridor.
 
-The Switch class also enforces its 0.6 mm trunk width. The checkpoint router
-leaves the USB differential pair unrouted until a coupled path passes its actual
-KiCad constraints. Failed maze branches are removed back to their last anchored
-junction; cleanup retains complete paths and fixed sensor-island routing. These
-rules improve layout validation, but remaining airwires still block fabrication.
+The Switch class also enforces its 0.6 mm trunk width. The dedicated USB route
+uses coupled trunks and classified, bounded local escapes under ADR-002; it
+passes actual KiCad coupling controls while EDS-19 qualification remains open.
+Failed maze branches are removed back to their last anchored junction; cleanup
+retains complete paths and fixed sensor-island routing. Remaining airwires still
+block fabrication.
 
 For a screening calculation, assume copper resistivity **1.8 ×10⁻⁸ Ω·m**
 (an explicit engineering assumption, not a laminate or temperature measurement),
@@ -345,18 +346,27 @@ keepouts, pin-1 markings and charging restrictions.
 ### 3.7 Pad-derived body ground returns, 2026-10-22
 
 Both variants add short 0.40 mm F.Cu ground paths from U1 pins 11, 14, 51,
-52, C5 pad 2, J2 pad 1 and U5 pad 2 to ordinary 0.6/0.3 mm through vias.
+52, C5 pad 2 and J2 pad 1 to ordinary 0.6/0.3 mm through vias.
 These layout choices
 join body copper regions missed by the coarse ground-stitch grid to the
 continuous In1.Cu GND plane. Paths derive from actual footprint pad centres;
 the generator rejects an anchor that is no longer GND and checks via/paste,
 protected-region and edge clearances. U1.14 exits upward to preserve space
-for the pending USB route below it. No electrical net or sensor-neck copper
-changes. The J2 return via sits at (21.1, 25.75). The current U5 return
-uses an L-shaped path to (13.15, 20.8), avoiding the bottom pogo pads; its
-placement guard requires explicit replacement when the dedicated USB layout
-moves U5. Filled-board DRC checks actual connections; this checkpoint does not
-qualify RF impedance or physical assembly.
+for the dedicated USB route below it. No electrical net or sensor-neck copper
+changes. The J2 return via sits at (21.1, 25.75). The dedicated USB module supplies
+the replacement U5 and C14 returns, with actual pad-to-ground-via connectivity
+guarded at public copper emission. Filled-board DRC checks actual connections;
+this checkpoint does not qualify RF impedance or physical assembly.
+
+### 3.9 Guarded native USB layout proposal (ADR-002)
+
+The shared A/B generator reserves U5 at (10.3,20.5), D1 at (18,21) and C14
+at (12.6,21.4), with six fixture pads moved to keep USB contact joins and probe
+branches short. `docs/41-fixture-map.md` is regenerated from actual placements
+by `make gen`. [ADR-002](adr/002-guarded-native-usb-topology.md) records the
+scoped coupling rules and engineering assumptions. Routing does not close the
+90 Ω ±10% impedance or physical functional gates.
+
 
 ## 4. U3 — TPS62840DLC (system regulator)
 
@@ -696,6 +706,7 @@ width/length and the shared electrical platform remain as specified.
 | EDS-16 | Bound effective C7 input and total +3V0 capacitance C1/C2/C3/C6/C8 including zero-bias startup, tolerance, temperature and aging; 21.2 µF nominal /26.818 µF positive-tolerance/temperature upper envelope; C8 minimum uses stated typical bias assumptions, not a guaranteed3–40 µF effective envelope | hardware maintainer | before controlled prototype order: desk review of stated component bounds/derating assumptions; before unrestricted operation: accepted part-specific effective bounds and measured startup/TX/load-step stability (docs/63) |
 | EDS-17 | Qualify U4 under-EP via fill/cap/planarity, stencil/paste and hidden-joint inspection; repriced manufacturer acceptance | hardware maintainer and assembler | before controlled prototype order; source/drawing/CPL review and accepted filled/capped/planarized fabrication + paste/reflow process |
 | EDS-18 | Bound VSET parasitic capacitance to the TI 100 pF maximum and review leakage/noise on the routed R6 connection | hardware maintainer | retained stackup/parasitic review before controlled order; measured startup and correct output selection before unrestricted operation |
+| EDS-19 | USB stackup/impedance, filled return paths, changed fixture registration and both-orientation functional qualification | hardware/firmware maintainer | retained stackup and reference/fixture review before controlled order; physical enumeration/programming/reset/sleep/attach qualification before unrestricted operation |
 | EDS-20 | Review U4 small-signal versus charge/discharge ground-return paths and single-point joining against TI SLUS810N §12.1; local plane vias alone do not establish compliance | hardware maintainer | retained filled-copper/current-path review before controlled prototype order; assembled charge accuracy, supply noise and thermal qualification before enabling charging |
 
 ## 11. Review checklist for this spec

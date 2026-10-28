@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .check import check
+from . import fixture
 from .design import NETS
 from .pcb import emit, write
 from .place import place
@@ -25,6 +26,7 @@ def main(argv: list[str]) -> int:
     validate()
     check_only = "--check-only" in argv
     failed = False
+    fixture_sections = []
     if not check_only:
         write_sch(ROOT)
         print("--- shared schematic")
@@ -32,6 +34,7 @@ def main(argv: list[str]) -> int:
     for key, v in VARIANTS.items():
         placed = place(v)
         findings = check(v, placed)
+        fixture_sections.append(fixture.section(v,placed))
         errors = [f for f in findings if f.severity == "ERROR"]
         print(f"--- variant {key.upper()}  {v.width} x {v.height} mm  ({v.revision})")
         for f in findings:
@@ -62,6 +65,8 @@ def main(argv: list[str]) -> int:
             write_svg(svg, render(v, placed, tracks, vias))
             print(f"    wrote {out.relative_to(ROOT)} (+ .kicad_pro, .kicad_dru, "
                   f"fp-lib-table) and {svg.relative_to(ROOT)}")
+    if not check_only and not failed:
+        (ROOT / 'docs/41-fixture-map.md').write_text((fixture.HEADER+''.join(fixture_sections)).rstrip()+'\n')
     return 1 if failed else 0
 
 

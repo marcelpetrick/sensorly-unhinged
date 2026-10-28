@@ -20,7 +20,7 @@ KiCad renders of the same two files: `img/render-a.png`, `img/render-b.png`.
 | Parts | 47 component footprints (46 fitted; R21 DNP) plus 17 test pads | identical |
 | Sensor position | bottom edge, board centre | on a 18 × 9 mm island |
 | Neck | — | 3.5 × 8.0 mm FR-4, 4 × 0.15 mm traces |
-| Nearest heat source to the sensor | **11.3 mm** (D1) | **24.3 mm** (D1) |
+| Nearest heat source to the sensor | **11.5 mm** (D1) | **24.5 mm** (J1) |
 | Idealized slab / neck conductance (not actual A/B coupling) | **70 mW/K** | **1.2 mW/K** |
 | Hypothetical slab / neck ratio | — | **57×**, not a performance claim |
 | Assembly difficulty | single-sided SMT; separate placement/stencil jobs | identical |
@@ -214,5 +214,17 @@ pads and actual routes move together. R12 (21.55, 7.2, 90°) and R13
 (21.45, 10.3, 270°) now sit beside U4 instead of near the sensor end.
 Both boards share these reservations before automatic small-signal placement.
 This removes long programming loops without changing the common netlist or
-values. B's nearest modeled heat source becomes D1 at 24.3 mm; this is a
-geometrical distance, not measured self-heating or thermal performance.
+values. At this historical pre-USB checkpoint B's nearest modeled heat source
+was D1 at24.3 mm. The USB update below supersedes this placement distance.
+
+## USB and fixture placement update
+
+The shared A/B USB topology moves U5 to (10.3,20.5,90°), D1 to (18,21,90°)
+and C14 to (12.6,21.4,270°). Six targets have explicit locations; the remaining
+targets retain their original placement model. All targets retain standard
+1.5 mm round copper pads. Use the generated [complete fixture map](41-fixture-map.md)
+for board registration and underside mirroring. The full set is not a regular
+2.54 mm array. The generator's candidate heat-source screen now reports D1 at
+11.5 mm on A and J1 at24.5 mm on B; these centre distances do not establish
+actual heating or A/B performance. USB return-path and impedance acceptance
+remains EDS-19.

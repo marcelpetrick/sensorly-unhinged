@@ -300,6 +300,10 @@ def _zones(v: Variant, netidx, tracks=()) -> str:
                 _rect(min(ax,bx)-margin,min(ay,by)-margin,max(ax,bx)+margin,max(ay,by)+margin),
                 f"zone/switch-escape/{v.key}/{i}/{j}",
                 keepout=dict(tracks="allowed",vias="allowed",pads="allowed",copperpour="allowed",footprints="allowed")))
+    from .usbroute import reference_zones, trunk_areas
+    if any(t.net in {'USB_D_N','USB_D_P'} for t in tracks):
+        out.append(reference_zones(v,netidx))
+        out.append(trunk_areas(v,netidx,tracks))
     power_nets = {"GND", "+3V0", "VBUS", "VBAT", "VSYS"}
     for i, track in enumerate(tracks):
         if track.net not in power_nets or track.width >= 0.4:
@@ -402,6 +406,9 @@ def _stackup() -> str:
 def emit(v: Variant, placed: list[Placement], tracks, vias) -> str:
     from .power import validate_switch_routes
     validate_switch_routes(placed, tracks, vias)
+    if any(t.net in {'USB_D_N','USB_D_P'} for t in tracks):
+        from .usbroute import validate_usb
+        validate_usb(tracks,vias,placed)
     G.validate_via_paste(placed, vias)
     netidx = _net_index()
     padnet = _pad_net_map()

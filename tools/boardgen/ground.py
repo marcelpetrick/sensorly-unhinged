@@ -16,13 +16,10 @@ def route_ground_returns(variant, placed):
     # Local pad-frame offsets: avoid the USB main-path corridor beneath U1.14.
     anchors = [("U1", "11", (-.9, 0)), ("U1", "14", (0, -1.1)),
                ("U1", "51", (.95, 0)), ("U1", "52", (-.85, 0)),
-               ("J2", "1", (0, -1.3)), ("U5", "2", (-1.2, -1.2)),
+               ("J2", "1", (0, -1.3)),
                ("C5", "2", (.8, 0))]
-    # The pending dedicated USB module provides its own reviewed U5 return;
-    # its placement change must replace this legacy path explicitly.
-    u5 = by_ref['U5']
-    if (u5.x, u5.y, u5.rot) != (15.5, 22.0, 0):
-        raise ValueError('U5 ground placement changed; use the dedicated USB return')
+    # U5/C14 returns belong to the dedicated USB module. Its public-emitter
+    # guard checks actual pad-to-ground-via connectivity independently.
     ax0, ax1, ay0, ay1 = antenna_keepout(variant)
     sx0, sx1, sy0, sy1 = sensor_keepout(variant)
     protected = [(ax0, ax1, ay0, ay1), (sx0, sx1, sy0, sy1)]
@@ -50,7 +47,7 @@ def route_ground_returns(variant, placed):
         if not G.box_inside_polys(path_box, variant.polys, margin=.3) or any(
                 G.boxes_overlap(path_box, area) for area in protected):
             raise ValueError(f'{ref}.{number} ground path enters a protected/edge region')
-        points = [start, (x, start[1]), (x, y)] if ref == 'U5' else [start, (x, y)]
+        points = [start, (x, y)]
         tracks.append(Track('GND', .4, 'F.Cu', points))
         vias.append(Via('GND', x, y))
     G.validate_via_paste(placed, vias)

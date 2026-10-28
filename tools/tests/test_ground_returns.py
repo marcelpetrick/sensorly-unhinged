@@ -28,13 +28,6 @@ class GroundReturnTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'no longer a GND anchor'):
                 route_ground_returns(VARIANTS['a'], place(VARIANTS['a']))
 
-    def test_usb_placement_change_requires_dedicated_ground_return(self):
-        variant = VARIANTS['a']
-        placed = place(variant)
-        next(p for p in placed if p.ref == 'U5').rot = 90
-        with self.assertRaisesRegex(ValueError, 'dedicated USB return'):
-            route_ground_returns(variant, placed)
-
     def test_component_move_into_sensor_region_is_rejected(self):
         variant = VARIANTS['b']
         placed = place(variant)

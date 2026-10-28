@@ -426,3 +426,30 @@ container also passes firmware-host/provenance smoke checks after the CI setup
 fix, and passes the new ground-connectivity regression under KiCad 10.0.5.
 See [the checkpoint review](94-ground-and-ci-checkpoint-review.md); GitHub CI
 will rerun on push. All physical/ordering evidence remains open.
+
+### Resumed completion order — 2026-10-28
+
+1. Verify and review the existing USB/fixture integration on both variants;
+   record exact filled-board results and commit source and generated files as
+   separate reviewable checkpoints. Preserve EDS-19 and the prototype gate.
+2. Integrate reviewed charger-control fanouts and ground returns against the
+   accepted USB geometry. Verify actual pad connectivity, paste clearance, USB
+   reference copper and both boards' filled DRC before accepting the changes.
+3. Complete supply trunks and remaining MCU, fixture and sensor connections.
+   Retain the shared electrical model and require zero unconnected items, DRC
+   errors, warnings and parity differences on both layouts.
+4. Complete independent firmware work permitted by the existing bring-up
+   safety policy. Keep radio, charging and USB500 disabled until their documented
+   requirements and physical qualification are satisfied.
+5. Re-run the full local pipeline, branch/current-file review and applicable
+   firmware build; make atomic commits and push. Obtain actual supplier,
+   assembly and order reviews, then build and measure the 5 + 5 prototypes.
+   No source-only check substitutes for those records or physical tests.
+
+The previous GitHub Hardware Quality and Firmware Bring-up runs passed at
+`147d0f5`. The USB candidate is currently uncommitted; a fresh filled-board
+check reports A31/B27 unconnected and zero ERC/DRC errors, warnings and parity
+differences. On 2026-10-28, regeneration, 11 focused host tests, four actual KiCad USB/ground
+controls, 19/19 documentation checks and both enclosure interference checks
+passed. Neither USB data net nor GND has a remaining airwire on either board.
+A full pipeline remains required before pushing the accepted checkpoint.

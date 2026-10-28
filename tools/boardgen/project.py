@@ -182,6 +182,17 @@ def dru(v: Variant) -> str:
         "A.enclosedByArea('Power escape *')\")",
         ')', '',
     ]
+    # ADR-002: global 2 mm remains; only classified short escapes get the
+    # aggregate 2+1.75+1+3.5+2.25=10.5 mm backstop. Source length/anchor guards
+    # remain mandatory because the spatial rule alone cannot bound a meander.
+    rules += ['(rule "USB classified breakouts uncoupled"',
+        '\t(constraint diff_pair_uncoupled (max 10.5mm))',
+        "\t(condition \"A.NetClass == 'USB' && A.enclosedByArea('USB classified breakout *')\")",
+        ')', '']
+    rules += ['(rule "USB paired trunk uncoupled"',
+        '\t(constraint diff_pair_uncoupled (max 2mm))',
+        "\t(condition \"A.NetClass == 'USB' && A.enclosedByArea('USB paired trunk *')\")",
+        ')', '']
     if v.key == "b":
         rules += [
             '(rule "nothing but the sensor nets crosses the neck"',

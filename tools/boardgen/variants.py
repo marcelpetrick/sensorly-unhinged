@@ -40,9 +40,9 @@ ANCHORED = {
     "U3":  (3.4, 10.0, 270),       # buck regulator
     "L1":  (3.4, 13.2, 180),
     # 4. the rest
-    "U5":  (15.5, 22.0, 0),      # USB ESD array
+    "U5":  (10.3, 20.5, 90),      # USB ESD array
     "SW1": (13.7, 28.0, 0),      # provisioning button
-    "D1":  (11.3, 22.0, 0),      # status LED
+    "D1":  (18.0, 21.0, 90),      # status LED
     # I2C pull-ups: anchored, not auto-placed. EDS S3.1 puts them on the MAIN
     # board so their dissipation stays there, and both variants hand the sensor
     # off at the bottom-centre edge, so this is where they belong in both.
@@ -73,7 +73,8 @@ NEAR = {
 # These geometry choices reserve short U1/U3/U4 power/return loops.
 POWER_LOCAL = {"C1": (4.9, 7.1, 180), "C7": (1.25, 7.7, 270), "C8": (2.8, 15.8, 180), "C9": (24.4, 7.1, 180), "C10": (28.2, 10.5, 90), "C11": (24.0, 14.0, 0), "Q1": (27.8, 17.1, 90), "R12": (21.55, 7.2, 90), "R13": (21.45, 10.3, 270)}
 
-# Pogo field: 2.54 mm grid on the bottom side, one contiguous rectangle.
+# Default pogo grid on the bottom side; six explicit USB-related overrides
+# below require the generated complete map in docs/41-fixture-map.md.
 TESTPAD_ORIGIN = (9.0, 19.5)
 TESTPAD_COLS = 6
 TESTPAD_PITCH = 2.54
@@ -198,3 +199,6 @@ def sensor_keepout(v: Variant) -> tuple[float, float, float, float]:
     if v.key == "b":
         return B_ISLAND_RECT[0], B_ISLAND_RECT[2], B_ISLAND_RECT[1], B_ISLAND_RECT[3]
     return (sx - 5.0, sx + 5.0, sy - 3.0, v.height)
+
+USB_LOCAL = {"C14": (12.6, 21.4, 270)}
+USB_TESTPAD_POSITIONS = {"TP7":(16.62,22.04), "TP8":(19.16,22.04), "TP10":(11.5,25.0), "TP11":(9.5,22.3), "TP13":(9.0,27.12), "TP14":(11.54,27.12)}

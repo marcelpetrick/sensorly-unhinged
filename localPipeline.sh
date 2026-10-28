@@ -166,7 +166,7 @@ reproducibility() {
   }
   local paths=(hardware/schematic hardware/variant-a hardware/variant-b
                hardware/lib hardware/outputs/bom.csv hardware/outputs/netlist.txt
-               docs/45-thermal-model.md docs/60-manufacturing-cost.md
+               docs/41-fixture-map.md docs/45-thermal-model.md docs/60-manufacturing-cost.md
                docs/61-cost-reduction.md docs/80-enclosure.md
                mechanical/env-sensor-case.scad mechanical/params-a.scad
                mechanical/params-b.scad mechanical/case-a.scad

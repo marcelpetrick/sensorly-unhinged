@@ -390,6 +390,11 @@ def route_rest(v: Variant, placed: list[Placement],
     ground_tracks, ground_vias = route_ground_returns(v, placed)
     tracks += ground_tracks
     vias += ground_vias
+    from .usbroute import route_usb
+    usb_tracks, usb_vias = route_usb(v, placed)
+    tracks += usb_tracks
+    vias += usb_vias
+    terms['VBUS'] = [t for t in terms['VBUS'] if t.ref not in {'U5', 'C14'}]
     terms['VSYS'] = [t for t in terms['VSYS'] if t.ref not in {'U3','U4'}]
     for net in ('VBUS','VBAT'):
         terms[net] = [t for t in terms[net] if t.ref != 'U4']
@@ -462,11 +467,8 @@ def route_rest(v: Variant, placed: list[Placement],
     todo.sort(key=difficulty)
 
     for net, ts in todo:
-        if net in {"SW_L", "EN_REG", "VSET", "ISET", "ITERM"}:
+        if net in {"SW_L", "EN_REG", "VSET", "ISET", "ITERM", "USB_D_P", "USB_D_N"}:
             continue  # complete reviewed local routes
-        if net in {"USB_D_P", "USB_D_N"}:
-            failed.append(f"{net}: dedicated differential routing remains open")
-            continue
         # Island routes already join U2 to the pull-ups. Finish only the
         # main-board MCU/test-pad branches; never re-enter the thermal area.
         if net in ISLAND_NETS:
