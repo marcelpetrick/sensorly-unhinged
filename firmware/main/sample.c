@@ -25,3 +25,18 @@ bool sensorly_decode(const uint8_t frame[6], double *temperature_c, double *humi
     *humidity_rh = rh < 0 ? 0 : rh > 100 ? 100 : rh;
     return true;
 }
+
+int sensorly_acquire(sensorly_read_frame_fn read_frame, void *context,
+                     int crc_error, double *temperature_c, double *humidity_rh) {
+    // One retry is a bring-up policy choice, not a measured reliability claim.
+    int status = crc_error;
+    for (unsigned attempt = 0; attempt < 2; ++attempt) {
+        uint8_t frame[6];
+        status = read_frame(context, frame);
+        if (status == 0) {
+            if (sensorly_decode(frame, temperature_c, humidity_rh)) return 0;
+            status = crc_error;
+        }
+    }
+    return status;
+}

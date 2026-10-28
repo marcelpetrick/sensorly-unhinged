@@ -33,8 +33,12 @@ task. This timeout is an engineering choice, not a measured shutdown guarantee.
 
 Read SHT45 at 0x44 over IO6/IO7 at a conservative 100 kHz. Use high precision
 command 0xFD and a 10 ms wait, as in [Sensirion's reference driver](https://github.com/Sensirion/embedded-i2c-sht4x/blob/master/sht4x_i2c.c).
-Use 50 ms I²C transaction limits; CRC failures produce null temperature and RH,
-never a previous sample or a partially updated pair. Conversion and CRC follow
+Use 50 ms I²C transaction limits. A transport error or CRC failure causes at
+most one new command/wait/read attempt; a second failure produces null
+temperature and RH, never a previous sample or a partially updated pair. The
+reported status is the final attempt's transport error or CRC error. This retry
+is a bring-up policy choice, not a measured reliability or energy guarantee.
+Conversion and CRC follow
 the [SHT4x datasheet](https://sensirion.com/products/catalog/SHT45) sections
 Data Processing and Checksum Calculation. The extra 10 ms startup wait is a
 bring-up margin, not a measured power budget.

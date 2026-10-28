@@ -48,6 +48,15 @@ static void safe_outputs(void) {
     ESP_ERROR_CHECK(gpio_config(&outputs));
 }
 
+static int read_sensor_frame(void *context, uint8_t frame[6]) {
+    i2c_master_dev_handle_t sensor = context;
+    const uint8_t command = 0xfd;
+    esp_err_t err = i2c_master_transmit(sensor, &command, 1, I2C_TIMEOUT_MS);
+    if (err != ESP_OK) return err;
+    vTaskDelay(pdMS_TO_TICKS(10));
+    return i2c_master_receive(sensor, frame, 6, I2C_TIMEOUT_MS);
+}
+
 static esp_err_t acquire(double *temperature_c, double *humidity_rh) {
     i2c_master_bus_handle_t bus = NULL;
     i2c_master_dev_handle_t sensor = NULL;
@@ -64,16 +73,9 @@ static esp_err_t acquire(double *temperature_c, double *humidity_rh) {
     if (err != ESP_OK) return err;
     err = i2c_master_bus_add_device(bus, &dev_cfg, &sensor);
     if (err == ESP_OK) {
-        // Sensirion's SHT4x reference driver: 0xfd, then wait 10 ms.
-        const uint8_t command = 0xfd;
-        uint8_t frame[6];
-        err = i2c_master_transmit(sensor, &command, 1, I2C_TIMEOUT_MS);
-        if (err == ESP_OK) {
-            vTaskDelay(pdMS_TO_TICKS(10));
-            err = i2c_master_receive(sensor, frame, sizeof(frame), I2C_TIMEOUT_MS);
-            if (err == ESP_OK && !sensorly_decode(frame, temperature_c, humidity_rh))
-                err = ESP_ERR_INVALID_CRC;
-        }
+        // Each retry starts a fresh measurement (Sensirion 0xfd + 10 ms).
+        err = sensorly_acquire(read_sensor_frame, sensor, ESP_ERR_INVALID_CRC,
+                               temperature_c, humidity_rh);
         i2c_master_bus_rm_device(sensor);
     }
     i2c_del_master_bus(bus);
