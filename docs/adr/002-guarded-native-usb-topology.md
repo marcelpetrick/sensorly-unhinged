@@ -18,7 +18,9 @@ spines, wrong polarity/layer/width, detached endpoints, changed critical pad
 placements, excess local path length, extra USB transitions and missing nearby
 return-via pairs. Both variants share the same topology. Actual KiCad controls
 retain the 2 mm trunk check and reject a fully divergent 6 mm route under the
-default rule. Native USB remains a controlled engineering interface.
+default rule. An actual KiCad control also verifies that the 2 mm trunk
+rule takes precedence where a classified breakout area overlaps it. Native USB
+remains a controlled engineering interface.
 
 The main pair stays on F.Cu with nominal 0.25 mm width and 0.20 mm gap; maximum
 nominal main copper skew is 0.1 mm (engineering assumption). Two short bottom

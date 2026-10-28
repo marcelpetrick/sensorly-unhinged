@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 import unittest
 from tools.boardgen import geometry as G
-from tools.boardgen.pcb import emit, _tracks, _net_index
+from tools.boardgen.pcb import emit, _tracks, _net_index, _zone
 from tools.boardgen.place import place
 from tools.boardgen.project import write_all
 from tools.boardgen.route import Track
@@ -16,7 +16,7 @@ from tools.boardgen.usbroute import route_usb, trunk_areas
 from tools.boardgen.variants import VARIANTS
 
 class USBDifferentialRules(unittest.TestCase):
-    def report(self, variant, tracks, named_trunks=False):
+    def report(self, variant, tracks, named_trunks=False, overlapping_areas=False):
         p=place(variant)
         # Empty copper emission avoids bypassing the complete USB source guard.
         source=emit(variant,p,[],[])
@@ -29,7 +29,17 @@ class USBDifferentialRules(unittest.TestCase):
                   f'(size 0.25 0.25) (layers "{t.layer}" "F.Mask") (net "{t.net}"))')
         source=source.rstrip()[:-1]+_tracks(tracks,[],_net_index())
         source+='(footprint "USB test terminals" (layer "F.Cu") (at 0 0) (attr smd) '+''.join(pads)+')'
-        if named_trunks:source+=trunk_areas(variant,_net_index(),[])
+        if overlapping_areas:
+            region=[(9,19),(17,19),(17,27),(9,27)]
+            keep=dict(tracks='allowed',vias='allowed',pads='allowed',
+                      copperpour='allowed',footprints='allowed')
+            source+=_zone('USB classified breakout proof','',_net_index(),['F.Cu'],
+                          region,'proof-local',keepout=keep)
+            if named_trunks:
+                source+=_zone('USB paired trunk proof','',_net_index(),['F.Cu'],
+                              region,'proof-trunk',keepout=keep)
+        elif named_trunks:
+            source+=trunk_areas(variant,_net_index(),[])
         source+='\n)\n'
         with tempfile.TemporaryDirectory(prefix='sensorly-usb-topology-') as d:
             root=Path(d);write_all(root,variant)
@@ -45,6 +55,16 @@ class USBDifferentialRules(unittest.TestCase):
             trunks=[t for t in tracks if t.purpose.startswith('usb:trunk-')]
             violations=self.report(v,trunks,True)
             self.assertFalse([x for x in violations if x['severity']=='error'],violations)
+
+    def test_paired_trunk_limit_wins_over_overlapping_breakout(self):
+        tracks=[Track('USB_D_N',.25,'F.Cu',[(10,20),(16,20)]),
+                Track('USB_D_P',.25,'F.Cu',[(10,20.45),(10,26.45)])]
+        for has_trunk in (False, True):
+            with self.subTest(paired_trunk=has_trunk):
+                violations=self.report(VARIANTS['a'],tracks,has_trunk,True)
+                uncoupled=any(x['type']=='diff_pair_uncoupled_length_too_long'
+                              for x in violations)
+                self.assertEqual(uncoupled,has_trunk,violations)
 
     def test_six_mm_divergent_copper_still_fails_default_rule(self):
         t=[Track('USB_D_N',.25,'F.Cu',[(12,20),(18,20)]),
