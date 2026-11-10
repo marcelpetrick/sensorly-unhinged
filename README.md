@@ -38,6 +38,9 @@ compactness can be measured instead of guessed.
 | ![Case A](docs/img/case-a-base.png) | ![Case B](docs/img/case-b-base.png) |
 | 47.0 × 39.2 × 19.6 mm, one chamber | 47.0 × 56.2 × 19.6 mm, two chambers, wall at the neck |
 
+Board images show copper and silkscreen; component bodies are omitted.
+Enclosure images are generated models.
+
 Build 5 of each, put them next to a reference instrument, and let the data pick
 the design. The decision gate is written down in
 [`docs/50-thermal-ab-test-plan.md`](docs/50-thermal-ab-test-plan.md) *before* the

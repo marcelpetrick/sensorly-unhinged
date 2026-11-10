@@ -214,7 +214,7 @@ render: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	@mkdir -p docs/img
 	@for v in $(VARIANTS); do \
 	  $(KICAD_CLI) pcb render --side top --background opaque --quality high \
-	    --width 760 --height 1200 --zoom 0.72 \
+	    --width 760 --height 1200 --zoom 0.60 \
 	    -o docs/img/render-$$v.png $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \
 	  echo "wrote docs/img/render-$$v.png"; \
 	done
