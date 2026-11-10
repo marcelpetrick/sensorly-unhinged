@@ -210,7 +210,7 @@ outputs: drc bom $(if $(filter release,$(OUTPUT_CLASS)),release-check)
 	  done; \
 	fi
 
-render: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
+render: schematic-render $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	@mkdir -p docs/img
 	@for v in $(VARIANTS); do \
 	  $(KICAD_CLI) pcb render --side top --background opaque --quality high \
@@ -218,9 +218,13 @@ render: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	    -o docs/img/render-$$v.png $(BUILD)/$$v/env-sensor-$$v.kicad_pcb >/dev/null; \
 	  echo "wrote docs/img/render-$$v.png"; \
 	done
+.PHONY: schematic-render
+schematic-render:
+	@mkdir -p docs/img
 	@$(KICAD_CLI) sch export svg --black-and-white --no-background-color \
 	  -o docs/img/ hardware/schematic/env-sensor.kicad_sch >/dev/null
 	@mv docs/img/env-sensor.svg docs/img/schematic.svg
+	@$(PY) -c 'from pathlib import Path; p = Path("docs/img/schematic.svg"); p.write_text("\n".join(line.rstrip() for line in p.read_text().splitlines()) + "\n")'
 	@echo "wrote docs/img/schematic.svg"
 
 clean:

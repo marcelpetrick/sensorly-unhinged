@@ -66,6 +66,8 @@ When geometry changes, update documentation previews with `make render` and
 On a headless machine with Xvfb installed, use `xvfb-run -a make render` and
 `xvfb-run -a make mech-render`. These are design previews, not photographs or
 physical fit evidence. Enclosure previews automatically frame the whole part.
+`make schematic-render` refreshes just the shared schematic SVG; the export
+removes trailing whitespace so generated previews pass the same diff checks.
 
 **Stop and repair** on any failed step, generated drift, unexpected A/B
 difference, missing provenance, or relaxed rule used to hide a violation. Do not
