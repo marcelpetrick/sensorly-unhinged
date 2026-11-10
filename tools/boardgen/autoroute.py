@@ -394,6 +394,21 @@ def route_rest(v: Variant, placed: list[Placement],
     usb_tracks, usb_vias = route_usb(v, placed)
     tracks += usb_tracks
     vias += usb_vias
+    # The sense divider capacitor sits beside R15. Join the two pads before
+    # generic routing occupies their narrow corridor. These are layout
+    # coordinates, guarded against placement drift on both board shapes.
+    sense_positions = {
+        "a": ((24.04, 31.0), (26.57, 31.0)),
+        "b": ((21.54, 31.0), (24.07, 31.0)),
+    }
+    r15, c13 = sense_positions[v.key]
+    for ref, pad, expected in (("R15", "1", r15), ("C13", "1", c13)):
+        term = next(t for t in terms["VBAT_SENSE"]
+                    if t.ref == ref and t.pad == pad)
+        if math.dist((term.x, term.y), expected) > 1e-7:
+            raise ValueError(f"VBAT_SENSE placement changed: {ref}.{pad}")
+    tracks.append(Track("VBAT_SENSE", SIGNAL_W, "F.Cu",
+                        [r15, (r15[0], 30.2), (c13[0], 30.2), c13]))
     terms['VBUS'] = [t for t in terms['VBUS'] if t.ref not in {'U5', 'C14'}]
     terms['VSYS'] = [t for t in terms['VSYS'] if t.ref not in {'U3','U4'}]
     for net in ('VBUS','VBAT'):

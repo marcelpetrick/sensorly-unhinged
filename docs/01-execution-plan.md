@@ -516,3 +516,17 @@ release-gate implementation and final verification. Fabrication, physical
 verification, protected charging and the product firmware contract remain
 ordered work, requiring their actual inputs and evidence. No component audit
 or source pipeline substitutes for those gates.
+
+
+### Sense-divider routing checkpoint — 2026-11-10
+
+A placement-guarded 0.15 mm F.Cu dogleg joins R15.1 to C13.1 on both layouts.
+It passes above R15's intervening GND pad at local y = 30.2 mm; the A span is
+x = 24.04–26.57 mm and the B span is x = 21.54–24.07 mm. The route adds three
+segments per board and removes no existing segments. Fresh filled-board checks
+give A30/B26 unconnected items, zero ERC/DRC errors, warnings or parity
+differences, and no GND or USB-data airwires. A KiCad deletion control confirms
+that removing the middle leg adds one VBAT_SENSE airwire on each board. The
+remaining sense path to the MCU, all charger controls, supply trunks and other
+listed airwires remain open. ADC acquisition, leakage/noise and calibration
+remain unmeasured; this checkpoint is not fabrication approval.
