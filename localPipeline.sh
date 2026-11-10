@@ -160,24 +160,11 @@ generator_rules() {
 
 reproducibility() {
   local log="$tmp_dir/gen.log"
-  make gen thermal bom cost mech >"$log" 2>&1 || {
+  make generated-check >"$log" 2>&1 || {
+    cat "$log"
     STEP_DETAIL="$(last_line "$log")"
     return 1
   }
-  local paths=(hardware/schematic hardware/variant-a hardware/variant-b
-               hardware/lib hardware/outputs/bom.csv hardware/outputs/netlist.txt
-               docs/41-fixture-map.md docs/45-thermal-model.md docs/60-manufacturing-cost.md
-               docs/61-cost-reduction.md docs/80-enclosure.md
-               mechanical/env-sensor-case.scad mechanical/params-a.scad
-               mechanical/params-b.scad mechanical/case-a.scad
-               mechanical/case-b.scad
-               docs/img/floorplan-a.svg docs/img/floorplan-b.svg)
-  if [ -n "$(git status --porcelain --untracked-files=all -- "${paths[@]}")" ]; then
-    printf 'generated files differ from the committed ones:\n'
-    git diff --stat -- "${paths[@]}"
-    STEP_DETAIL="regenerated output drifted; commit it or fix the generator"
-    return 1
-  fi
   STEP_DETAIL="schematic, both boards and all generated docs regenerate identically"
 }
 

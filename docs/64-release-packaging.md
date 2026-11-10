@@ -8,6 +8,17 @@ does not meet that gate. Prototype-order review and packaging are implemented se
 `hardware/prototype-readiness.json`. Public engineering source prereleases do not
 carry a manufacturing-readiness claim or a product release marker.
 
+## Generated-source preflight
+
+Both `make release-check` and `make prototype-check` first run
+`make generated-check`. This regenerates the schematic, both boards and the
+tracked reports and compares them with Git. A clean commit containing a changed
+generator and stale boards is rejected before qualification or exports. Existing
+uncommitted generated inputs are rejected before regeneration, preserving edits
+for review. Review and commit intentional regenerated changes, then rerun the
+check. The local pipeline uses the same preflight; package CLIs reach it through
+Make. This check proves reproducibility, not physical performance.
+
 ## One release path
 
 Run `make release-package RELEASE_TAG=hw-a1` (or the revision actually printed

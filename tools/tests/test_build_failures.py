@@ -13,7 +13,7 @@ class BuildFailureTests(unittest.TestCase):
     def test_release_output_mode_requires_qualification(self):
         with tempfile.TemporaryDirectory() as d:
             r = subprocess.run(["make", "-f", str(ROOT / "Makefile"),
-                                "-o", "drc", "-o", "bom", "-o", "erc",
+                                "-o", "drc", "-o", "bom", "-o", "erc", "-o", "generated-check",
                                 "outputs", "OUTPUT_CLASS=release", "PY=false",
                                 "KICAD_CLI=true"], cwd=d, capture_output=True)
             self.assertNotEqual(r.returncode, 0)
@@ -51,3 +51,15 @@ class BuildFailureTests(unittest.TestCase):
                                 "mech", "PY=true"], cwd=d, env=env, capture_output=True)
             self.assertNotEqual(r.returncode, 0)
             self.assertNotIn(b"wrote mechanical/case-a-base.stl", r.stdout)
+
+    def test_manufacturing_gates_require_generation_even_with_named_file(self):
+        for goal in ("release-check", "prototype-check"):
+            with self.subTest(goal=goal), tempfile.TemporaryDirectory() as d:
+                (Path(d) / "generated-check").touch()
+                result = subprocess.run(["make", "-f", str(ROOT / "Makefile"),
+                    "-o", "erc", "-o", "drc", goal, "PY=false"],
+                    cwd=d, capture_output=True)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(b"tools.check_generated", result.stdout)
+                self.assertNotIn(b"tools.release_gate", result.stdout)
+                self.assertNotIn(b"tools.prototype_gate", result.stdout)

@@ -25,7 +25,7 @@ endif
 
 .PHONY: all gen symbols check erc drc outputs render bom thermal cost mech license clean help test
 .DEFAULT_GOAL := help
-.PHONY: release-check release release-package
+.PHONY: generated-check release-check release release-package
 .PHONY: power
 
 power:
@@ -154,7 +154,10 @@ drc: $(foreach v,$(VARIANTS),$(BUILD)/$(v)/env-sensor-$(v).kicad_pcb)
 	done
 	@echo "DRC gate passed for all variants"
 
-release-check: erc drc
+generated-check:
+	$(PY) -m tools.check_generated
+
+release-check: generated-check erc drc
 	$(PY) -m tools.release_gate
 
 # Qualification runs before any release export. Development exports stay draft.
@@ -242,7 +245,7 @@ production-capture:
 	$(PY) -m production.capture $(CAPTURE_ARGS)
 
 .PHONY: prototype-check prototype-package
-prototype-check: erc drc
+prototype-check: generated-check erc drc
 	$(PY) -m tools.prototype_gate
 	$(MAKE) firmware-test firmware
 
