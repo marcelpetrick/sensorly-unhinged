@@ -578,3 +578,30 @@ unconnected items. Protected charging, source authorization, supplier/DFM/CPL
 reviews, physical samples, A/B measurements and product firmware still retain
 their separate gates. Current delegates have completed their handoffs; no
 background work is claimed to continue after this checkpoint.
+
+
+### Full outstanding-work continuation — 2026-11-10, after `8a73cd5`
+
+The clean starting tree matches `origin/master`; Hardware Quality and Firmware
+Bring-up both passed for `8a73cd5`. The following work is active, not accepted
+routing or an order approval. Preserve the flight manual's evidence and stop
+conditions throughout.
+
+| Order | Owner / isolated work | Acceptance |
+|---|---|---|
+| 1 | Coordinator: generic route search and integration | Retry rejected short-via paths without relaxing spacing; preserve already routed nets and require fresh filled A/B reports, stable source generation and meaningful regressions. |
+| 2 | Supply delegate: VBAT / VSYS / VBUS and plane access | Deliberate power-width paths with off-paste transitions; reserve necessary corridors before generic control routing where required, inspect returns, then verify both layouts. |
+| 3 | Charger delegate: TS, /CE, charge enable and /CHG branches | Pad-derived fine-pitch escapes and actual remote connectivity; retain default-disabled charge policy, protected sensing/ground process gates and every placement/net guard. |
+| 4 | Signal delegate: MCU/fixture, reset/wake, ADC and B SDA | Complete signal branches without moving the sensor neck or bypassing fixture/USB/ground checks; validate any placement change against both boards and cases. |
+| 5 | Coordinator plus independent review | Integrate one source idea at a time; regenerate separately, update the exact DRC budget, run the complete pipeline and applicable pinned checks, review current files, commit atomically and push. |
+| 6 | Named hardware/supplier/assembler reviewers | Close the five prototype review slots with genuine exact-revision records after zero-airwire routing. Pack/harness, stackup, DFM/CPL and hidden-joint process approval remain external inputs. |
+| 7 | Hardware/test/firmware maintainers | Manufacture the controlled 5+5 lot, execute serial-linked bring-up and A/B measurements, complete the product firmware contract and qualification, then revise and validate the controlled series. No source-only test closes a physical gate. |
+
+The 30 A / 26 B baseline includes supply, charger/control, reset/strap, UART,
+ADC/TS and fixture branches. Routing logs can list a partly connected net as
+failed even where one local path already works; use actual filled DRC endpoint
+reports to decide what remains. A lower total alone is insufficient: report
+net-by-net regressions and retain zero ground/USB-data airwires. A post-router
+supply search found the local VBAT pocket has no legal .4 mm escape/via with
+all existing control copper in place; that calls for reviewed earlier corridor
+reservation, not relaxed clearances or drills through paste.
