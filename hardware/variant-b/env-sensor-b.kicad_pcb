@@ -8993,6 +8993,30 @@
 		(uuid "79f9003b-71f9-5d7f-bf77-6a7bf3e73aa5")
 	)
 	(segment
+		(start 121.54 91.0)
+		(end 121.54 90.2)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 32)
+		(uuid "2394860c-2d33-5295-8ac7-d24b95f4ceb7")
+	)
+	(segment
+		(start 121.54 90.2)
+		(end 124.07 90.2)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 32)
+		(uuid "6b3668ef-91c1-5ec6-aa8c-7455e179b3ad")
+	)
+	(segment
+		(start 124.07 90.2)
+		(end 124.07 91.0)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 32)
+		(uuid "562eaa54-9666-5ca6-af1c-70518f9333dc")
+	)
+	(segment
 		(start 109.0 79.5)
 		(end 109.0 78.9)
 		(width 0.15)
@@ -13437,72 +13461,6 @@
 		(net 0)
 		(net_name "")
 		(layers "B.Cu")
-		(uuid "d218e6de-452f-5ca6-a8ae-6747f755830f")
-		(name "Power escape GND 68 0")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0.2)
-		)
-		(min_thickness 0.2)
-		(filled_areas_thickness no)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.3)
-			(thermal_bridge_width 0.4)
-		)
-		(polygon
-			(pts
-				(xy 108.9 78.8) (xy 109.1 78.8) (xy 109.1 79.6) (xy 108.9 79.6)
-			)
-		)
-	)
-	(zone
-		(net 0)
-		(net_name "")
-		(layers "B.Cu")
-		(uuid "017ef9f1-346b-5722-b4ea-8dcfc1ddbac3")
-		(name "Power escape GND 68 1")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0.2)
-		)
-		(min_thickness 0.2)
-		(filled_areas_thickness no)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.3)
-			(thermal_bridge_width 0.4)
-		)
-		(polygon
-			(pts
-				(xy 108.3 78.8) (xy 109.1 78.8) (xy 109.1 79.0) (xy 108.3 79.0)
-			)
-		)
-	)
-	(zone
-		(net 0)
-		(net_name "")
-		(layers "B.Cu")
 		(uuid "acb8c78e-fcec-5e3c-8980-1a4f2b8ff465")
 		(name "Power escape GND 69 0")
 		(hatch edge 0.5)
@@ -13528,7 +13486,7 @@
 		)
 		(polygon
 			(pts
-				(xy 119.1 84.0) (xy 119.3 84.0) (xy 119.3 84.7) (xy 119.1 84.7)
+				(xy 108.9 78.8) (xy 109.1 78.8) (xy 109.1 79.6) (xy 108.9 79.6)
 			)
 		)
 	)
@@ -13561,16 +13519,16 @@
 		)
 		(polygon
 			(pts
-				(xy 118.6 84.0) (xy 119.3 84.0) (xy 119.3 84.2) (xy 118.6 84.2)
+				(xy 108.3 78.8) (xy 109.1 78.8) (xy 109.1 79.0) (xy 108.3 79.0)
 			)
 		)
 	)
 	(zone
 		(net 0)
 		(net_name "")
-		(layers "F.Cu")
+		(layers "B.Cu")
 		(uuid "eaaad987-13ec-5cbb-ba6e-476bee3d1ac6")
-		(name "Power escape +3V0 70 0")
+		(name "Power escape GND 70 0")
 		(hatch edge 0.5)
 		(connect_pads
 			(clearance 0.2)
@@ -13594,7 +13552,40 @@
 		)
 		(polygon
 			(pts
-				(xy 107.3 69.0) (xy 108.2 69.0) (xy 108.2 69.2) (xy 107.3 69.2)
+				(xy 119.1 84.0) (xy 119.3 84.0) (xy 119.3 84.7) (xy 119.1 84.7)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "B.Cu")
+		(uuid "f4862f6f-686b-5a50-8f41-fc94778a35a1")
+		(name "Power escape GND 70 1")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0.2)
+		)
+		(min_thickness 0.2)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.3)
+			(thermal_bridge_width 0.4)
+		)
+		(polygon
+			(pts
+				(xy 118.6 84.0) (xy 119.3 84.0) (xy 119.3 84.2) (xy 118.6 84.2)
 			)
 		)
 	)
@@ -13627,40 +13618,7 @@
 		)
 		(polygon
 			(pts
-				(xy 107.4 90.6) (xy 107.6 90.6) (xy 107.6 91.4) (xy 107.4 91.4)
-			)
-		)
-	)
-	(zone
-		(net 0)
-		(net_name "")
-		(layers "F.Cu")
-		(uuid "8fe08238-9fb3-5df0-8dcc-43b770c2d0ed")
-		(name "Power escape +3V0 71 1")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0.2)
-		)
-		(min_thickness 0.2)
-		(filled_areas_thickness no)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.3)
-			(thermal_bridge_width 0.4)
-		)
-		(polygon
-			(pts
-				(xy 106.8 90.6) (xy 107.6 90.6) (xy 107.6 90.8) (xy 106.8 90.8)
+				(xy 107.3 69.0) (xy 108.2 69.0) (xy 108.2 69.2) (xy 107.3 69.2)
 			)
 		)
 	)
@@ -13693,7 +13651,7 @@
 		)
 		(polygon
 			(pts
-				(xy 109.4 91.2) (xy 109.6 91.2) (xy 109.6 92.0) (xy 109.4 92.0)
+				(xy 107.4 90.6) (xy 107.6 90.6) (xy 107.6 91.4) (xy 107.4 91.4)
 			)
 		)
 	)
@@ -13726,6 +13684,72 @@
 		)
 		(polygon
 			(pts
+				(xy 106.8 90.6) (xy 107.6 90.6) (xy 107.6 90.8) (xy 106.8 90.8)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu")
+		(uuid "cad369e5-3c84-5980-9e10-4b72161bb115")
+		(name "Power escape +3V0 73 0")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0.2)
+		)
+		(min_thickness 0.2)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.3)
+			(thermal_bridge_width 0.4)
+		)
+		(polygon
+			(pts
+				(xy 109.4 91.2) (xy 109.6 91.2) (xy 109.6 92.0) (xy 109.4 92.0)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu")
+		(uuid "be32bd6f-8176-5df8-b421-753517137b04")
+		(name "Power escape +3V0 73 1")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0.2)
+		)
+		(min_thickness 0.2)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.3)
+			(thermal_bridge_width 0.4)
+		)
+		(polygon
+			(pts
 				(xy 109.3 91.8) (xy 109.6 91.8) (xy 109.6 92.0) (xy 109.3 92.0)
 			)
 		)
@@ -13734,8 +13758,8 @@
 		(net 0)
 		(net_name "")
 		(layers "B.Cu")
-		(uuid "cad369e5-3c84-5980-9e10-4b72161bb115")
-		(name "Power escape +3V0 73 0")
+		(uuid "5e985a63-a893-5524-83cd-e7f91dc5ee86")
+		(name "Power escape +3V0 74 0")
 		(hatch edge 0.5)
 		(connect_pads
 			(clearance 0.2)
@@ -13767,72 +13791,6 @@
 		(net 0)
 		(net_name "")
 		(layers "B.Cu")
-		(uuid "be32bd6f-8176-5df8-b421-753517137b04")
-		(name "Power escape +3V0 73 1")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0.2)
-		)
-		(min_thickness 0.2)
-		(filled_areas_thickness no)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.3)
-			(thermal_bridge_width 0.4)
-		)
-		(polygon
-			(pts
-				(xy 116.0 78.9) (xy 116.7 78.9) (xy 116.7 79.1) (xy 116.0 79.1)
-			)
-		)
-	)
-	(zone
-		(net 0)
-		(net_name "")
-		(layers "F.Cu")
-		(uuid "5e985a63-a893-5524-83cd-e7f91dc5ee86")
-		(name "Power escape +3V0 74 0")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0.2)
-		)
-		(min_thickness 0.2)
-		(filled_areas_thickness no)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.3)
-			(thermal_bridge_width 0.4)
-		)
-		(polygon
-			(pts
-				(xy 105.7 66.3) (xy 105.9 66.3) (xy 105.9 67.2) (xy 105.7 67.2)
-			)
-		)
-	)
-	(zone
-		(net 0)
-		(net_name "")
-		(layers "F.Cu")
 		(uuid "64b5e354-472f-5377-82dc-0839feb7eb1b")
 		(name "Power escape +3V0 74 1")
 		(hatch edge 0.5)
@@ -13858,7 +13816,7 @@
 		)
 		(polygon
 			(pts
-				(xy 105.7 66.3) (xy 106.8 66.3) (xy 106.8 66.5) (xy 105.7 66.5)
+				(xy 116.0 78.9) (xy 116.7 78.9) (xy 116.7 79.1) (xy 116.0 79.1)
 			)
 		)
 	)
@@ -13891,7 +13849,7 @@
 		)
 		(polygon
 			(pts
-				(xy 105.9 76.4) (xy 106.1 76.4) (xy 106.1 76.8) (xy 105.9 76.8)
+				(xy 105.7 66.3) (xy 105.9 66.3) (xy 105.9 67.2) (xy 105.7 67.2)
 			)
 		)
 	)
@@ -13924,7 +13882,7 @@
 		)
 		(polygon
 			(pts
-				(xy 105.3 76.6) (xy 106.1 76.6) (xy 106.1 76.8) (xy 105.3 76.8)
+				(xy 105.7 66.3) (xy 106.8 66.3) (xy 106.8 66.5) (xy 105.7 66.5)
 			)
 		)
 	)
@@ -13957,7 +13915,7 @@
 		)
 		(polygon
 			(pts
-				(xy 121.9 76.8) (xy 122.1 76.8) (xy 122.1 77.1) (xy 121.9 77.1)
+				(xy 105.9 76.4) (xy 106.1 76.4) (xy 106.1 76.8) (xy 105.9 76.8)
 			)
 		)
 	)
@@ -13990,7 +13948,7 @@
 		)
 		(polygon
 			(pts
-				(xy 121.9 76.8) (xy 122.7 76.8) (xy 122.7 77.0) (xy 121.9 77.0)
+				(xy 105.3 76.6) (xy 106.1 76.6) (xy 106.1 76.8) (xy 105.3 76.8)
 			)
 		)
 	)
@@ -14023,7 +13981,7 @@
 		)
 		(polygon
 			(pts
-				(xy 105.1 77.5) (xy 105.3 77.5) (xy 105.3 78.1) (xy 105.1 78.1)
+				(xy 121.9 76.8) (xy 122.1 76.8) (xy 122.1 77.1) (xy 121.9 77.1)
 			)
 		)
 	)
@@ -14056,7 +14014,7 @@
 		)
 		(polygon
 			(pts
-				(xy 104.6 77.5) (xy 105.3 77.5) (xy 105.3 77.7) (xy 104.6 77.7)
+				(xy 121.9 76.8) (xy 122.7 76.8) (xy 122.7 77.0) (xy 121.9 77.0)
 			)
 		)
 	)
@@ -14089,7 +14047,7 @@
 		)
 		(polygon
 			(pts
-				(xy 118.4 85.8) (xy 118.6 85.8) (xy 118.6 86.6) (xy 118.4 86.6)
+				(xy 105.1 77.5) (xy 105.3 77.5) (xy 105.3 78.1) (xy 105.1 78.1)
 			)
 		)
 	)
@@ -14122,7 +14080,7 @@
 		)
 		(polygon
 			(pts
-				(xy 117.8 85.8) (xy 118.6 85.8) (xy 118.6 86.0) (xy 117.8 86.0)
+				(xy 104.6 77.5) (xy 105.3 77.5) (xy 105.3 77.7) (xy 104.6 77.7)
 			)
 		)
 	)
@@ -14155,7 +14113,40 @@
 		)
 		(polygon
 			(pts
-				(xy 124.8 75.9) (xy 125.6 75.9) (xy 125.6 76.1) (xy 124.8 76.1)
+				(xy 118.4 85.8) (xy 118.6 85.8) (xy 118.6 86.6) (xy 118.4 86.6)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu")
+		(uuid "835c8194-0a08-50bb-8338-0b30bcdef3f1")
+		(name "Power escape +3V0 79 1")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0.2)
+		)
+		(min_thickness 0.2)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.3)
+			(thermal_bridge_width 0.4)
+		)
+		(polygon
+			(pts
+				(xy 117.8 85.8) (xy 118.6 85.8) (xy 118.6 86.0) (xy 117.8 86.0)
 			)
 		)
 	)
@@ -14188,40 +14179,7 @@
 		)
 		(polygon
 			(pts
-				(xy 128.8 80.8) (xy 129.0 80.8) (xy 129.0 81.1) (xy 128.8 81.1)
-			)
-		)
-	)
-	(zone
-		(net 0)
-		(net_name "")
-		(layers "F.Cu")
-		(uuid "2481da36-570e-5eb5-ac0d-3dafcec2723a")
-		(name "Power escape +3V0 80 1")
-		(hatch edge 0.5)
-		(connect_pads
-			(clearance 0.2)
-		)
-		(min_thickness 0.2)
-		(filled_areas_thickness no)
-		(keepout
-			(tracks allowed)
-			(vias allowed)
-			(pads allowed)
-			(copperpour allowed)
-			(footprints allowed)
-		)
-		(placement
-			(enabled no)
-			(sheetname "")
-		)
-		(fill
-			(thermal_gap 0.3)
-			(thermal_bridge_width 0.4)
-		)
-		(polygon
-			(pts
-				(xy 128.2 80.8) (xy 129.0 80.8) (xy 129.0 81.0) (xy 128.2 81.0)
+				(xy 124.8 75.9) (xy 125.6 75.9) (xy 125.6 76.1) (xy 124.8 76.1)
 			)
 		)
 	)
@@ -14254,7 +14212,7 @@
 		)
 		(polygon
 			(pts
-				(xy 128.8 83.3) (xy 129.0 83.3) (xy 129.0 83.6) (xy 128.8 83.6)
+				(xy 128.8 80.8) (xy 129.0 80.8) (xy 129.0 81.1) (xy 128.8 81.1)
 			)
 		)
 	)
@@ -14287,7 +14245,7 @@
 		)
 		(polygon
 			(pts
-				(xy 128.2 83.3) (xy 129.0 83.3) (xy 129.0 83.5) (xy 128.2 83.5)
+				(xy 128.2 80.8) (xy 129.0 80.8) (xy 129.0 81.0) (xy 128.2 81.0)
 			)
 		)
 	)
@@ -14320,7 +14278,40 @@
 		)
 		(polygon
 			(pts
-				(xy 109.4 92.7) (xy 110.1 92.7) (xy 110.1 92.9) (xy 109.4 92.9)
+				(xy 128.8 83.3) (xy 129.0 83.3) (xy 129.0 83.6) (xy 128.8 83.6)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu")
+		(uuid "fbd993d8-4103-5423-9de2-6f3cbf5117fd")
+		(name "Power escape +3V0 82 1")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0.2)
+		)
+		(min_thickness 0.2)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.3)
+			(thermal_bridge_width 0.4)
+		)
+		(polygon
+			(pts
+				(xy 128.2 83.3) (xy 129.0 83.3) (xy 129.0 83.5) (xy 128.2 83.5)
 			)
 		)
 	)
@@ -14353,6 +14344,39 @@
 		)
 		(polygon
 			(pts
+				(xy 109.4 92.7) (xy 110.1 92.7) (xy 110.1 92.9) (xy 109.4 92.9)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu")
+		(uuid "f1f7329e-5696-59a8-8da7-430bc05e1745")
+		(name "Power escape +3V0 84 0")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0.2)
+		)
+		(min_thickness 0.2)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.3)
+			(thermal_bridge_width 0.4)
+		)
+		(polygon
+			(pts
 				(xy 128.8 86.8) (xy 129.0 86.8) (xy 129.0 87.6) (xy 128.8 87.6)
 			)
 		)
@@ -14361,8 +14385,8 @@
 		(net 0)
 		(net_name "")
 		(layers "F.Cu")
-		(uuid "da5a2aa7-afdb-5db7-a65f-d73b0c044c79")
-		(name "Power escape +3V0 83 1")
+		(uuid "77901646-a56c-54e4-95bb-4a1065ceff56")
+		(name "Power escape +3V0 84 1")
 		(hatch edge 0.5)
 		(connect_pads
 			(clearance 0.2)
