@@ -485,3 +485,34 @@ The journal prototype also remains exploratory: a telemetry encoding, actual
 ESP-IDF storage backend, partition sizing, endurance analysis and power-cut
 tests are required before a 500-record persistence claim can be made. Its
 test-only 64-byte records and assumed atomic backend are not product evidence.
+
+
+### Reconciliation and work order — 2026-11-10
+
+Starting commit: `468d6d8`, clean `master` matching `origin/master`. No previous
+subagent was running when this session began. Earlier scratch worktrees under
+`/tmp` are absent; their proposed routes and journal are not accepted source.
+The committed development budget remains A31/B27; this is a recorded baseline
+pending the fresh full run, not evidence of a completed layout.
+
+1. Harden direct prototype/product qualification against stale generated
+   sources. Share the pipeline's reproducibility invariant with the Make gates;
+   prove rejection of a clean commit whose generator and board disagree, and
+   preservation of uncommitted generated edits.
+2. Audit every BOM group against the model, library provenance and manufacturer
+   sources. Record actual reviewed properties, unresolved questions and required
+   supplier/bench evidence; keep the EDS Open table authoritative.
+3. Attempt a bounded remaining-route completion in an isolated worktree.
+   Accept only fresh filled-board results on both variants without replacing
+   an existing USB, ground, sensor, paste or power invariant with a weaker one.
+4. Publish the [flight manual](02-flight-manual.md): executable procedures,
+   expected evidence, stop/recovery criteria and a reproducible session handoff.
+   Reconcile live summaries; retain explicitly dated historical checkpoints.
+5. Independently review the current diff, run the complete local pipeline,
+   commit each verified idea atomically, and push without rewriting history.
+
+Steps 2–4 are delegated to smaller models; the coordinator owns integration,
+release-gate implementation and final verification. Fabrication, physical
+verification, protected charging and the product firmware contract remain
+ordered work, requiring their actual inputs and evidence. No component audit
+or source pipeline substitutes for those gates.

@@ -5,6 +5,7 @@ One page. Everything else in `docs/` is detail hanging off this.
 Current state, corrective priorities and remaining completion gates are tracked
 in [01 — Recovery and completion plan](01-execution-plan.md). The phase table
 below is the original development sequence, not a completed-gates checklist.
+Use the [flight manual](02-flight-manual.md) to execute and hand off each gate.
 
 ## The product
 

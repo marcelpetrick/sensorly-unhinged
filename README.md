@@ -55,7 +55,8 @@ pipeline pass does not imply a working sensor or safe battery charging.
 **Partially routed:** the current exact counts are recorded in
 [`hardware/drc-budget.json`](hardware/drc-budget.json), with verification history
 in the [execution plan](docs/01-execution-plan.md). Sensor routes, local power/ground paths and regulator
-controls are generated; USB and remaining main-board branches are incomplete.
+controls and guarded USB routing are generated; remote supplies and remaining
+control/test-pad branches are incomplete.
 Development DRC has zero errors, warnings and schematic/PCB parity differences;
 manufacturing also requires zero unconnected items.
 Phase 6 of 14 — see [`docs/00-plan.md`](docs/00-plan.md).
@@ -64,6 +65,9 @@ A compiled, radio-disabled [bring-up application and fixture capture](docs/72-fi
 are now available. Full telemetry firmware and device qualification remain open.
 The [prototype-to-production handoff](docs/65-prototype-to-production.md) separates
 public engineering sources, controlled prototype orders and qualified products.
+
+Use the [flight manual](docs/02-flight-manual.md) for change, order and bring-up
+checklists, including expected evidence and stop conditions.
 
 The current audit and ordered work through the prototype experiment and 20-unit
 series are in [`docs/01-execution-plan.md`](docs/01-execution-plan.md).
@@ -161,6 +165,8 @@ lives in a designer's memory gets widened the first time a route is awkward.
 |---|---|
 | [`AGENTS.md`](AGENTS.md) | working agreement — read before changing anything |
 | [`docs/00-plan.md`](docs/00-plan.md) | 14 phases with gates, schedule, risks, non-goals |
+| [`docs/02-flight-manual.md`](docs/02-flight-manual.md) | procedures, expected evidence, stop conditions and handoff |
+| [`docs/96-component-audit-20261110.md`](docs/96-component-audit-20261110.md) | component-by-component provenance and outstanding qualification |
 | [`docs/10-requirements.md`](docs/10-requirements.md) | numbered requirements, locked vs open |
 | [`docs/20-component-selection.md`](docs/20-component-selection.md) | why SHT45 and not BME280; why C6 and not C3 |
 | [`docs/30-electrical-design-spec.md`](docs/30-electrical-design-spec.md) | the circuit, every value traced to a datasheet |
