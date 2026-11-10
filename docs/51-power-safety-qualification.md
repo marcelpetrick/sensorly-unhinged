@@ -81,7 +81,7 @@ voltage, and no pack where the case permits it. The no-pack case keeps radio off
 | Configured by data host | Firmware may set `USB_ISEL=1`; total input remains at or below 500 mA. |
 | Suspend, deconfigure and detach | Firmware clears `USB_ISEL` before/at the transition; no retained 500 mA authorization. |
 | Charge-only/unknown source | It never reaches configured state, so `USB_ISEL` remains low and input stays at or below 100 mA. |
-| Watchdog reset or induced USB-stack crash | External R8 returns EN1 low without firmware; input returns to the USB100 bound. |
+| Watchdog reset or induced USB-stack crash | For the controlled prototype, R8/R20 pull EN1/EN2 high while the MCU rail is valid: require standby and charging disabled; measure current and rail-loss behavior. A future USB100 fallback needs a separately reviewed hardware/firmware source policy and fault tests (EDS-12/13); R8 does not pull EN1 low on the current board. |
 | Low-pack radio transmit after configuration | Source remains within 500 mA and the battery safely supplies any power-path supplement current. |
 | Missing/depleted pack before configuration | Firmware does not start radio; it reports/records a bounded power-policy fault where possible. |
 

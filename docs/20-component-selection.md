@@ -1,6 +1,9 @@
 # 20 — Component Selection Trade Study (sensor + MCU)
 
-Status: **decided for Rev 1**, revisit at the Rev 2 gate
+Status: **architecture selected for Rev 1**, revisit at the Rev 2 gate.
+Exact component/assembly qualification remains open; see the
+[2026-11-10 component audit](96-component-audit-20261110.md) and
+[purchasing qualification](63-assembly-qualification.md).
 Date: 2026-08-25
 Supersedes: the provisional picks in `docs/vision.md` §1 / §4 / §5
 

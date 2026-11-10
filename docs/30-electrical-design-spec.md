@@ -711,6 +711,10 @@ width/length and the shared electrical platform remain as specified.
 
 ## 11. Review checklist for this spec
 
+The [2026-11-10 component audit](96-component-audit-20261110.md) records
+model/BOM/pad consistency and the limits of the existing drawing review.
+It does not sign off this checklist or close the Open table.
+
 - [ ] every ESP32 module pin number re-checked against datasheet v1.5 Table 3-1
 - [ ] SHT4x pin 1 orientation re-checked against the Sensirion land pattern
 - [ ] BQ24074 EP tied to GND with a via array

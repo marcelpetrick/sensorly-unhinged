@@ -264,3 +264,13 @@ registration tolerances. C9/C10 local return holes are moved outside paste.
 the solder-loss/process issue for under-paste vias. Only the four reviewed
 U4 EP positions retain the explicit filled/capped/planarized acceptance gate.
 No general via-in-pad assembly allowance is implied by same-net connectivity.
+
+
+## Audit continuation — 2026-11-10
+
+The [component audit](96-component-audit-20261110.md) maps every BOM reference
+to the shared model, existing drawing review and remaining qualification gaps.
+It retains the single-source/alternate restrictions and open EDS gates; no
+supplier acceptance or physical orientation approval is inferred. The reset
+qualification wording in [doc 51](51-power-safety-qualification.md) now matches
+the current R8/R20 pull-ups and distinguishes a future USB100 fallback policy.
