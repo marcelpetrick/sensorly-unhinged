@@ -111,10 +111,10 @@ mech:
 mech-render:
 	@for v in $(VARIANTS); do \
 	    openscad -D 'part="base"' --camera=20,28,10,55,0,25,190 \
-	      --imgsize=640,640 --colorscheme=Tomorrow \
+	      --imgsize=640,640 --colorscheme=Tomorrow --viewall --autocenter \
 	      -o docs/img/case-$$v-base.png mechanical/case-$$v.scad; \
 	    openscad -D 'part="lid"' --camera=20,28,2,235,0,25,190 \
-	      --imgsize=640,640 --colorscheme=Tomorrow \
+	      --imgsize=640,640 --colorscheme=Tomorrow --viewall --autocenter \
 	      -o docs/img/case-$$v-lid.png mechanical/case-$$v.scad; \
 	  done; \
 	  echo "wrote docs/img/case-*.png"

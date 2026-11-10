@@ -51,6 +51,12 @@ checkpoint only. `make firmware` additionally requires the exact ESP-IDF setup
 in [bring-up instructions](72-firmware-bringup.md). Compilation and synthetic
 tests are source evidence, never device evidence.
 
+When geometry changes, update documentation previews with `make render` and
+`make mech-render`, then inspect both boards and all four enclosure images.
+On a headless machine with Xvfb installed, use `xvfb-run -a make render` and
+`xvfb-run -a make mech-render`. These are design previews, not photographs or
+physical fit evidence. Enclosure previews automatically frame the whole part.
+
 **Stop and repair** on any failed step, generated drift, unexpected A/B
 difference, missing provenance, or relaxed rule used to hide a violation. Do not
 advance a package using an older PASS from another commit. Commit the reason and
