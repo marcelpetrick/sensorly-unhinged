@@ -527,6 +527,54 @@ segments per board and removes no existing segments. Fresh filled-board checks
 give A30/B26 unconnected items, zero ERC/DRC errors, warnings or parity
 differences, and no GND or USB-data airwires. A KiCad deletion control confirms
 that removing the middle leg adds one VBAT_SENSE airwire on each board. The
-remaining sense path to the MCU, all charger controls, supply trunks and other
+remaining sense path to the MCU, remaining charger control branches, supply trunks and other
 listed airwires remain open. ADC acquisition, leakage/noise and calibration
 remain unmeasured; this checkpoint is not fabrication approval.
+
+
+### Verified integration and experiment disposition — 2026-11-10
+
+Accepted source through `97ca240` includes the generated-source manufacturing
+preflight, full BOM/fixture audit, operational manual, refreshed previews and
+R15–C13 sense branch. The audit and manual used smaller-model delegates;
+independent reviews covered the removed/replaced reproducibility invariant,
+route guards, meaningful deletion test, and current documentation. The found
+SVG whitespace issue was fixed in `ef8a2bf`/`97ca240`; the full checkpoint diff
+now passes `git diff --check origin/master...HEAD`.
+
+| Evidence | Observed result and limit |
+|---|---|
+| Integrated `./localPipeline.sh` | All 15 stages PASS, no skips; 133 host tests and 28 actual KiCad tests. Python 3.14.7 / KiCad 10.0.6. Includes deterministic regeneration, 19/19 documentation figures, four mesh bounds, both lid/base and cable/case-plus-pack intersections, BOM, ERC, DRC/parity and draft exports. |
+| Current filled routing | A30/B26 unconnected; zero ERC violations, DRC errors/warnings or parity differences. Ground and USB data connectivity controls pass. |
+| Pinned CI-version control | The new sense placement and actual KiCad positive/deletion tests pass in the exact workflow image, KiCad 10.0.5. The read-only Docker reproduction required a library-path symlink because local scratch library tables contain absolute checkout paths; no rules were ignored. |
+| Component consistency | Reproduced the audit's read-only check: 47 BOM references, 17 excluded fixture pads, all referenced footprints and wired pad numbers match the model. This does not independently repeat every drawing comparison or qualify availability, substitutes or assembled behavior. |
+| Documentation previews | `make render`, `make mech-render` and `make schematic-render` pass. Board outlines and all case parts were visually checked; SVG XML parses and branch whitespace checks pass. Preview framing changes do not change geometry. |
+| Qualification rejection | Prototype/product gate modules reject A30/B26 routing plus all five prototype reviews and all seven product evidence slots. All evidence remains null; draft exports remain unapproved. |
+
+Local diagnostics are `/tmp/sensorly-integrated-pipeline-20261110.log`,
+`/tmp/sensorly-sense-{drc,tests,kicad1005}-20261110.log`,
+`/tmp/sensorly-{prototype,product}-rejection-20261110.log` and
+`/tmp/sensorly-{board,mech}-previews-20261110.log`. They are development logs,
+not physical/supplier qualification records. The complete pipeline ran after
+sense integration; subsequent preview-only fixes were checked by their Make
+export commands and XML/whitespace inspection. Firmware source is unchanged;
+the host decoder/retry tests pass, while the pinned device build will rerun in
+CI. No device was flashed or measured in this session.
+
+Rejected isolated candidates were fully reverted:
+
+- A UART_TX escape/via plus B.Cu fixture branch reduced airwires but caused seven
+  shorts/clearance violations on each board, including GND, R13 and TP12 SDA.
+- A BTN_PROV continuation meets R3.2 SDA between C5 and the existing track;
+  B already has that connection. BOOT_MODE_H requires a wider body route.
+- Straight 0.4 mm F.Cu VBAT and VSYS trunks crossed C3 or the EN_REG/GND paths.
+- A B.Cu VBAT transition crossed USB_ISEL/approached USB_EN2; moving it into the
+  centre corridor failed the independent U1.28 drill-to-paste guard.
+
+These lower airwire totals are not accepted copper. The next routing work needs
+reviewed off-paste transitions and layer paths around the MCU/fixture corridor,
+followed by fresh checks on both boards. W2c remains open until **zero**
+unconnected items. Protected charging, source authorization, supplier/DFM/CPL
+reviews, physical samples, A/B measurements and product firmware still retain
+their separate gates. Current delegates have completed their handoffs; no
+background work is claimed to continue after this checkpoint.
