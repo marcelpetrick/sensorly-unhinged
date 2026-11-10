@@ -37,11 +37,21 @@ available when their gates apply:
 make gen
 make check test firmware-test
 make erc drc
+git diff --check
+git diff --stat
+```
+
+`make gen` writes the schematic, both boards and model drawings. Review these
+changes and make atomic source/documentation commits and a separate generated
+output commit where practical. The reproducibility gate compares against Git,
+so intentional regenerated changes must be committed before this final gate:
+
+```sh
 ./localPipeline.sh
 git status --short
 ```
 
-`make gen` writes the schematic, both boards and model drawings. The pipeline
+Push only after the final gate passes. The pipeline
 regenerates deterministic sources, checks drift, libraries, docs, BOM, ERC,
 DRC/parity, actual KiCad negative controls and draft outputs. Save its final
 PASS/FAIL summary, tool versions, source commit and changed-file diff with the
