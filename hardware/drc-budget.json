@@ -1,13 +1,13 @@
 {
   "_comment": "Development-only sense-divider checkpoint; require fresh KiCad reports on both variants. Zero ERC/DRC errors, warnings and schematic parity differences; no ignored checks or warning allowances. Manufacturing gates still require zero unconnected items.",
   "a": {
-    "unconnected": 28,
-    "note": "Reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R15-C13 sense branch, Q1.3-to-R18.1 CHARGE_EN_N branch, and Q1.1-to-R7.1 CHARGE_ENABLE branch are present. U4.4 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
+    "unconnected": 26,
+    "note": "Reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R14-R15-C13 sense branches, Q1.3-to-R18.1 CHARGE_EN_N branch, Q1.1-to-R7.1 CHARGE_ENABLE branch, and R10.2-to-U4.9 CHG_N branch are present. U4.4 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
     "warnings": []
   },
   "b": {
-    "unconnected": 25,
-    "note": "Reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R15-C13 sense branch, and the guarded B U4.1-to-J2.2 PACK_TS branch are present. R21.1 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
+    "unconnected": 23,
+    "note": "Reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R14-R15-C13 sense branches, guarded U4.1-to-J2.2 PACK_TS branch, and TP14.1-to-R10.2 CHG_N branch are present. R21.1 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
     "warnings": []
   }
 }
