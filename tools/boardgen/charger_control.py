@@ -7,8 +7,6 @@ from .route import Track, Via
 
 
 def route_charger_controls(v, placed):
-    if v.key != "b":
-        return [], []  # A's existing CHG_N trunk occupies this TS via site.
     parts = {part.ref: part for part in placed}
     if (parts["U4"].x, parts["U4"].y, parts["U4"].rot) != (24.4, 10.5, 0):
         raise ValueError("U4 charger placement changed; review signal escapes")
@@ -18,6 +16,30 @@ def route_charger_controls(v, placed):
                   parts["U4"].x, parts["U4"].y, parts["U4"].rot)
     if tuple(round(v, 3) for v in pad) != (23.0, 9.75):
         raise ValueError("U4.1 land-pattern position changed")
+    if v.key == "a":
+        # The compact board leaves the two non-U4 CHARGE_EN_N terminals
+        # separated by the crowded Q1/LED region. Retain the verified U4
+        # escape for a later placement/routing pass and join Q1 to R18 here.
+        for ref, number, expected in (("Q1", "3", (27.8, 16.125)),
+                                      ("R18", "1", (18.64, 28.0))):
+            if (ref, number) not in NETS["CHARGE_EN_N"]:
+                raise ValueError(f"{ref}.{number} must remain CHARGE_EN_N")
+            part = parts[ref]
+            actual = G.xform(*G.get(part.footprint).pads[number][0],
+                             part.x, part.y, part.rot)
+            if any(abs(a - e) > 1e-7 for a, e in zip(actual, expected)):
+                raise ValueError(f"{ref}.{number} CHARGE_EN_N position changed")
+        tracks = [
+            Track("CHARGE_EN_N", .15, "F.Cu",
+                  [(27.8, 16.1), (26.2, 16.1), (26.2, 17.8), (23.2, 17.8)]),
+            Track("CHARGE_EN_N", .15, "B.Cu", [(23.2, 17.8), (23.2, 28.7)]),
+            Track("CHARGE_EN_N", .15, "F.Cu",
+                  [(23.2, 28.7), (18.6, 28.7), (18.6, 28.0)]),
+        ]
+        vias = [Via("CHARGE_EN_N", 23.2, 17.8),
+                Via("CHARGE_EN_N", 23.2, 28.7)]
+        G.validate_via_paste(placed, vias)
+        return tracks, vias
     via = Via("PACK_TS", 22.5, 9.3)
     tracks = [Track("PACK_TS", .15, "F.Cu",
                     [pad, (22.5, 9.75), (via.x, via.y)])]

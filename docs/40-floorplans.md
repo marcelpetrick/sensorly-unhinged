@@ -208,6 +208,14 @@ zero errors, warnings, parity differences, GND airwires, and USB data airwires.
 R21.1 remains disconnected from this branch. Variant A's existing CHG_N trunk
 occupies the proposed U4 escape via site, so this geometry does not apply to A.
 
+### Variant A charger enable branch, 2026-11-11
+
+The compact board now routes Q1.3 to R18.1 on CHARGE_EN_N around the Q1/LED
+region, using two paste-clear vias. U4.4 remains open and needs a separately
+reviewed fine-pitch escape. The filled-board report has 29 unconnected items
+on A, down from 30, with zero errors, warnings, or parity differences.
+Variant B's Q1.3-to-R18.1 route remains blocked by its current copper geometry.
+
 ### Regulator controls, 2026-10-22
 
 The shared U3 EN_REG/VSET pad escapes and R5/R6 connections now route through
