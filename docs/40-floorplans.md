@@ -258,3 +258,16 @@ for board registration and underside mirroring. The full set is not a regular
 11.5 mm on A and J1 at24.5 mm on B; these centre distances do not establish
 actual heating or A/B performance. USB return-path and impedance acceptance
 remains EDS-19.
+
+
+### GPIO8 pull-up plane access — 2026-11-11
+
+R22 moves from the automatically packed (1.0,10.75,90°) position to the common
+(1.0,12.4,90°) position on both boards. Its GPIO8/BOOT_MODE_H pin assignment,
+10 kΩ value, package and rotation do not change. The former +3V0 pad was boxed
+in by the EN_REG/VSET return corridor, neighbouring ground and the board edge.
+The new +3V0 pad at (1.0,11.89) reaches an off-paste 0.6/0.3 mm via at
+(0.8,11.2) through a 0.15 mm, 0.89 mm-long plane-neckdown stub. The existing
+2.5 mm bounded plane-feed rule and normal clearances remain active. The
+BOOT_MODE_H signal still needs its remote route; this closes only supply-plane
+access. Placement/net guards and actual filled-board checks apply to A and B.

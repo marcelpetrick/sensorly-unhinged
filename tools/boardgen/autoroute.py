@@ -577,6 +577,10 @@ def route_rest(v: Variant, placed: list[Placement],
         if math.dist((term.x, term.y), expected) > 1e-7:
             raise ValueError(f"VBAT_SENSE placement changed: {ref}.{pad}")
     tracks.append(Track("VBAT_SENSE", SIGNAL_W, "F.Cu", [r14, r15]))
+    from .plane_access import route_plane_access
+    plane_tracks, plane_vias = route_plane_access(v, placed)
+    tracks += plane_tracks
+    vias += plane_vias
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 
