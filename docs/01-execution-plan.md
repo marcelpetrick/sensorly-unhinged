@@ -618,3 +618,59 @@ GND or USB-data airwires. Deleting only the new segment adds one
 VBAT_SENSE airwire per variant in the actual KiCad test. The remaining B
 VBAT_SENSE path to U1.5 and the other listed airwires still require routing;
 the lower total is not manufacturing approval.
+
+
+### Accepted routing continuation — 2026-11-11
+
+Starting electrical state was A30/B26. Four guarded charger changes close the
+B U4-to-pack TS path, A Q1-to-R18 disable path, A Q1-to-R7 gate pull-down path,
+and one status branch on each board. The R14–R15 join closes another sense
+branch on each board; the R22 relocation gives the GPIO8 pull-up supply-plane
+access on both. The accepted state is **A25/B22**, a reduction of nine open
+connections. No ERC/DRC errors, warnings or parity differences remain, and both
+GND and USB data nets retain zero airwires. This is still incomplete routing.
+
+The complete local pipeline passes all 15 stages, with **139 host tests and
+35 actual KiCad controls**, deterministic generation, 19/19 documentation
+figures, both enclosure interference checks and draft exports. A subsequent
+via-obstacle correction uses the existing via's actual diameter; its five
+focused tests pass, including two new mixed-size cases. Committed via sizes
+and manufacturing rules did not change. Logs:
+`/tmp/sensorly-full-pipeline-20261111.log`,
+`/tmp/sensorly-status-sense-tests-20261111.log`,
+`/tmp/sensorly-plane-tests-20261111.log`, and
+`/tmp/sensorly-via-obstacles-tests-20261111.log`.
+
+Actual filled-report backlog at this checkpoint (open connections, not pad
+counts):
+
+| Net | A | B |
+|---|---:|---:|
+| `+3V0` | 3 | 0 |
+| `BOOT_MODE_H` | 1 | 1 |
+| `BTN_PROV` | 1 | 0 |
+| `CHARGE_ENABLE` | 1 | 1 |
+| `CHARGE_EN_N` | 1 | 2 |
+| `CHG_N` | 1 | 1 |
+| `EN` | 2 | 2 |
+| `PACK_TS` | 1 | 1 |
+| `PACK_TS_SENSE` | 1 | 1 |
+| `SDA` | 0 | 1 |
+| `UART_RX` | 1 | 0 |
+| `UART_TX` | 1 | 1 |
+| `VBAT` | 2 | 3 |
+| `VBAT_SENSE` | 0 | 1 |
+| `VBUS` | 6 | 6 |
+| `VSYS` | 3 | 1 |
+
+Global UART ordering, smaller generic signal vias, and fixture target moves
+were not adopted: lower totals or clean individual paths concealed displaced
+signals, GND islands or collisions with fixed routes appended after routing.
+A controlled fixed-route reservation/component-connectivity experiment remains
+isolated. The remaining U4.4 and A TS escapes require reviewing the local
+VBAT/USB-control corridors; additive post-routing A* found no path. Power
+reservation can close VBAT but displaces other routes and has not been merged.
+The next integration must preserve actual clearances, paste exclusions and
+USB/ground connectivity; no unconnected allowance closes manufacturing gates.
+Supplier approvals, physical samples, measurements and product firmware
+qualification remain separate outstanding work.
