@@ -566,6 +566,17 @@ def route_rest(v: Variant, placed: list[Placement],
     charger_tracks, charger_vias = route_charger_controls(v, placed)
     tracks += charger_tracks
     vias += charger_vias
+    sense_join = {
+        "a": ((22.56, 31.0), (24.04, 31.0)),
+        "b": ((20.06, 29.75), (21.54, 31.0)),
+    }
+    r14, r15 = sense_join[v.key]
+    for ref, pad, expected in (("R14", "2", r14), ("R15", "1", r15)):
+        term = next(t for t in terms["VBAT_SENSE"]
+                    if t.ref == ref and t.pad == pad)
+        if math.dist((term.x, term.y), expected) > 1e-7:
+            raise ValueError(f"VBAT_SENSE placement changed: {ref}.{pad}")
+    tracks.append(Track("VBAT_SENSE", SIGNAL_W, "F.Cu", [r14, r15]))
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 

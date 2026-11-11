@@ -605,3 +605,16 @@ net-by-net regressions and retain zero ground/USB-data airwires. A post-router
 supply search found the local VBAT pocket has no legal .4 mm escape/via with
 all existing control copper in place; that calls for reviewed earlier corridor
 reservation, not relaxed clearances or drills through paste.
+
+
+### Sense divider upper branch — 2026-11-11
+
+A placement-guarded 0.15 mm F.Cu segment connects R14.2 to R15.1 on both
+variants, complementing the existing R15.1-to-C13.1 branch. A uses
+22.56,31.0–24.04,31.0 mm; B uses 20.06,29.75–21.54,31.0 mm. The populated
+KiCad layouts have A26/B23 unconnected items after the accepted charger
+branches, with zero ERC/DRC errors, warnings or parity differences and no
+GND or USB-data airwires. Deleting only the new segment adds one
+VBAT_SENSE airwire per variant in the actual KiCad test. The remaining B
+VBAT_SENSE path to U1.5 and the other listed airwires still require routing;
+the lower total is not manufacturing approval.
