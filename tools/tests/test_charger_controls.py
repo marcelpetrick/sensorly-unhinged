@@ -38,3 +38,16 @@ class ChargerControlGuards(unittest.TestCase):
                     {net: [p for p in original if p != (ref, number)]}):
                 with self.assertRaisesRegex(ValueError, 'must remain ' + net):
                     charger_control.route_charger_controls(VARIANTS['a'], place(VARIANTS['a']))
+
+    def test_changed_status_endpoint_requires_review(self):
+        for key, ref, number in (('a', 'R10', '2'), ('a', 'U4', '9'),
+                                 ('b', 'R10', '2'), ('b', 'TP14', '1')):
+            placed = place(VARIANTS[key])
+            next(p for p in placed if p.ref == ref).x += .1
+            with self.subTest(variant=key, ref=ref), self.assertRaises(ValueError):
+                charger_control.route_charger_controls(VARIANTS[key], placed)
+            original = charger_control.NETS['CHG_N']
+            with self.subTest(variant=key, ref=ref, net=True), patch.dict(charger_control.NETS,
+                    {'CHG_N': [p for p in original if p != (ref, number)]}):
+                with self.assertRaisesRegex(ValueError, 'must remain CHG_N'):
+                    charger_control.route_charger_controls(VARIANTS[key], place(VARIANTS[key]))

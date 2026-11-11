@@ -220,6 +220,15 @@ The compact board also routes Q1.1 to its gate pull-down R7.1 on CHARGE_ENABLE w
 paste-clear vias and a B.Cu run beside the ILIM trunk. U1.24 remains open on
 this net. The filled-board unconnected count on A is now 28; B remains 25.
 
+### Charger status branches, 2026-11-11
+
+A now joins R10.2 to U4.9 on CHG_N with an edge-side B.Cu run; TP14.1 is
+still open. B now joins TP14.1 to R10.2 using one paste-clear via; U4.9 is
+still open. These routes use different geometry because the generic autorouter
+left different connected groups in each variant. Filled-board KiCad reports
+show A27/B24 unconnected items, zero errors/warnings/parity differences, and
+zero GND or USB-data airwires.
+
 ### Regulator controls, 2026-10-22
 
 The shared U3 EN_REG/VSET pad escapes and R5/R6 connections now route through
