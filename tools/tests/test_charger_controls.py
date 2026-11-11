@@ -27,13 +27,14 @@ class ChargerControlGuards(unittest.TestCase):
                     charger_control.route_charger_controls(VARIANTS['b'], placed)
 
     def test_changed_enable_endpoint_requires_review(self):
-        for ref, number in (('Q1', '3'), ('R18', '1')):
+        for ref, number, net in (('Q1', '3', 'CHARGE_EN_N'), ('R18', '1', 'CHARGE_EN_N'),
+                                 ('Q1', '1', 'CHARGE_ENABLE'), ('R7', '1', 'CHARGE_ENABLE')):
             placed = place(VARIANTS['a'])
             next(p for p in placed if p.ref == ref).x += .1
             with self.subTest(ref=ref), self.assertRaises(ValueError):
                 charger_control.route_charger_controls(VARIANTS['a'], placed)
-            original = charger_control.NETS['CHARGE_EN_N']
+            original = charger_control.NETS[net]
             with self.subTest(ref=ref, net=True), patch.dict(charger_control.NETS,
-                    {'CHARGE_EN_N': [p for p in original if p != (ref, number)]}):
-                with self.assertRaisesRegex(ValueError, 'must remain CHARGE_EN_N'):
+                    {net: [p for p in original if p != (ref, number)]}):
+                with self.assertRaisesRegex(ValueError, 'must remain ' + net):
                     charger_control.route_charger_controls(VARIANTS['a'], place(VARIANTS['a']))

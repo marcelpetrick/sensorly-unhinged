@@ -216,6 +216,10 @@ reviewed fine-pitch escape. The filled-board report has 29 unconnected items
 on A, down from 30, with zero errors, warnings, or parity differences.
 Variant B's Q1.3-to-R18.1 route remains blocked by its current copper geometry.
 
+The compact board also routes Q1.1 to its gate pull-down R7.1 on CHARGE_ENABLE with two
+paste-clear vias and a B.Cu run beside the ILIM trunk. U1.24 remains open on
+this net. The filled-board unconnected count on A is now 28; B remains 25.
+
 ### Regulator controls, 2026-10-22
 
 The shared U3 EN_REG/VSET pad escapes and R5/R6 connections now route through

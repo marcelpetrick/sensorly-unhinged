@@ -34,6 +34,9 @@ class ChargerEndpointConnectivity(unittest.TestCase):
     def test_actual_transistor_to_pullup_path_and_missing_trunk(self):
         self.prove_path('a', 'CHARGE_EN_N', {('Q1', '3'), ('R18', '1')})
 
+    def test_actual_enable_gate_to_pulldown_path_and_missing_trunk(self):
+        self.prove_path('a', 'CHARGE_ENABLE', {('Q1', '1'), ('R7', '1')})
+
     def prove_path(self, key, net, wanted):
         source = ROOT / f'_build/{key}/env-sensor-{key}.kicad_pcb'
         with tempfile.TemporaryDirectory(prefix='sensorly-charger-ts-') as d:

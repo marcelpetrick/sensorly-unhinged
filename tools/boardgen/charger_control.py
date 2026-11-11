@@ -20,24 +20,35 @@ def route_charger_controls(v, placed):
         # The compact board leaves the two non-U4 CHARGE_EN_N terminals
         # separated by the crowded Q1/LED region. Retain the verified U4
         # escape for a later placement/routing pass and join Q1 to R18 here.
-        for ref, number, expected in (("Q1", "3", (27.8, 16.125)),
-                                      ("R18", "1", (18.64, 28.0))):
-            if (ref, number) not in NETS["CHARGE_EN_N"]:
-                raise ValueError(f"{ref}.{number} must remain CHARGE_EN_N")
+        for ref, number, net, expected in (
+                ("Q1", "3", "CHARGE_EN_N", (27.8, 16.125)),
+                ("R18", "1", "CHARGE_EN_N", (18.64, 28.0)),
+                ("Q1", "1", "CHARGE_ENABLE", (26.85, 18.075)),
+                ("R7", "1", "CHARGE_ENABLE", (27.65, 7.76))):
+            if (ref, number) not in NETS[net]:
+                raise ValueError(f"{ref}.{number} must remain {net}")
             part = parts[ref]
             actual = G.xform(*G.get(part.footprint).pads[number][0],
                              part.x, part.y, part.rot)
             if any(abs(a - e) > 1e-7 for a, e in zip(actual, expected)):
-                raise ValueError(f"{ref}.{number} CHARGE_EN_N position changed")
+                raise ValueError(f"{ref}.{number} {net} position changed")
         tracks = [
             Track("CHARGE_EN_N", .15, "F.Cu",
                   [(27.8, 16.1), (26.2, 16.1), (26.2, 17.8), (23.2, 17.8)]),
             Track("CHARGE_EN_N", .15, "B.Cu", [(23.2, 17.8), (23.2, 28.7)]),
             Track("CHARGE_EN_N", .15, "F.Cu",
                   [(23.2, 28.7), (18.6, 28.7), (18.6, 28.0)]),
+            Track("CHARGE_ENABLE", .15, "F.Cu",
+                  [(26.8, 18.1), (27.6, 18.1)]),
+            Track("CHARGE_ENABLE", .15, "B.Cu",
+                  [(27.6, 18.1), (27.6, 8.3)]),
+            Track("CHARGE_ENABLE", .15, "F.Cu",
+                  [(27.6, 8.3), (27.6, 7.8)]),
         ]
         vias = [Via("CHARGE_EN_N", 23.2, 17.8),
-                Via("CHARGE_EN_N", 23.2, 28.7)]
+                Via("CHARGE_EN_N", 23.2, 28.7),
+                Via("CHARGE_ENABLE", 27.6, 18.1),
+                Via("CHARGE_ENABLE", 27.6, 8.3)]
         G.validate_via_paste(placed, vias)
         return tracks, vias
     via = Via("PACK_TS", 22.5, 9.3)
