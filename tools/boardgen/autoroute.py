@@ -562,6 +562,10 @@ def route_rest(v: Variant, placed: list[Placement],
             retained.append(via)
     vias = retained
     tracks, vias = _prune_dead_branches(placed, padnet, tracks, vias, island_tracks, island_vias)
+    from .charger_control import route_charger_controls
+    charger_tracks, charger_vias = route_charger_controls(v, placed)
+    tracks += charger_tracks
+    vias += charger_vias
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 

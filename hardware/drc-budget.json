@@ -6,8 +6,8 @@
     "warnings": []
   },
   "b": {
-    "unconnected": 26,
-    "note": "Reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology and the R15-C13 sense branch are present. Remote supply and remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
+    "unconnected": 25,
+    "note": "Reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R15-C13 sense branch, and the guarded B U4.1-to-J2.2 PACK_TS branch are present. R21.1 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
     "warnings": []
   }
 }

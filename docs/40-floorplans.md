@@ -199,6 +199,15 @@ A47/B45 unconnected items with zero DRC errors, warnings and parity differences;
 these are a development checkpoint, and fabrication still requires zero
 unconnected items. Remote power branches and charger control nets remain open.
 
+### Variant B charger thermistor branch, 2026-11-11
+
+A guarded U4.1 escape now reaches J2.2 through two paste-clear vias and a
+B.Cu trunk on variant B. The generated board and filled-board KiCad report show
+25 unconnected items on B, down from 26; A remains at 30. Both reports have
+zero errors, warnings, parity differences, GND airwires, and USB data airwires.
+R21.1 remains disconnected from this branch. Variant A's existing CHG_N trunk
+occupies the proposed U4 escape via site, so this geometry does not apply to A.
+
 ### Regulator controls, 2026-10-22
 
 The shared U3 EN_REG/VSET pad escapes and R5/R6 connections now route through
