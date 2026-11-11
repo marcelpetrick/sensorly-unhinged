@@ -271,3 +271,12 @@ The new +3V0 pad at (1.0,11.89) reaches an off-paste 0.6/0.3 mm via at
 2.5 mm bounded plane-feed rule and normal clearances remain active. The
 BOOT_MODE_H signal still needs its remote route; this closes only supply-plane
 access. Placement/net guards and actual filled-board checks apply to A and B.
+
+
+### Existing-via obstacle sizes — 2026-11-11
+
+The maze router now blocks each existing via's actual copper diameter instead
+of assuming the global default. This prevents under-clearance around a larger
+via and unnecessary blockage around a smaller one. Current committed vias
+retain their selected dimensions; the rejected density experiment is not
+adopted. Mixed-size obstacle controls cover both cases and both routing layers.

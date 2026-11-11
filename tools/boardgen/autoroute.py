@@ -69,8 +69,8 @@ def m_pad(mine: float, c: float) -> float:
     return c + mine / 2 + MASK_EXP
 
 
-def m_via(mine: float, c: float) -> float:
-    return VIA_SIZE / 2 + c + mine / 2
+def m_via(existing_size: float, mine: float, c: float) -> float:
+    return existing_size / 2 + c + mine / 2
 
 
 R_VIA = VIA_SIZE / 2 + CLR_POWER + SAFETY + SIGNAL_W / 2
@@ -200,7 +200,7 @@ class Board:
 
     def add_via(self, vv: Via, mine: float = SIGNAL_W,
                 mine_net: str | None = None):
-        m = m_via(mine, clr(mine_net, vv.net))
+        m = m_via(vv.size, mine, clr(mine_net, vv.net))
         for L in (0, 1):
             self.block(L, vv.x - m, vv.y - m, vv.x + m, vv.y + m)
 

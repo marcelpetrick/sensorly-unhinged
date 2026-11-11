@@ -32,3 +32,17 @@ class CleanupTests(unittest.TestCase):
         _BASE_GRIDS.clear()
         fresh = Board(VARIANTS["a"], [])
         self.assertEqual([bytes(layer) for layer in fresh.blocked],expected)
+
+
+class ViaClearanceTests(unittest.TestCase):
+    def test_large_existing_via_blocks_its_full_copper_radius(self):
+        board = Board(VARIANTS['a'], [])
+        board.add_via(Via('OTHER', 10, 20, size=1.0), mine=.15, mine_net='TEST')
+        for layer in (0, 1):
+            self.assertFalse(board.free(107, 200, layer))
+
+    def test_small_existing_via_does_not_take_the_default_diameter(self):
+        board = Board(VARIANTS['a'], [])
+        board.add_via(Via('OTHER', 10, 20, size=.4, drill=.2), mine=.15, mine_net='TEST')
+        for layer in (0, 1):
+            self.assertTrue(board.free(105, 200, layer))
