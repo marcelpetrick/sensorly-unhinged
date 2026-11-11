@@ -171,6 +171,7 @@
 <path class="trk" d="M 28.90 21.90 L 29.00 21.90 L 29.00 12.60"/>
 <path class="trk" d="M 29.00 12.60 L 26.50 12.60 L 26.50 11.30 L 25.80 11.30 L 25.80 11.20"/>
 <path class="trk" d="M 22.56 31.00 L 24.04 31.00"/>
+<path class="trk" d="M 1.00 11.89 L 0.80 11.89 L 0.80 11.20"/>
 <circle class="via" cx="23.00" cy="29.70" r="0.30"/>
 <circle class="via" cx="23.70" cy="32.10" r="0.30"/>
 <circle class="via" cx="4.65" cy="8.50" r="0.30"/>
@@ -265,6 +266,7 @@
 <circle class="via" cx="27.60" cy="8.30" r="0.30"/>
 <circle class="via" cx="28.90" cy="21.90" r="0.30"/>
 <circle class="via" cx="29.00" cy="12.60" r="0.30"/>
+<circle class="via" cx="0.80" cy="11.20" r="0.30"/>
 <circle class="via" cx="10.00" cy="12.50" r="0.30"/>
 <circle class="via" cx="2.50" cy="25.00" r="0.30"/>
 <circle class="via" cx="2.50" cy="32.50" r="0.30"/>
@@ -468,6 +470,10 @@
 <rect class="pad-b" x="15.87" y="23.83" width="1.50" height="1.50" />
 <rect class="crtyd" x="18.16" y="23.58" width="2.00" height="2.00" />
 <rect class="pad-b" x="18.41" y="23.83" width="1.50" height="1.50" />
+<rect class="crtyd" x="0.53" y="11.47" width="0.94" height="1.86" />
+<rect class="pad" x="0.68" y="12.64" width="0.64" height="0.54" />
+<rect class="pad" x="0.68" y="11.62" width="0.64" height="0.54" />
+<text class="ref" x="1.00" y="12.40">R22</text>
 <rect class="crtyd" x="3.20" y="6.12" width="3.40" height="1.96" />
 <rect class="pad" x="5.35" y="6.38" width="1.00" height="1.45" />
 <rect class="pad" x="3.45" y="6.38" width="1.00" height="1.45" />
@@ -601,10 +607,6 @@
 <rect class="pad" x="21.27" y="32.18" width="0.54" height="0.64" />
 <rect class="pad" x="22.29" y="32.18" width="0.54" height="0.64" />
 <text class="ref" x="22.05" y="32.50">R21</text>
-<rect class="crtyd" x="0.53" y="9.82" width="0.94" height="1.86" />
-<rect class="pad" x="0.68" y="10.99" width="0.64" height="0.54" />
-<rect class="pad" x="0.68" y="9.97" width="0.64" height="0.54" />
-<text class="ref" x="1.00" y="10.75">R22</text>
 <text class="dim" x="0" y="-0.6">30 x 34 mm   HW A1   Compact</text>
 <rect x="0.00" y="35.30" width="1.1" height="1.1" fill="#e3b341"/>
 <text class="dim" x="1.60" y="36.20">top pad</text>

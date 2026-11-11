@@ -3617,6 +3617,121 @@
 			(net 12 "GND")
 		)
 	)
+	(footprint "sensorly:R_0402_1005Metric"
+		(layer "F.Cu")
+		(uuid "a7a85241-df6d-52d3-ba1b-4f7107967c60")
+		(at 101.0 72.4 90)
+		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
+		(tags "resistor")
+		(property "Reference" "R22"
+			(at 0 -1.17 0)
+			(hide yes)
+			(layer "F.SilkS")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Value" "10k 1%"
+			(at 0 1.17 0)
+			(layer "F.Fab")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "KiLib_Generator" "SMD_2terminal_chip_molded"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr smd)
+		(duplicate_pad_numbers_are_jumpers no)
+		(fp_line
+			(start -0.153641 -0.38)
+			(end 0.153641 -0.38)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(layer "F.SilkS")
+		)
+		(fp_line
+			(start -0.153641 0.38)
+			(end 0.153641 0.38)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(layer "F.SilkS")
+		)
+		(fp_rect
+			(start -0.93 -0.47)
+			(end 0.93 0.47)
+			(stroke
+				(width 0.05)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.CrtYd")
+		)
+		(fp_rect
+			(start -0.525 -0.27)
+			(end 0.525 0.27)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+		)
+		(fp_text user "${REFERENCE}"
+			(at 0 0 0)
+			(layer "F.Fab")
+			(effects
+				(font
+					(size 0.26 0.26)
+					(thickness 0.04)
+				)
+			)
+		)
+		(pad "1" smd roundrect
+			(at -0.51 0 90.0)
+			(size 0.54 0.64)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.25)
+			(net 2 "BOOT_MODE_H")
+		)
+		(pad "2" smd roundrect
+			(at 0.51 0 90.0)
+			(size 0.54 0.64)
+			(layers "F.Cu" "F.Mask" "F.Paste")
+			(roundrect_rratio 0.25)
+			(net 1 "+3V0")
+		)
+		(embedded_fonts no)
+		(model "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0402_1005Metric.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
+	)
 	(footprint "sensorly:C_0805_2012Metric"
 		(layer "F.Cu")
 		(uuid "012039da-b681-5411-bc49-9f88b536f271")
@@ -7605,121 +7720,6 @@
 			)
 		)
 	)
-	(footprint "sensorly:R_0402_1005Metric"
-		(layer "F.Cu")
-		(uuid "a7a85241-df6d-52d3-ba1b-4f7107967c60")
-		(at 101.0 70.75 90)
-		(descr "Resistor SMD 0402 (1005 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf)")
-		(tags "resistor")
-		(property "Reference" "R22"
-			(at 0 -1.17 0)
-			(hide yes)
-			(layer "F.SilkS")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "Value" "10k 1%"
-			(at 0 1.17 0)
-			(layer "F.Fab")
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(property "KiLib_Generator" "SMD_2terminal_chip_molded"
-			(at 0 0 0)
-			(layer "F.SilkS")
-			(hide yes)
-			(effects
-				(font
-					(size 1 1)
-					(thickness 0.15)
-				)
-			)
-		)
-		(attr smd)
-		(duplicate_pad_numbers_are_jumpers no)
-		(fp_line
-			(start -0.153641 -0.38)
-			(end 0.153641 -0.38)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-		)
-		(fp_line
-			(start -0.153641 0.38)
-			(end 0.153641 0.38)
-			(stroke
-				(width 0.12)
-				(type solid)
-			)
-			(layer "F.SilkS")
-		)
-		(fp_rect
-			(start -0.93 -0.47)
-			(end 0.93 0.47)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.CrtYd")
-		)
-		(fp_rect
-			(start -0.525 -0.27)
-			(end 0.525 0.27)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(fill no)
-			(layer "F.Fab")
-		)
-		(fp_text user "${REFERENCE}"
-			(at 0 0 0)
-			(layer "F.Fab")
-			(effects
-				(font
-					(size 0.26 0.26)
-					(thickness 0.04)
-				)
-			)
-		)
-		(pad "1" smd roundrect
-			(at -0.51 0 90.0)
-			(size 0.54 0.64)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 2 "BOOT_MODE_H")
-		)
-		(pad "2" smd roundrect
-			(at 0.51 0 90.0)
-			(size 0.54 0.64)
-			(layers "F.Cu" "F.Mask" "F.Paste")
-			(roundrect_rratio 0.25)
-			(net 1 "+3V0")
-		)
-		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Resistor_SMD.3dshapes/R_0402_1005Metric.step"
-			(offset
-				(xyz 0 0 0)
-			)
-			(scale
-				(xyz 1 1 1)
-			)
-			(rotate
-				(xyz 0 0 0)
-			)
-		)
-	)
 	(gr_line
 		(start 100.0 60.0)
 		(end 130.0 60.0)
@@ -10520,6 +10520,22 @@
 		(net 32)
 		(uuid "26a4b96e-aa63-5b51-b833-0cd0e6e84fad")
 	)
+	(segment
+		(start 101.0 71.89)
+		(end 100.8 71.89)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 1)
+		(uuid "0514f495-16e5-5d11-bb3a-dfc3716b01ae")
+	)
+	(segment
+		(start 100.8 71.89)
+		(end 100.8 71.2)
+		(width 0.15)
+		(layer "F.Cu")
+		(net 1)
+		(uuid "b31032a2-3296-52ad-9241-ffabd8afdd82")
+	)
 	(via
 		(at 115.4 91.9)
 		(size 0.6)
@@ -11327,6 +11343,14 @@
 		(layers "F.Cu" "B.Cu")
 		(net 9)
 		(uuid "c3561dfc-61cb-57dd-aab1-0943f666601a")
+	)
+	(via
+		(at 100.8 71.2)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 1)
+		(uuid "e67e878a-5bcf-583e-9aa0-7b20d48619c1")
 	)
 	(via
 		(at 102.5 85.0)
@@ -14515,6 +14539,72 @@
 		(polygon
 			(pts
 				(xy 128.2 86.8) (xy 129.0 86.8) (xy 129.0 87.0) (xy 128.2 87.0)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu")
+		(uuid "640cf20a-2021-53dd-b8bf-5434e44c47c6")
+		(name "Power escape +3V0 153 0")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0.2)
+		)
+		(min_thickness 0.2)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.3)
+			(thermal_bridge_width 0.4)
+		)
+		(polygon
+			(pts
+				(xy 100.7 71.79) (xy 101.1 71.79) (xy 101.1 71.99) (xy 100.7 71.99)
+			)
+		)
+	)
+	(zone
+		(net 0)
+		(net_name "")
+		(layers "F.Cu")
+		(uuid "79959da3-3a31-5b39-9eb5-fcb4890dc5e4")
+		(name "Power escape +3V0 153 1")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0.2)
+		)
+		(min_thickness 0.2)
+		(filled_areas_thickness no)
+		(keepout
+			(tracks allowed)
+			(vias allowed)
+			(pads allowed)
+			(copperpour allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.3)
+			(thermal_bridge_width 0.4)
+		)
+		(polygon
+			(pts
+				(xy 100.7 71.1) (xy 100.9 71.1) (xy 100.9 71.99) (xy 100.7 71.99)
 			)
 		)
 	)
