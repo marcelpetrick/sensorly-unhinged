@@ -164,6 +164,9 @@
 <path class="trk" d="M 27.80 16.10 L 26.20 16.10 L 26.20 17.80 L 23.20 17.80"/>
 <path class="trk" d="M 23.20 17.80 L 23.20 28.70"/>
 <path class="trk" d="M 23.20 28.70 L 18.60 28.70 L 18.60 28.00"/>
+<path class="trk" d="M 26.80 18.10 L 27.60 18.10"/>
+<path class="trk" d="M 27.60 18.10 L 27.60 8.30"/>
+<path class="trk" d="M 27.60 8.30 L 27.60 7.80"/>
 <circle class="via" cx="23.00" cy="29.70" r="0.30"/>
 <circle class="via" cx="23.70" cy="32.10" r="0.30"/>
 <circle class="via" cx="4.65" cy="8.50" r="0.30"/>
@@ -254,6 +257,8 @@
 <circle class="via" cx="19.20" cy="20.00" r="0.30"/>
 <circle class="via" cx="23.20" cy="17.80" r="0.30"/>
 <circle class="via" cx="23.20" cy="28.70" r="0.30"/>
+<circle class="via" cx="27.60" cy="18.10" r="0.30"/>
+<circle class="via" cx="27.60" cy="8.30" r="0.30"/>
 <circle class="via" cx="10.00" cy="12.50" r="0.30"/>
 <circle class="via" cx="2.50" cy="25.00" r="0.30"/>
 <circle class="via" cx="2.50" cy="32.50" r="0.30"/>
