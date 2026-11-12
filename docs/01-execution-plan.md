@@ -729,3 +729,20 @@ but service may be needed. That behavior is tested and documented in doc 72.
 Automatic recovery from every erase interruption, device endurance/power-cut
 qualification, production serial/UTC mapping and MQTT ACK delivery remain open.
 No F-03 product qualification or actual device measurement is claimed.
+
+
+### Integrated journal verification — 2026-11-12
+
+At `f37d203`, all 15 `./localPipeline.sh` stages pass: 145 host regression
+tests, the firmware C host tests, 35 actual KiCad controls, byte-identical
+regeneration, enclosure builds and draft fab outputs. Python 3.14.7 / KiCad
+10.0.6; log: `/tmp/sensorly-journal-full-pipeline-20261112.log`. Filled boards
+remain A25/B19 with zero errors, warnings, parity differences and GND/USB-data
+airwires. This confirms the integrated source checkpoint, not physical readiness.
+
+An isolated experiment based on `f37d203` reused connected fixed power copper
+as maze sources. Fresh generated/filled checks still reported A25/B19 with
+zero violations/parity; it offered no connection-count improvement and was
+not integrated. Reports: `/tmp/sensorly-power-sources-{a,b}-20261112.json`.
+The next routing work remains the U4 disable/local-control escape and supply
+corridors in the root plan. No supplier or bench gate was closed.

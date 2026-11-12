@@ -10,10 +10,12 @@ and the prototype/product manifests remain the approval authorities.
 ## Verified checkpoint
 
 Accepted routing source: `54541eb`, generated layouts: `025cb1e`.
+Bring-up journal integration: `f37d203`; full local pipeline passed on that
+commit on 2026-11-12 (Python 3.14.7 / KiCad 10.0.6).
 Both layouts retain one electrical platform. Fresh filled checks have **A25/B19
 open connections**, zero ERC/DRC errors, warnings and parity differences,
 and zero GND/USB-data airwires. All 15 local pipeline stages pass with
-**144 host tests and 35 actual KiCad controls**. This does not authorize fabrication.
+**145 host tests and 35 actual KiCad controls**. This does not authorize fabrication.
 
 - [x] Audit all 47 BOM references and 17 fixture targets; retain unqualified alternates and supplier gaps explicitly.
 - [x] Integrate reviewed USB, local power, charger/status, sense-divider and GPIO8 pull-up plane paths.
