@@ -167,6 +167,7 @@ lives in a designer's memory gets widened the first time a route is awkward.
 | | |
 |---|---|
 | [`AGENTS.md`](AGENTS.md) | working agreement — read before changing anything |
+| [`plan.md`](plan.md) | current work order, exact routing backlog and remaining gates |
 | [`docs/00-plan.md`](docs/00-plan.md) | 14 phases with gates, schedule, risks, non-goals |
 | [`docs/02-flight-manual.md`](docs/02-flight-manual.md) | procedures, expected evidence, stop conditions and handoff |
 | [`docs/96-component-audit-20261110.md`](docs/96-component-audit-20261110.md) | component-by-component provenance and outstanding qualification |

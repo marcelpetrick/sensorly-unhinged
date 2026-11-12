@@ -5,7 +5,9 @@ This file is the contract for every contributor, human or agent, working on
 developed as two physical variants (A compact / B thermally isolated) from **one**
 electrical platform.
 
-Read this before touching anything. It is short on purpose.
+Read this before touching anything. Then read [plan.md](plan.md) for the current
+work order, [the execution record](docs/01-execution-plan.md) for verified history,
+and [the flight manual](docs/02-flight-manual.md) for operating procedures.
 
 ---
 
@@ -132,3 +134,31 @@ it. Anything vendored keeps its own terms and gets a line in
   it deliberately does not.
 - Footprint/pin-1/rotation errors are the highest-consequence mistake available
   in this repo. Verify against the datasheet land pattern, every time.
+
+
+## 8. Integration and evidence discipline
+
+- Start from the actual Git status and current plan; an old scratch directory,
+  agent message or log is not proof that a task is still running or accepted.
+- Keep delegated edits in isolated worktrees with explicit file ownership.
+  Handoffs identify source revision, changed files, exact commands/results and
+  net-by-net deltas. Recheck the combined root layout before accepting a patch.
+- Stop after a failed generator command. Never run DRC on leftover boards and
+  present that result as verification of the failed source change.
+- Reserve reviewed fixed copper before generic routing and preserve it during
+  pruning. Reuse only physically connected copper; matching net labels or
+  overlapping pad bounding boxes do not establish connectivity. Respect pad
+  shapes, layers and actual existing via diameters.
+- Check both filled boards after every accepted routing change. Report exact
+  unconnected counts and per-net regressions; require zero GND and USB-data
+  airwires, errors, warnings and parity differences at accepted checkpoints.
+  A development budget records unfinished work; it never waives manufacturing's
+  zero-open requirement or a physical/supplier evidence gate.
+- For durable storage, keep invalid/uncommitted data, committed corruption and
+  I/O failure distinct. A failed read must not select a stale bank or authorize
+  erase/ID reuse. Test interrupted programming, ACK and compaction, as well as
+  failures reported after a write completed. Compile the real ESP-IDF backend;
+  host tests alone do not establish device power-loss qualification.
+- Update `plan.md` and the affected canonical docs with accepted results. Keep
+  unresolved supplier, bench and product gates open; do not infer approval from
+  compilation, draft exports, a lower airwire count or a populated file path.
