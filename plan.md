@@ -47,6 +47,19 @@ Review findings and corrective evidence: [current-state audit](docs/99-current-s
 - [ ] **P2 — Run the A/B experiment:** retain calibrated references, uncertainty, charging/cooldown restrictions and the predeclared decision gate; an inconclusive result stays inconclusive.
 - [ ] **P2 — Revise and qualify the controlled 20-unit series:** close measured findings and sourcing risks, repeat affected tests, retain 20 device records and pass the product release/package gates.
 
+## Active routing closure — starting at `7d631c6`
+
+- [ ] Join A's remaining +3V0 pull-up/fixture supply pads through guarded off-paste plane feeds; verify both variants.
+- [ ] Close U4.4 disable and the remaining charger-control branches without weakening fine-pitch/paste/clearance rules.
+- [ ] Close VBUS, VBAT and VSYS supply branches, preserving the GND reference and +3V0 plane connectivity.
+- [ ] Close EN, boot, UART, sensor/fixture and remaining MCU branches; retain fixture registration unless explicitly reviewed.
+- [ ] Integrate only independently generated/filled candidates with exact per-net deltas; recheck the combined layout after each accepted patch.
+- [ ] Require zero opens/errors/warnings/parity on both boards, run the full pipeline and review actual copper/returns before removing the routing blocker. Supplier and physical gates remain separate.
+
+Experiments run in isolated worktrees with explicit file ownership. A candidate
+result is not an accepted root checkpoint. Preserve rejected results and stop
+on generator failure rather than checking leftover boards.
+
 ## Routing backlog at the checkpoint
 
 Counts are open connections from filled reports, not pad counts. A zero in one
