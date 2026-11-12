@@ -1,9 +1,10 @@
 # 40 — Floorplans A and B
 
 Both boards are emitted from one model (`tools/boardgen/`). The parts, values,
-netlist, net classes and design rules are identical; `variants.py` is the only
-file that differs between them, and it contains outline, sensor position and
-thermal zones — nothing electrical.
+netlist, net classes and design rules are shared. `variants.py` defines the
+outlines, sensor positions and thermal zones. Guarded routing and placement
+modules also contain variant-specific geometry; they do not fork the electrical
+platform. Every route change must be checked on both filled boards.
 
 | | ![Variant A](img/floorplan-a.svg) | ![Variant B](img/floorplan-b.svg) |
 |---|---|---|
@@ -81,9 +82,12 @@ the actual comparison. The experiment must remain capable of choosing A.
 
 ## Routing status — stated plainly
 
-Both boards are **partially routed**: the 2026-10-14 regenerated checkpoint has
-**59** unconnected items on A and **52** on B, checked with KiCad 10.0.6. The
-development budget records these exact counts; fabrication requires zero.
+Both boards are **partially routed**: the accepted 2026-11-12 checkpoint has
+**25** unconnected items on A and **19** on B, checked with KiCad 10.0.6. The
+[current plan](../plan.md) records the per-net backlog, and the development
+budget enforces both the exact total and per-net counts. GND and USB-data
+connections are complete at this checkpoint; fabrication requires zero opens
+on every net. Earlier counts below are dated design history.
 What the generator routes, and why:
 
 | | |
@@ -93,9 +97,13 @@ What the generator routes, and why:
 | **GND** | F.Cu/B.Cu pours and stitching; orphan fragments are removed. An unconnected pad still requires a deliberate return connection. |
 | **Whatever else it could reach** | Track/via counts are printed by `make gen`; KiCad connectivity is the completion criterion. |
 
-The rest — mostly escapes from the 0.5 mm-pitch charger and the
-USB-C receptacle's interleaved D+/D− pairs — is a KiCad session.
-`hardware/drc-budget.json` records each variant's count and warning identities.
+Remaining work includes charger controls, remote power trunks and MCU/fixture
+branches. The USB data pair now has guarded dedicated routes, tested by actual
+KiCad controls; its physical impedance/return acceptance remains EDS-19.
+`hardware/drc-budget.json` records each variant's total, per-net counts and
+warning identities. Manual routing is permitted by the working agreement;
+reviewed fixed paths currently live in the generator so regeneration retains
+them on both variants.
 
 **Why the router stops there.** It has no rip-up and no shoving: once a net is
 placed it stays, so a net routed early can permanently block one routed later.
@@ -113,8 +121,8 @@ The cleanup checkpoint enforces Power-class width rules after the general
 fabrication minimum, uses bounded tagged pad-escape corridors, and takes the
 larger interacting net-class clearance for obstacles. Failed construction
 branches and unused signal vias are pruned without removing connected trunks
-or the immutable sensor paths. USB maze routing is disabled pending a dedicated
-coupled route. Switch-node routes stay on the top layer. Routing remains open.
+or the immutable sensor paths. USB maze routing is disabled; dedicated guarded pair routing
+supplies the connector and ESD paths. Switch-node routes stay on the top layer. Routing remains open.
 
 ## Prior expectation, to be falsified
 
