@@ -801,3 +801,16 @@ and fixture-via dimensions. Reports/logs:
 `/tmp/sensorly-routing-root-vbat2-{gen,fill}-20261112.log`,
 `/tmp/sensorly-routing-root-vbat-tests-20261112.log`. Further routing and the
 full batch gate remain pending; supplier and physical evidence stays open.
+
+
+### Shared VSYS bridge checkpoint — 2026-11-12
+
+Fresh combined root A22/B16→A21/B15 improves only VSYS3→2 on A and1→0 on B.
+The guarded .4mm In2 path joins C10/U4 and C7/U3 without disturbing In1 or
+existing outer routing. Zero ERC/DRC errors/warnings/parity and GND/USB opens;
+VBAT and +3V0 connectivity retained. Six focused host/actual KiCad controls
+pass, including removal of the C10 landing via restoring one VSYS open each.
+Reports and logs: `/tmp/sensorly-routing-root-vsys-{a,b}-20261112.json`,
+`/tmp/sensorly-routing-root-vsys-{gen,fill,tests}-20261112.log`. Two A VSYS
+remote branches, other routing, full batch validation and physical/supplier
+qualification remain open.

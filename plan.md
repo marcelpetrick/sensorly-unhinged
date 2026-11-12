@@ -13,7 +13,7 @@ Accepted routing source: `54541eb`, generated layouts: `025cb1e`.
 Bring-up journal integration: `f37d203`, initialization hardened in `0163925`.
 The full local pipeline passed on the reviewed `0163925` source on 2026-11-12
 (Python 3.14.7 / KiCad 10.0.6); previews refreshed in `386f657`.
-Both layouts retain one electrical platform. Fresh filled checks have **A22/B16
+Both layouts retain one electrical platform. Fresh filled checks have **A21/B15
 open connections**, zero ERC/DRC errors, warnings and parity differences,
 and zero GND/USB-data airwires. All 15 local pipeline stages pass with
 **154 host tests and 35 actual KiCad controls**. This does not authorize fabrication.
@@ -59,6 +59,10 @@ combined A22/B16 retains every other per-net count, zero violations/parity and
 zero GND/USB opens. Source and actual via-deletion controls pass; rail/supplier
 qualification remains open.
 
+The subsequent shared upper-body VSYS bridge verifies A21/B15: only VSYS3→2
+on A and1→0 on B. Six host/actual KiCad controls pass; full batch verification
+and the two remaining A VSYS branches remain open.
+
 ## Active routing closure — starting at `7d631c6`
 
 - [ ] Join A's remaining +3V0 pull-up/fixture supply pads through guarded off-paste plane feeds; verify both variants.
@@ -94,7 +98,7 @@ column does not qualify that net's analog or physical behavior.
 | `VBAT` | 0 | 0 |
 | `VBAT_SENSE` | 0 | 1 |
 | `VBUS` | 6 | 6 |
-| `VSYS` | 3 | 1 |
+| `VSYS` | 2 | 0 |
 
 ## Handoff and timing
 
