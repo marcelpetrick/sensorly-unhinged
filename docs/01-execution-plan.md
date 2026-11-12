@@ -674,3 +674,28 @@ The next integration must preserve actual clearances, paste exclusions and
 USB/ground connectivity; no unconnected allowance closes manufacturing gates.
 Supplier approvals, physical samples, measurements and product firmware
 qualification remain separate outstanding work.
+
+
+### Component-aware routing checkpoint — 2026-11-12
+
+Source `54541eb` and generated `025cb1e` reserve reviewed fixed copper before
+maze routing and preserve it through pruning. Physical copper components now
+avoid routing already connected pads again. Shape checks use actual circles,
+ovals and rounded rectangles; review found and corrected a bounding-box corner
+false join before acceptance. A guarded B ground-plane return restores a
+separated connector-side window.
+
+Fresh root checks report **A25/B19** unconnected items, zero ERC/DRC errors,
+warnings or parity differences, and no ground/USB-data airwires. B closes
+another VBAT, CHG_N and PACK_TS connection; its unfinished UART direction moves
+from TX to RX. No electrical design, component values or footprint lands change.
+All 15 pipeline stages pass, with **144 host tests and 35 KiCad controls**.
+Log: `/tmp/sensorly-pipeline-20261112.log`; focused root connectivity/shape
+controls: `/tmp/sensorly-components-root-tests-20261111.log`.
+
+W2 remains open until both counts are zero. The earlier W4/W5/W6 supplier,
+physical-prototype and product gates remain open. An isolated journal candidate
+has host fault-injection tests and a successful pinned ESP-IDF v5.5.4 build,
+but is not yet accepted source or physical power-loss qualification. Review
+corrected stale-bank fallback on read failure/committed-header corruption and
+committed-record corruption during compaction; final integration is pending.
