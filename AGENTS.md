@@ -150,7 +150,8 @@ it. Anything vendored keeps its own terms and gets a line in
   overlapping pad bounding boxes do not establish connectivity. Respect pad
   shapes, layers and actual existing via diameters.
 - Check both filled boards after every accepted routing change. Report exact
-  unconnected counts and per-net regressions; require zero GND and USB-data
+  unconnected counts and per-net regressions; enforce both in the development
+  budget gate rather than accepting an unchanged total. Require zero GND and USB-data
   airwires, errors, warnings and parity differences at accepted checkpoints.
   A development budget records unfinished work; it never waives manufacturing's
   zero-open requirement or a physical/supplier evidence gate.
@@ -159,6 +160,11 @@ it. Anything vendored keeps its own terms and gets a line in
   erase/ID reuse. Test interrupted programming, ACK and compaction, as well as
   failures reported after a write completed. Compile the real ESP-IDF backend;
   host tests alone do not establish device power-loss qualification.
+- Preserve reviewed prototype/release archives and checksum sidecars. Never
+  overwrite either member on a repeated export; use a new output directory or
+  explicitly dispose of the previous pair outside the packaging command.
+  Verify the checksum before consuming a package; two files are not a
+  crash-atomic publication.
 - Update `plan.md` and the affected canonical docs with accepted results. Keep
   unresolved supplier, bench and product gates open; do not infer approval from
   compilation, draft exports, a lower airwire count or a populated file path.

@@ -746,3 +746,30 @@ zero violations/parity; it offered no connection-count improvement and was
 not integrated. Reports: `/tmp/sensorly-power-sources-{a,b}-20261112.json`.
 The next routing work remains the U4 disable/local-control escape and supply
 corridors in the root plan. No supplier or bench gate was closed.
+
+
+### Current-state review and reader-facing refresh — 2026-11-12
+
+The literal reviewBranch scope at `13bac7b` was empty because work is already
+on master. A separate implementation audit found three confirmed issues:
+count-only DRC budgeting, truncation of existing reviewed package/checksum
+pairs on failed regeneration, and single-bank factory-empty initialization.
+Fixes `da5c966`, `c467e7c` and `0163925` retain the shared electrical platform
+and add targeted fault controls. Independent combined review found no further
+blocking Code/Architecture defect; [the review](99-current-state-review-20261112.md)
+records initial findings, reproducers, fixes and limits.
+
+All 15 pipeline stages pass with 154 host tests and 35 KiCad controls, exact
+A25/B19 per-net budgets, zero ERC/DRC errors/warnings/parity, byte-identical
+regeneration, enclosure checks and draft exports. Pinned ESP-IDF v5.5.4 builds
+the real backend (`0x2f320` app bytes); root ASan/UBSan tests pass. Logs:
+`/tmp/sensorly-current-review-{pipeline,idf,sanitizers}-20261112.log`. Both
+prototype/product gates still reject incomplete routing and absent evidence.
+
+README now showcases the first-PCB A/B experiment and board/enclosure gallery,
+links committed schematic sources, and separates verified work from physical
+gates. Both board PNGs were regenerated and inspected (`386f657`). GitHub About
+and ten topics were updated and read back using the githubAbout skill; the
+review retains exact wording, previous metadata and claim provenance. No
+manufacturing order, bench result, thermal advantage or professional hardware
+approval is implied. Continue the root plan's routing and supplier work order.

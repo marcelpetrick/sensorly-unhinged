@@ -26,7 +26,7 @@ KiCad renders of the same two files: `img/render-a.png`, `img/render-b.png`.
 | Hypothetical slab / neck ratio | — | **57×**, not a performance claim |
 | Assembly difficulty | single-sided SMT; separate placement/stencil jobs | identical |
 | Panel area / PCB cost | lower | ~19 % more area |
-| Mechanical risk | none | the neck: 3.5 mm of FR-4 carrying an island |
+| Mechanical risk | rectangular PCB; retention still untested | the neck: 3.5 mm of FR-4 carrying an island |
 | Enclosure | one chamber, vents at the sensor edge | two chambers with a dividing wall at the neck |
 
 B now has the same 30 mm electronics-body width as A: the extra 2 mm of

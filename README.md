@@ -81,7 +81,7 @@ The verified 2026-11-12 checkpoint is recorded in [the current plan](plan.md):
 | ERC / DRC / schematic parity | **0 violations, 0 errors, 0 warnings, 0 parity differences** |
 | Routing | **A: 25 / B: 19 open connections**; zero GND/USB-data airwires |
 | Reproducibility | Generated sources regenerate byte-identically |
-| Local verification | **15 pipeline stages**, 145 host tests and 35 actual KiCad controls pass |
+| Local verification | **15 pipeline stages**, 154 host tests and 35 actual KiCad controls pass |
 | Bring-up firmware | Pinned ESP-IDF build; radio disabled; acquired samples written to a reviewed flash journal |
 | Physical qualification | Still open; no measured A/B advantage or qualified charging claim |
 
@@ -183,7 +183,7 @@ preparing either kind of package.
 | Examine the experiment | [Predeclared A/B test plan](docs/50-thermal-ab-test-plan.md) |
 | Check sourcing and cost | [Cost estimate](docs/60-manufacturing-cost.md) · [Cost reduction](docs/61-cost-reduction.md) · [Component audit](docs/96-component-audit-20261110.md) |
 | Bring up a real sample | [Power qualification](docs/51-power-safety-qualification.md) · [Firmware and capture](docs/72-firmware-bringup.md) |
-| Contribute or review | [Working agreement](AGENTS.md) · [Flight manual](docs/02-flight-manual.md) · [Requirements](docs/10-requirements.md) |
+| Contribute or review | [Current implementation review](docs/99-current-state-review-20261112.md) · [Working agreement](AGENTS.md) · [Flight manual](docs/02-flight-manual.md) · [Requirements](docs/10-requirements.md) |
 | Explore the longer journey | [14-phase roadmap](docs/00-plan.md) · [Original vision](docs/vision.md) |
 
 ```text

@@ -10,12 +10,13 @@ and the prototype/product manifests remain the approval authorities.
 ## Verified checkpoint
 
 Accepted routing source: `54541eb`, generated layouts: `025cb1e`.
-Bring-up journal integration: `f37d203`; full local pipeline passed on that
-commit on 2026-11-12 (Python 3.14.7 / KiCad 10.0.6).
+Bring-up journal integration: `f37d203`, initialization hardened in `0163925`.
+The full local pipeline passed on the reviewed `0163925` source on 2026-11-12
+(Python 3.14.7 / KiCad 10.0.6); previews refreshed in `386f657`.
 Both layouts retain one electrical platform. Fresh filled checks have **A25/B19
 open connections**, zero ERC/DRC errors, warnings and parity differences,
 and zero GND/USB-data airwires. All 15 local pipeline stages pass with
-**145 host tests and 35 actual KiCad controls**. This does not authorize fabrication.
+**154 host tests and 35 actual KiCad controls**. This does not authorize fabrication.
 
 - [x] Audit all 47 BOM references and 17 fixture targets; retain unqualified alternates and supplier gaps explicitly.
 - [x] Integrate reviewed USB, local power, charger/status, sense-divider and GPIO8 pull-up plane paths.
@@ -27,9 +28,11 @@ and zero GND/USB-data airwires. All 15 local pipeline stages pass with
 
 - [x] Resolve the branch-review base: `master`/`origin/master` at `13bac7b`; the branch diff is empty. Audit the current implementation separately.
 - [x] Reproduce and fix count-only routing acceptance: exact per-net budgets now prevent a same-total regression; GND/USB-data opens cannot be budgeted.
-- [ ] Review flash recovery, bring-up capture and package publication; fix confirmed defects with fault-injection tests.
-- [ ] Refresh the README and GitHub About while retaining first-PCB identity and explicit prototype limits; reconcile stale floorplan routing prose.
-- [ ] Review the combined fixes, run the complete pipeline and pinned firmware build when firmware changes, commit atomically, push and inspect CI.
+- [x] Review flash recovery, bring-up capture and package publication; reject ambiguous second-bank initialization and preserve existing package/checksum pairs with fault-injection tests.
+- [x] Refresh the README and GitHub About while retaining first-PCB identity and explicit prototype limits; reconcile stale floorplan routing prose.
+- [x] Independently review the combined fixes; pass all 15 pipeline stages, 154 host tests, 35 KiCad controls, the pinned firmware build and sanitizer tests. Record fixes in atomic commits; inspect published CI during handoff.
+
+Review findings and corrective evidence: [current-state audit](docs/99-current-state-review-20261112.md).
 
 ## Work order
 
