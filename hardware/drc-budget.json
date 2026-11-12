@@ -6,8 +6,8 @@
     "warnings": []
   },
   "b": {
-    "unconnected": 22,
-    "note": "R22 supply-plane access, reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R14-R15-C13 sense branches, guarded U4.1-to-J2.2 PACK_TS branch, and TP14.1-to-R10.2 CHG_N branch are present. R21.1 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
+    "unconnected": 19,
+    "note": "R22 supply-plane access, reviewed local U3/U4 power and programming paths, guarded connector-side GND plane return, guarded native USB topology, R14-R15-C13 sense branches, guarded U4.1-to-J2.2 PACK_TS branch, and TP14.1-to-R10.2 CHG_N branch are present. Component-aware routing closes PACK_TS including R21.1 and the B charger-status network; UART_RX and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
     "warnings": []
   }
 }

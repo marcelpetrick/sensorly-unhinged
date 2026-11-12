@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import heapq
 import math
+import re
 from dataclasses import dataclass
 
 from . import geometry as G
@@ -371,6 +372,178 @@ def _track(run, width, net) -> Track:
     return Track(net, width, LAYERS[run[0][2]], simple)
 
 
+def _fixed_components(net, ts, placed, fixed_tracks, fixed_vias, board):
+    """Physical same-net copper components and usable grid nodes on each one.
+
+    Track centre lines alone are insufficient: a pad or via may touch a trace
+    without sharing its endpoint. Conversely, two nearby fixed islands must
+    remain separate until the maze actually connects them.
+    """
+    traces = [t for t in fixed_tracks if t.net == net]
+    drills = [vv for vv in fixed_vias if vv.net == net]
+    items = [("pad", t) for t in ts] + [("track", t) for t in traces] + [("via", vv) for vv in drills]
+    parent = list(range(len(items)))
+
+    def root(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def join(i, j):
+        parent[root(i)] = root(j)
+
+    parts = {p.ref: p for p in placed}
+    def pad_copper(t):
+        """Axis-aligned copper as a base rectangle dilated by corner radius.
+
+        A circle is a point plus its radius; a roundrect has a shrunken base
+        rectangle. This prevents bounding-box corners from creating phantom
+        electrical joins. Non-orthogonal/unknown pads use an inscribed circle.
+        """
+        p = parts[t.ref]
+        fp = G.get(p.footprint)
+        body = None
+        for candidate in G._blocks(fp.text, 'pad '):
+            if not candidate.startswith(f'(pad "{t.pad}" '):
+                continue
+            at = re.search(r'\(at ([-\d.]+) ([-\d.]+)(?: ([-\d.]+))?\)', candidate)
+            if at and math.dist(G.xform(float(at[1]), float(at[2]), p.x, p.y, p.rot),
+                                (t.x,t.y)) <= 1e-7:
+                body = candidate
+                break
+        if body is None:
+            raise ValueError(f'cannot locate pad shape for {t.ref}.{t.pad}')
+        match = re.match(r'\(pad "[^"]*" \w+ (\w+)', body)
+        size = re.search(r'\(size ([-\d.]+) ([-\d.]+)\)', body)
+        if not match or not size:
+            raise ValueError(f'cannot read pad shape for {t.ref}.{t.pad}')
+        shape = match[1]
+        w,h = float(size[1]),float(size[2])
+        local_angle = float(at[3] or 0)
+        angle = (p.rot+local_angle) % 180
+        if abs(angle-90) < 1e-7:
+            w, h = h, w
+        elif abs(angle) > 1e-7:
+            shape = 'circle'
+            w = h = min(w,h)
+        if shape == 'rect':
+            radius = 0.
+        elif shape == 'circle':
+            radius = min(w,h)/2
+            w = h = 0.
+        elif shape == 'roundrect':
+            rr = re.search(r'\(roundrect_rratio ([-\d.]+)\)', body)
+            if rr is None:
+                raise ValueError(f'roundrect radius absent for {t.ref}.{t.pad}')
+            radius = min(w,h)*float(rr[1])
+            w -= 2*radius; h -= 2*radius
+        elif shape == 'oval':
+            radius = min(w,h)/2
+            w -= 2*radius; h -= 2*radius
+        else:
+            raise ValueError(f'unsupported pad shape {shape} for {t.ref}.{t.pad}')
+        return (t.x-w/2,t.y-h/2,t.x+w/2,t.y+h/2,radius)
+
+    pad_shapes = [pad_copper(t) for t in ts]
+
+    def point_segment(p, a, b):
+        dx, dy = b[0]-a[0], b[1]-a[1]
+        d = dx*dx+dy*dy
+        u = max(0., min(1., ((p[0]-a[0])*dx+(p[1]-a[1])*dy)/d)) if d else 0.
+        return math.hypot(p[0]-a[0]-u*dx, p[1]-a[1]-u*dy)
+
+    def segments(t):
+        return zip(t.pts, t.pts[1:])
+
+    def point_box(p, box):
+        x0,y0,x1,y1 = box
+        return math.hypot(max(x0-p[0],0,p[0]-x1), max(y0-p[1],0,p[1]-y1))
+
+    def segment_box_distance(a,b,box):
+        x0,y0,x1,y1 = box
+        if min(a[0],b[0]) <= x1 and max(a[0],b[0]) >= x0 and min(a[1],b[1]) <= y1 and max(a[1],b[1]) >= y0:
+            # Exact clipping against an axis-aligned pad rectangle.
+            lo, hi = 0., 1.
+            for p, q in ((-(b[0]-a[0]),a[0]-x0), (b[0]-a[0],x1-a[0]),
+                         (-(b[1]-a[1]),a[1]-y0), (b[1]-a[1],y1-a[1])):
+                if abs(p) < 1e-12:
+                    if q < 0: break
+                elif p < 0: lo = max(lo,q/p)
+                else: hi = min(hi,q/p)
+            else:
+                if lo <= hi: return 0.
+        return min(point_box(a,box),point_box(b,box),
+                   *(point_segment(c,a,b) for c in ((x0,y0),(x0,y1),(x1,y0),(x1,y1))))
+
+    def segment_distance(p,q,u,w):
+        def cross(a,b,c):
+            return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
+        if (cross(p,q,u)*cross(p,q,w) <= 0 and
+                cross(u,w,p)*cross(u,w,q) <= 0 and
+                max(min(p[0],q[0]),min(u[0],w[0])) <= min(max(p[0],q[0]),max(u[0],w[0])) and
+                max(min(p[1],q[1]),min(u[1],w[1])) <= min(max(p[1],q[1]),max(u[1],w[1]))):
+            return 0.
+        return min(point_segment(p,u,w),point_segment(q,u,w),
+                   point_segment(u,p,q),point_segment(w,p,q))
+
+    def intersects(i,j):
+        ka, a = items[i]; kb, b = items[j]
+        if ka == "pad" and kb == "pad":
+            if a.layer != b.layer: return False
+            x0,y0,x1,y1,r0=pad_shapes[i]; u0,v0,u1,v1,r1=pad_shapes[j]
+            return math.hypot(max(x0-u1,u0-x1,0),max(y0-v1,v0-y1,0)) <= r0+r1+1e-7
+        if ka == "via" and kb == "via":
+            return math.hypot(a.x-b.x,a.y-b.y) <= (a.size+b.size)/2
+        if ka == "pad" and kb == "via" or ka == "via" and kb == "pad":
+            pad_index,via = (i,b) if ka == "pad" else (j,a)
+            *box,radius = pad_shapes[pad_index]
+            return point_box((via.x,via.y),box) <= radius+via.size/2+1e-7
+        if ka == "pad" and kb == "track" or ka == "track" and kb == "pad":
+            pad_index,track = (i,b) if ka == "pad" else (j,a)
+            pad = items[pad_index][1]
+            *box,radius = pad_shapes[pad_index]
+            return LAYERS[pad.layer] == track.layer and any(
+                segment_box_distance(p,q,box) <= radius+track.width/2+1e-7
+                for p,q in segments(track))
+        if ka == "via" and kb == "track" or ka == "track" and kb == "via":
+            via,track = (a,b) if ka == "via" else (b,a)
+            return any(point_segment((via.x,via.y),p,q) <= (via.size+track.width)/2
+                       for p,q in segments(track))
+        if a.layer != b.layer: return False
+        # Segment intersections and copper width recognize real T-junctions.
+        for p,q in segments(a):
+            for u,w in segments(b):
+                if segment_distance(p,q,u,w) <= (a.width+b.width)/2:
+                    return True
+        return False
+
+    for i in range(len(items)):
+        for j in range(i+1,len(items)):
+            if intersects(i,j): join(i,j)
+    components = {}
+    for i,(kind,obj) in enumerate(items):
+        group = components.setdefault(root(i), {"pads": set(), "nodes": set()})
+        if kind == "pad":
+            group["pads"].add(i)
+            group["nodes"].add((round(obj.x/GRID),round(obj.y/GRID),obj.layer))
+        elif kind == "via":
+            x,y = round(obj.x/GRID),round(obj.y/GRID)
+            if abs(x*GRID-obj.x) < 1e-7 and abs(y*GRID-obj.y) < 1e-7:
+                group["nodes"].update(((x,y,0),(x,y,1)))
+        else:
+            layer = LAYERS.index(obj.layer)
+            for a,b in segments(obj):
+                x0,x1 = sorted((a[0],b[0])); y0,y1 = sorted((a[1],b[1]))
+                for x in range(max(0,math.floor((x0-obj.width/2)/GRID)),
+                               min(board.w,math.ceil((x1+obj.width/2)/GRID)+1)):
+                    for y in range(max(0,math.floor((y0-obj.width/2)/GRID)),
+                                   min(board.h,math.ceil((y1+obj.width/2)/GRID)+1)):
+                        if board.free(x,y,layer) and point_segment((x*GRID,y*GRID),a,b) <= 1e-7:
+                            group["nodes"].add((x,y,layer))
+    return list(components.values())
+
+
 def route_rest(v: Variant, placed: list[Placement],
                island_tracks: list[Track], island_vias: list[Via]):
     """Route everything except the sensor island. Returns (tracks, vias, stats)."""
@@ -409,6 +582,30 @@ def route_rest(v: Variant, placed: list[Placement],
             raise ValueError(f"VBAT_SENSE placement changed: {ref}.{pad}")
     tracks.append(Track("VBAT_SENSE", SIGNAL_W, "F.Cu",
                         [r15, (r15[0], 30.2), (c13[0], 30.2), c13]))
+    # Reserve every reviewed path before the plane escapes and the maze router
+    # claim copper. A late append let otherwise legal maze paths short these
+    # fixed routes after their occupancy checks had already passed.
+    from .charger_control import route_charger_controls
+    charger_tracks, charger_vias = route_charger_controls(v, placed)
+    tracks += charger_tracks
+    vias += charger_vias
+    sense_join = {
+        "a": ((22.56, 31.0), (24.04, 31.0)),
+        "b": ((20.06, 29.75), (21.54, 31.0)),
+    }
+    r14, r15 = sense_join[v.key]
+    for ref, pad, expected in (("R14", "2", r14), ("R15", "1", r15)):
+        term = next(t for t in terms["VBAT_SENSE"]
+                    if t.ref == ref and t.pad == pad)
+        if math.dist((term.x, term.y), expected) > 1e-7:
+            raise ValueError(f"VBAT_SENSE placement changed: {ref}.{pad}")
+    tracks.append(Track("VBAT_SENSE", SIGNAL_W, "F.Cu", [r14, r15]))
+    from .plane_access import route_plane_access
+    plane_tracks, plane_vias = route_plane_access(v, placed)
+    tracks += plane_tracks
+    vias += plane_vias
+    fixed_tracks = list(tracks)
+    fixed_vias = list(vias)
     terms['VBUS'] = [t for t in terms['VBUS'] if t.ref not in {'U5', 'C14'}]
     terms['VSYS'] = [t for t in terms['VSYS'] if t.ref not in {'U3','U4'}]
     for net in ('VBUS','VBAT'):
@@ -503,13 +700,29 @@ def route_rest(v: Variant, placed: list[Placement],
         # 0.5 mm-pitch part can be sealed by its neighbours' clearance, and
         # seeding on one of those strands the whole net.
         cells = [snap(t) for t in ts]
+        components = _fixed_components(net, ts, placed,
+                                       island_tracks + fixed_tracks,
+                                       island_vias + fixed_vias, board)
+        if not any(len(c["pads"]) > 1 for c in components):
+            # There is no already-joined pad pair to skip. Preserve the
+            # ordinary one-terminal-at-a-time search and its routing order.
+            components = [{"pads": {i}, "nodes": {cell}}
+                          for i, cell in enumerate(cells)]
+        pad_component = {i: component for component in components
+                         for i in component["pads"]}
         seed_i = 0
-        for i, c in enumerate(cells):
+        candidates = range(len(cells))
+        for i in candidates:
+            c = cells[i]
             if any(board.free(c[0] + dx, c[1] + dy, c[2]) for dx, dy in DIRS):
                 seed_i = i
                 break
-        connected = {cells[seed_i]}
-        remaining = [c for i, c in enumerate(cells) if i != seed_i]
+        seed_component = pad_component[seed_i]
+        connected = (set(seed_component["nodes"]) if net == "PACK_TS"
+                     else {cells[seed_i]})
+        remaining_indices = [i for i in range(len(cells))
+                             if pad_component[i] is not seed_component]
+        remaining = [cells[i] for i in remaining_indices]
         while remaining:
             sources = {node for node in connected if all(
                 (node[0], node[1]) == (round(vv.x/GRID), round(vv.y/GRID))
@@ -538,13 +751,20 @@ def route_rest(v: Variant, placed: list[Placement],
                 board.add_via(vv, width, net)
             for node in path:
                 connected.add(node)
-            remaining = [r for r in remaining if r not in connected]
+            reached = [pad_component[i] for i in remaining_indices
+                       if cells[i] == path[-1]]
+            if net == "PACK_TS":
+                for component in reached:
+                    connected.update(component["nodes"])
+            remaining_indices = [i for i in remaining_indices
+                                 if all(pad_component[i] is not c for c in reached)]
+            remaining = [cells[i] for i in remaining_indices]
             # Later branches must also see this branch's vias and corners.
             vmask = exact_via_mask(v, placed, padnet, net,
                                    island_tracks + tracks, island_vias + vias)
 
     retained = []
-    for via in vias:
+    for via in vias[len(fixed_vias):]:
         if via.net in PLANE_NETS:
             retained.append(via)
             continue
@@ -560,27 +780,11 @@ def route_rest(v: Variant, placed: list[Placement],
                     touching_layers.add(tr.layer)
         if len(touching_layers) >= 2:
             retained.append(via)
-    vias = retained
-    tracks, vias = _prune_dead_branches(placed, padnet, tracks, vias, island_tracks, island_vias)
-    from .charger_control import route_charger_controls
-    charger_tracks, charger_vias = route_charger_controls(v, placed)
-    tracks += charger_tracks
-    vias += charger_vias
-    sense_join = {
-        "a": ((22.56, 31.0), (24.04, 31.0)),
-        "b": ((20.06, 29.75), (21.54, 31.0)),
-    }
-    r14, r15 = sense_join[v.key]
-    for ref, pad, expected in (("R14", "2", r14), ("R15", "1", r15)):
-        term = next(t for t in terms["VBAT_SENSE"]
-                    if t.ref == ref and t.pad == pad)
-        if math.dist((term.x, term.y), expected) > 1e-7:
-            raise ValueError(f"VBAT_SENSE placement changed: {ref}.{pad}")
-    tracks.append(Track("VBAT_SENSE", SIGNAL_W, "F.Cu", [r14, r15]))
-    from .plane_access import route_plane_access
-    plane_tracks, plane_vias = route_plane_access(v, placed)
-    tracks += plane_tracks
-    vias += plane_vias
+    maze_tracks, maze_vias = _prune_dead_branches(
+        placed, padnet, tracks[len(fixed_tracks):], retained,
+        island_tracks + fixed_tracks, island_vias + fixed_vias)
+    tracks = fixed_tracks + maze_tracks
+    vias = fixed_vias + maze_vias
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 

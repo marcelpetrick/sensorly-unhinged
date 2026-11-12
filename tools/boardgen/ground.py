@@ -51,4 +51,15 @@ def route_ground_returns(variant, placed):
         tracks.append(Track('GND', .4, 'F.Cu', points))
         vias.append(Via('GND', x, y))
     G.validate_via_paste(placed, vias)
+    if variant.key == 'b':
+        # The F.Cu return window between the connector and charger is bounded
+        # by signal copper. A direct off-paste via joins it to In1.Cu even
+        # when a later routing change separates that window from the perimeter.
+        window = Via('GND', 23.0, 21.0)
+        box = (window.x-.3, window.x+.3, window.y-.3, window.y+.3)
+        if not G.box_inside_polys(box, variant.polys, margin=.3) or any(
+                G.boxes_overlap(box, area) for area in protected):
+            raise ValueError('connector-side GND return enters a protected/edge region')
+        G.validate_via_paste(placed, [window])
+        vias.append(window)
     return tracks, vias

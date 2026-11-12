@@ -280,3 +280,25 @@ of assuming the global default. This prevents under-clearance around a larger
 via and unnecessary blockage around a smaller one. Current committed vias
 retain their selected dimensions; the rejected density experiment is not
 adopted. Mixed-size obstacle controls cover both cases and both routing layers.
+
+### Fixed-copper reservation and connected routing — 2026-11-11
+
+Reviewed charger-control, sense-divider and plane-access paths are reserved
+before the plane escapes and maze routing. The maze identifies terminals joined
+by physically touching fixed copper and does not route them again as separate
+targets; circle and rounded-rectangle pad corners use their actual copper
+shapes, so disconnected fixed islands remain separate. The guarded B PACK_TS
+branch also offers its actual trace and through-via grid nodes as routing
+sources. Fixed paths are preserved during dead-branch pruning. A connector-side
+GND via at (23.0,21.0) on B joins a separated F.Cu return window to In1.Cu;
+the generator checks its edge, protected-area and paste clearances. Both
+variants retain identical electrical design and component placement. The
+filled-board reports show A25/B19 unconnected items, zero other DRC findings,
+zero parity differences, and no GND or USB-data airwires. The remaining opens
+still prevent manufacturing release.
+
+At this development checkpoint B closes one VBAT, one CHG_N and one PACK_TS
+open, including the formerly disconnected R21.1 raw-TS pad. R21 remains DNP;
+this does not connect raw TS to the MCU or authorize charging. Its incomplete UART connection moves from TX to RX; both debug directions
+still require complete routing before fabrication. The exact counts and pad
+endpoints remain in the filled reports; no existing release is requalified.
