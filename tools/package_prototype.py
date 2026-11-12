@@ -2,13 +2,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Create a controlled prototype order package only after fresh build/review gates."""
 import argparse
-import hashlib
 from pathlib import Path
 import subprocess
-import zipfile
 
 from .boardgen.variants import VARIANTS
-from .package_release import manufacturing_paths, source_commit
+from .package_release import archive_bundle, manufacturing_paths, source_commit
 from .prototype_gate import ROOT, blockers, review_paths
 
 
@@ -36,7 +34,7 @@ def build_archive(variant, commit, output_dir, root=ROOT):
     name = f"sensorly-unhinged-prototype-{revision}-{commit[:12]}"
     output_dir.mkdir(parents=True, exist_ok=True)
     archive = output_dir / f"{name}.zip"
-    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+    with archive_bundle(archive) as bundle:
         bundle.writestr(f"{name}/PROTOTYPE.txt",
                         "CONTROLLED ENGINEERING PROTOTYPES ONLY — NOT A QUALIFIED PRODUCT\n"
                         f"Revision: {VARIANTS[variant].revision}\nSource commit: {commit}\n"
@@ -45,9 +43,7 @@ def build_archive(variant, commit, output_dir, root=ROOT):
                         "Follow docs/65-prototype-to-production.md before ordering or powering.\n")
         for path in sorted(set(paths)):
             bundle.write(path, f"{name}/{path.relative_to(root).as_posix()}")
-    sidecar = archive.with_suffix(".zip.sha256")
-    sidecar.write_text(f"{hashlib.sha256(archive.read_bytes()).hexdigest()}  {archive.name}\n")
-    return archive, sidecar
+    return archive, archive.with_suffix(".zip.sha256")
 
 
 def main(argv=None):

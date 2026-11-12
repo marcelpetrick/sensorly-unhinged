@@ -26,7 +26,13 @@ on the selected board). The packager checks the tag, requires a clean committed
 source tree, runs gated fabrication exports and mandatory OpenSCAD mesh
 generation, and checks the source commit again before archiving. An explicitly
 supplied `RELEASE_COMMIT` must be the full current HEAD. The default archive and
-SHA-256 sidecar are written under `_build/release/`.
+SHA-256 sidecar are written under `_build/release/`. Existing archives or
+sidecars are never overwritten: use a new output directory for a separately
+reviewed regeneration. Both files are staged before exclusive publication;
+write failures leave no new package, and a publication collision preserves the
+other writer's file while removing only links created by the failed run.
+Publishing two files is not crash-atomic. A ZIP without a matching verified
+sidecar is incomplete and must not be sent to manufacturing.
 
 The Python CLI is used by Make and applies the same live export gate when
 invoked directly. `--validate-only` validates only the printed revision/tag;

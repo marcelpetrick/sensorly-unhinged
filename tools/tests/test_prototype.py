@@ -90,3 +90,37 @@ class PrototypeTests(unittest.TestCase):
             (root / "hardware/outputs/rev-a/drill/env-sensor-a.drl").unlink()
             with self.assertRaisesRegex(ValueError, "missing/empty"):
                 package_prototype.build_archive("a", "a" * 40, root / "out", root)
+
+
+    def complete_package(self, root):
+        self.fixture(root)
+        for _ in range(100):
+            try:
+                return package_prototype.build_archive("a", "a" * 40, root / "out", root)
+            except ValueError as exc:
+                prefix = "missing/empty/external prototype input: "
+                self.assertTrue(str(exc).startswith(prefix), str(exc))
+                path = Path(str(exc)[len(prefix):])
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("SYNTHETIC TEST INPUT\n")
+        self.fail("Fixture did not converge")
+
+    def test_repackaging_preserves_prior_prototype_package(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive, sidecar = self.complete_package(root)
+            before = (archive.read_bytes(), sidecar.read_bytes())
+            with self.assertRaisesRegex(ValueError, "overwrite existing"):
+                package_prototype.build_archive("a", "a" * 40, root / "out", root)
+            self.assertEqual((archive.read_bytes(), sidecar.read_bytes()), before)
+
+    def test_failed_prototype_write_never_publishes_an_archive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            archive, sidecar = self.complete_package(root)
+            archive.unlink()
+            sidecar.unlink()
+            with patch.object(zipfile.ZipFile, "write", side_effect=OSError("injected write failure")):
+                with self.assertRaisesRegex(OSError, "injected write failure"):
+                    package_prototype.build_archive("a", "a" * 40, root / "out", root)
+            self.assertEqual(list((root / "out").iterdir()), [])

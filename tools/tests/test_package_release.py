@@ -5,6 +5,7 @@ import unittest
 import zipfile
 import hashlib
 import json
+import os
 import subprocess
 from pathlib import Path
 from unittest.mock import patch
@@ -177,3 +178,48 @@ class PackageReleaseTests(unittest.TestCase):
             (root / "hardware/outputs/rev-a/DRAFT.txt").write_text("incomplete\n")
             with self.assertRaisesRegex(ValueError, "draft outputs"):
                 build_archive("hw-a1", commit, root / "out", root)
+
+
+    def test_repackaging_preserves_existing_archive_and_checksum(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            commit = self.qualified_inputs(root)
+            archive, sidecar = build_archive("hw-a1", commit, root / "out", root)
+            before = (archive.read_bytes(), sidecar.read_bytes())
+            with self.assertRaisesRegex(ValueError, "overwrite existing"):
+                build_archive("hw-a1", commit, root / "out", root)
+            self.assertEqual((archive.read_bytes(), sidecar.read_bytes()), before)
+            # An orphan sidecar also belongs to an earlier invocation.
+            archive.unlink()
+            with self.assertRaisesRegex(ValueError, "overwrite existing"):
+                build_archive("hw-a1", commit, root / "out", root)
+            self.assertFalse(archive.exists())
+            self.assertEqual(sidecar.read_bytes(), before[1])
+
+    def test_archive_write_failure_leaves_no_published_package(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            commit = self.qualified_inputs(root)
+            with patch.object(zipfile.ZipFile, "write", side_effect=OSError("injected write failure")):
+                with self.assertRaisesRegex(OSError, "injected write failure"):
+                    build_archive("hw-a1", commit, root / "out", root)
+            self.assertEqual(list((root / "out").iterdir()), [])
+
+    def test_publication_race_preserves_the_other_writer(self):
+        for collision in ("archive", "sidecar"):
+            with self.subTest(collision=collision), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                commit = self.qualified_inputs(root)
+                archive = root / "out/sensorly-unhinged-hw-a1.zip"
+                sidecar = archive.with_suffix(".zip.sha256")
+                other = archive if collision == "archive" else sidecar
+                real_link = os.link
+                def collide(source, destination):
+                    if destination == other:
+                        other.write_bytes(b"other writer's completed file")
+                    real_link(source, destination)
+                with patch("tools.package_release.os.link", side_effect=collide):
+                    with self.assertRaises(FileExistsError):
+                        build_archive("hw-a1", commit, root / "out", root)
+                self.assertEqual(other.read_bytes(), b"other writer's completed file")
+                self.assertEqual(list((root / "out").iterdir()), [other])

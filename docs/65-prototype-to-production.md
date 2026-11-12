@@ -92,6 +92,12 @@ The prototype packager requires a clean committed tree, runs fresh ERC/DRC,
 prototype reviews, host tests and firmware build, then regenerates draft outputs
 and mandatory enclosure meshes. It rechecks the tree and evidence, requires all
 manufacturing inputs, and emits a variant/revision/commit-named ZIP plus SHA-256.
+The ZIP and checksum are staged before exclusive publication. Repeated package
+names or an existing checksum are rejected without changing the previous
+files; select a new output directory for a new reviewed export. A failed write
+publishes neither file. A publication collision rolls back only this run's
+links. The pair is not crash-atomic, so an archive without a matching verified
+sidecar is incomplete and cannot authorize an order.
 Project symbol/footprint library tables are included so the archived KiCad
 sources resolve their vendored libraries. Only its reviewed, explicit input list
 enters the archive; the archive carries

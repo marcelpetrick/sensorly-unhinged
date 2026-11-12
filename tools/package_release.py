@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
+import os
 import re
 import subprocess
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -120,6 +123,41 @@ def release_inputs(root: Path, variant: str) -> list[Path]:
     return sorted(set(files), key=lambda path: path.relative_to(root).as_posix())
 
 
+@contextmanager
+def archive_bundle(archive: Path):
+    """Stage complete files, then publish without replacing an existing pair.
+
+    Each hard link is an exclusive publication on the destination filesystem.
+    If the second publication fails, remove only our first link. This is not
+    a two-file crash-atomic transaction: consumers must verify the sidecar.
+    """
+    sidecar = archive.with_suffix(".zip.sha256")
+    for path in (archive, sidecar):
+        if path.exists() or path.is_symlink():
+            raise ValueError(f"refusing to overwrite existing package file: {path}")
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=f".{archive.name}.", dir=archive.parent) as directory:
+        staged_archive = Path(directory) / archive.name
+        staged_sidecar = Path(directory) / sidecar.name
+        with zipfile.ZipFile(staged_archive, "x", compression=zipfile.ZIP_DEFLATED) as bundle:
+            yield bundle
+        checksum = hashlib.sha256(staged_archive.read_bytes()).hexdigest()
+        staged_sidecar.write_text(f"{checksum}  {archive.name}\n")
+        published = []
+        try:
+            for staged, destination in ((staged_archive, archive), (staged_sidecar, sidecar)):
+                os.link(staged, destination)
+                published.append((staged, destination))
+        except OSError:
+            for staged, destination in reversed(published):
+                try:
+                    if destination.samefile(staged):
+                        destination.unlink()
+                except FileNotFoundError:
+                    pass
+            raise
+
+
 def build_archive(tag: str, commit: str, output_dir: Path,
                   root: Path = ROOT) -> tuple[Path, Path]:
     variant = variant_for_tag(tag)
@@ -137,16 +175,13 @@ def build_archive(tag: str, commit: str, output_dir: Path,
         f"source commit: {commit}\n"
         "qualification: hardware/release-readiness.json\n"
     )
-    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+    with archive_bundle(archive) as bundle:
         prefix = f"sensorly-unhinged-{tag}"
         bundle.writestr(f"{prefix}/MANIFEST.txt", manifest)
         for path in files:
             relative = path.relative_to(root)
             bundle.write(path, f"{prefix}/{relative.as_posix()}")
-    checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
-    checksum_path = archive.with_suffix(".zip.sha256")
-    checksum_path.write_text(f"{checksum}  {archive.name}\n")
-    return archive, checksum_path
+    return archive, archive.with_suffix(".zip.sha256")
 
 
 def main() -> int:
