@@ -117,6 +117,8 @@ journal_result_t journal_open(journal_t *j,journal_io_t io) {
        (blank(first,sizeof(first)) || get32(first+32)!=COMMIT)) {
         header_result_t data=bank_data_blank(j,0);
         if(data==HEADER_IO_ERROR) return JOURNAL_IO_ERROR;
+        if(data==HEADER_VALID) data=bank_data_blank(j,1);
+        if(data==HEADER_IO_ERROR) return JOURNAL_IO_ERROR;
         if(data==HEADER_VALID) {
         // Factory-empty partition only. Erase whole bank on first use.
             if(!io.erase(io.ctx,0,JOURNAL_BANK_SIZE)||!write_header(j,0,1,0,0)) return JOURNAL_IO_ERROR;

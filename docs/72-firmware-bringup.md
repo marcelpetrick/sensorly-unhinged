@@ -116,7 +116,12 @@ or physical power-loss qualification. Before the MQTT contract can close,
 firmware must map inventory serial/variant/revision, establish a trusted clock,
 exercise power cuts on actual flash, and ACK only confirmed broker deliveries.
 
-The first flash use initializes an erased journal partition. Reflashing only
+The first flash use initializes an erased journal partition only after the data
+areas of both banks are confirmed blank. Unexplained nonblank data behind blank
+headers returns `CORRUPT`; a read failure returns `IO_ERROR`. Neither case writes
+or erases flash. This check rejects ambiguous or foreign media; it does not claim
+that ordinary append interruptions produce that state. A torn first header can
+still be retried when both data areas are blank. Reflashing only
 the application preserves the partition; a whole-flash erase destroys queued
 measurements. Do not ACK through the API until a delivery implementation defines
 its acknowledgement and duplicate handling. Firmware uses the same partition

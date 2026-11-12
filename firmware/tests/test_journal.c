@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct { uint8_t flash[2*JOURNAL_BANK_SIZE]; int fail_at; int writes; bool report_after; uint32_t fail_read_at; bool fail_read_once; uint32_t corrupt_read_at; int corrupt_read_nth, corrupt_read_count; bool partial_erase_once; } mem_t;
+typedef struct { uint8_t flash[2*JOURNAL_BANK_SIZE]; int fail_at; int writes; int erases; bool report_after; uint32_t fail_read_at; bool fail_read_once; uint32_t corrupt_read_at; int corrupt_read_nth, corrupt_read_count; bool partial_erase_once; } mem_t;
 static bool rd(void *v,uint32_t at,void *p,size_t n) {
     mem_t *m=v; if((uint64_t)at+n>sizeof(m->flash)) return false;
     if(m->fail_read_once && at==m->fail_read_at) { m->fail_read_once=false; return false; }
@@ -30,6 +30,7 @@ static bool wr(void *v,uint32_t at,const void *p,size_t n) {
 static bool er(void *v,uint32_t at,size_t n) {
     mem_t *m=v; if(at%JOURNAL_ERASE_SIZE||n%JOURNAL_ERASE_SIZE||
                    (uint64_t)at+n>sizeof(m->flash)) return false;
+    m->erases++;
     if(m->partial_erase_once) {
         m->partial_erase_once=false;
         memset(m->flash+at,0xff,16); // interrupted first erase unit, commit word still zero
@@ -192,6 +193,20 @@ static void factory_read_fault(void) {
     assert(m->writes==0); // Factory read failure must not initialize a header.
     free(m);
 }
+static void factory_requires_both_banks_empty(void) {
+    for(int fault=0;fault<2;fault++) {
+        mem_t *m=malloc(sizeof(*m)); assert(m); fresh(m);
+        if(fault==0) m->flash[JOURNAL_BANK_SIZE+64]=0x53;
+        else { m->fail_read_at=JOURNAL_BANK_SIZE+64; m->fail_read_once=true; }
+        uint8_t *before=malloc(sizeof(m->flash)); assert(before);
+        memcpy(before,m->flash,sizeof(m->flash));
+        journal_t j;
+        assert(journal_open(&j,io(m))==(fault==0?JOURNAL_CORRUPT:JOURNAL_IO_ERROR));
+        assert(m->writes==0&&m->erases==0);
+        assert(memcmp(before,m->flash,sizeof(m->flash))==0);
+        free(before); free(m);
+    }
+}
 static void corruption_between_scan_and_compaction(void) {
     mem_t *m=malloc(sizeof(*m)); assert(m); fresh(m);
     journal_t j; assert(journal_open(&j,io(m))==JOURNAL_OK);
@@ -242,4 +257,4 @@ static void unopened_api_is_safe(void) {
     assert(journal_ack(&j,1)==JOURNAL_IO_ERROR);
     assert(journal_oldest(&j,&s,&id)==JOURNAL_IO_ERROR);
 }
-int main(void) { basic(); faults(); torn_ack_and_corruption(); first_header_fault(); ambiguous_overflow(); compaction_faults(); committed_header_faults(); factory_read_fault(); corruption_between_scan_and_compaction(); partial_erase_fails_closed(); unopened_api_is_safe(); puts("journal host tests passed"); }
+int main(void) { basic(); faults(); torn_ack_and_corruption(); first_header_fault(); ambiguous_overflow(); compaction_faults(); committed_header_faults(); factory_read_fault(); factory_requires_both_banks_empty(); corruption_between_scan_and_compaction(); partial_erase_fails_closed(); unopened_api_is_safe(); puts("journal host tests passed"); }
