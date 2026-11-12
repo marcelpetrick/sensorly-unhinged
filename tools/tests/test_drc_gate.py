@@ -16,7 +16,7 @@ class DrcTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             directory = Path(d)
             budget = directory / "budget.json"
-            budget.write_text(json.dumps({"a": {"unconnected": 0, "warnings": [
+            budget.write_text(json.dumps({"a": {"unconnected": 0, "unconnected_by_net": {}, "warnings": [
                 {"type": "isolated_copper", "items": ["zone-1"], "count": 1}]}}))
             report = directory / "report.json"
             data = self.report()
@@ -55,3 +55,39 @@ class DrcTests(unittest.TestCase):
         a = dict(type="lib_footprint_mismatch", items=[dict(uuid="u1")])
         b = dict(type="lib_footprint_mismatch", items=[dict(uuid="u3")])
         self.assertNotEqual(warning_key(a), warning_key(b))
+
+
+class NetBudgetTests(unittest.TestCase):
+    def run_gate(self, nets, expected_nets, total=None):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            report = DrcTests().report()
+            report["unconnected_items"] = [dict(items=[
+                dict(description=f"Pad 1 [{net}] of U1", uuid="first"),
+                dict(description=f"Via [{net}]", uuid="second")]) for net in nets]
+            budget = {"a": {"unconnected": sum(expected_nets.values()) if total is None else total,
+                            "unconnected_by_net": expected_nets, "warnings": []}}
+            (root / "report.json").write_text(json.dumps(report))
+            (root / "budget.json").write_text(json.dumps(budget))
+            with patch.object(drc_gate, "BUDGET", root / "budget.json"), contextlib.redirect_stdout(io.StringIO()):
+                return drc_gate.main([str(root / "report.json"), "a"])
+
+    def test_same_total_cannot_hide_changed_net(self):
+        self.assertEqual(self.run_gate(["EN", "VBUS"], {"EN": 1, "VBUS": 1}), 0)
+        self.assertEqual(self.run_gate(["EN", "UART_RX"], {"EN": 1, "VBUS": 1}), 1)
+
+    def test_ground_and_usb_opens_cannot_be_budgeted(self):
+        for net in ("GND", "USB_D_P", "USB_D_N"):
+            with self.subTest(net=net):
+                self.assertEqual(self.run_gate([net], {net: 1}), 1)
+
+    def test_inconsistent_budget_fails_closed(self):
+        self.assertEqual(self.run_gate(["EN"], {"EN": 1}, total=2), 1)
+        self.assertEqual(self.run_gate([], {"EN": True}), 1)
+
+    def test_unidentified_or_mismatched_endpoint_fails_closed(self):
+        for items in ([], [{"description": "Pad 1 [EN]"}],
+                      [{"description": "Pad 1 [EN]"}, {"description": "Via"}],
+                      [{"description": "Pad 1 [EN]"}, {"description": "Via [VBUS]"}]):
+            with self.subTest(items=items), self.assertRaises(ValueError):
+                drc_gate.unconnected_by_net({"unconnected_items": [{"items": items}]})

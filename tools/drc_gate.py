@@ -10,14 +10,15 @@ Policy:
   * any schematic/PCB parity difference -> fail (both come from one model)
   * any DRC violation at severity `error`  -> fail
   * unconnected items above the recorded budget -> fail
-  * unconnected items below the budget -> fail too, with "update the budget",
-    so that routing progress is recorded rather than silently absorbed
+  * exact per-net open counts must match; an unchanged total cannot hide a regression
+  * GND and USB-data airwires always fail, even if explicitly budgeted
 
 Run: python -m tools.drc_gate _build/a/drc.json a
 """
 from __future__ import annotations
 
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -54,8 +55,20 @@ def main(argv: list[str]) -> int:
     except (OSError, ValueError, KeyError, TypeError) as exc:
         print(f"    INVALID DRC REPORT: {exc}")
         return 1
-    budgets = json.loads(BUDGET.read_text()) if BUDGET.exists() else {}
-    expected = budgets.get(variant, {}).get("unconnected")
+    try:
+        budgets = json.loads(BUDGET.read_text())
+        budget = budgets[variant]
+        expected = budget["unconnected"]
+        expected_nets = budget["unconnected_by_net"]
+        if (type(expected) is not int or expected < 0 or not isinstance(expected_nets, dict)
+                or any(not isinstance(net, str) or not net or type(count) is not int or count <= 0
+                       for net, count in expected_nets.items())
+                or sum(expected_nets.values()) != expected):
+            raise ValueError("invalid or inconsistent per-net budget")
+        actual_nets = unconnected_by_net(d)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"    INVALID ROUTING BUDGET/REPORT: {exc}")
+        return 1
 
     parity = d["schematic_parity"]
     errors = [v for v in d["violations"] if v["severity"] == "error"]
@@ -77,6 +90,14 @@ def main(argv: list[str]) -> int:
           f"{unconnected} unconnected")
 
     bad = False
+    for net in sorted(set(actual_nets) | set(expected_nets)):
+        actual, expected_net = actual_nets[net], expected_nets.get(net, 0)
+        if actual != expected_net:
+            print(f"    OPEN COUNT {net}: expected {expected_net}, found {actual}; review and update per-net budget")
+            bad = True
+        if net in {"GND", "USB_D_P", "USB_D_N"} and (actual or expected_net):
+            print(f"    PROHIBITED OPEN NET: {net}")
+            bad = True
     # Schematic parity has to be exact. The board is generated from the same
     # model as the schematic, so any difference is a generator bug, not a
     # design choice.
@@ -103,6 +124,33 @@ def main(argv: list[str]) -> int:
               f"Good - record it in hardware/drc-budget.json.")
         bad = True
     return 1 if bad else 0
+
+
+def unconnected_by_net(report):
+    """KiCad JSON exposes net names in item descriptions, not separate fields.
+
+    Require every endpoint to identify the same net. Reject unknown/localized
+    formats rather than silently treating an unparsed connection as complete.
+    """
+    counts = Counter()
+    for row in report["unconnected_items"]:
+        if not isinstance(row, dict):
+            raise ValueError("invalid unconnected item")
+        items = row.get("items")
+        if not isinstance(items, list) or len(items) < 2:
+            raise ValueError("unconnected item has no endpoint pair")
+        nets = []
+        for item in items:
+            if not isinstance(item, dict):
+                raise ValueError("invalid unconnected endpoint")
+            names = re.findall(r"\[([^\[\]]+)\]", item.get("description", ""))
+            if len(names) != 1:
+                raise ValueError("unconnected endpoint has no unambiguous net name")
+            nets.append(names[0])
+        if len(set(nets)) != 1:
+            raise ValueError("unconnected endpoints disagree on net")
+        counts[nets[0]] += 1
+    return counts
 
 
 def warning_key(w):

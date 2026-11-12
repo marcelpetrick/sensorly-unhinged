@@ -23,6 +23,14 @@ and zero GND/USB-data airwires. All 15 local pipeline stages pass with
 - [x] Run full source/reproducibility, ERC/DRC/parity, mechanical and draft-output checks on the accepted checkpoint.
 - [x] Document the operating procedure, component audit and rejected experiments; commit accepted work atomically.
 
+## Current implementation review — 2026-11-12
+
+- [x] Resolve the branch-review base: `master`/`origin/master` at `13bac7b`; the branch diff is empty. Audit the current implementation separately.
+- [x] Reproduce and fix count-only routing acceptance: exact per-net budgets now prevent a same-total regression; GND/USB-data opens cannot be budgeted.
+- [ ] Review flash recovery, bring-up capture and package publication; fix confirmed defects with fault-injection tests.
+- [ ] Refresh the README and GitHub About while retaining first-PCB identity and explicit prototype limits; reconcile stale floorplan routing prose.
+- [ ] Review the combined fixes, run the complete pipeline and pinned firmware build when firmware changes, commit atomically, push and inspect CI.
+
 ## Work order
 
 - [ ] **P0 — Finish routing:** close every connection in the table below on both boards. Review the U4.4 disable escape and local supply/USB-control corridors first; then supply trunks and MCU/fixture branches. Preserve all clearances, paste exclusions, thermal/RF areas and USB reference copper.

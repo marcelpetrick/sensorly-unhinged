@@ -1,13 +1,42 @@
 {
-  "_comment": "Development-only sense-divider checkpoint; require fresh KiCad reports on both variants. Zero ERC/DRC errors, warnings and schematic parity differences; no ignored checks or warning allowances. Manufacturing gates still require zero unconnected items.",
+  "_comment": "Development-only routing checkpoint; exact total and per-net counts require fresh filled KiCad reports on both variants. GND and USB-data opens are prohibited. Zero ERC/DRC errors, warnings and schematic parity differences; no ignored checks or warning allowances. Manufacturing gates require zero unconnected items.",
   "a": {
     "unconnected": 25,
     "note": "R22 supply-plane access, reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R14-R15-C13 sense branches, Q1.3-to-R18.1 CHARGE_EN_N branch, Q1.1-to-R7.1 CHARGE_ENABLE branch, and R10.2-to-U4.9 CHG_N branch are present. U4.4 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
-    "warnings": []
+    "warnings": [],
+    "unconnected_by_net": {
+      "+3V0": 3,
+      "BOOT_MODE_H": 1,
+      "BTN_PROV": 1,
+      "CHARGE_ENABLE": 1,
+      "CHARGE_EN_N": 1,
+      "CHG_N": 1,
+      "EN": 2,
+      "PACK_TS": 1,
+      "PACK_TS_SENSE": 1,
+      "UART_RX": 1,
+      "UART_TX": 1,
+      "VBAT": 2,
+      "VBUS": 6,
+      "VSYS": 3
+    }
   },
   "b": {
     "unconnected": 19,
     "note": "R22 supply-plane access, reviewed local U3/U4 power and programming paths, guarded connector-side GND plane return, guarded native USB topology, R14-R15-C13 sense branches, guarded U4.1-to-J2.2 PACK_TS branch, and TP14.1-to-R10.2 CHG_N branch are present. Component-aware routing closes PACK_TS including R21.1 and the B charger-status network; UART_RX and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval.",
-    "warnings": []
+    "warnings": [],
+    "unconnected_by_net": {
+      "BOOT_MODE_H": 1,
+      "CHARGE_ENABLE": 1,
+      "CHARGE_EN_N": 2,
+      "EN": 2,
+      "PACK_TS_SENSE": 1,
+      "SDA": 1,
+      "UART_RX": 1,
+      "VBAT": 2,
+      "VBAT_SENSE": 1,
+      "VBUS": 6,
+      "VSYS": 1
+    }
   }
 }

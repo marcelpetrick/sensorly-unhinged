@@ -57,7 +57,11 @@ DRC/parity, actual KiCad negative controls and draft outputs. Save its final
 PASS/FAIL summary, tool versions, source commit and changed-file diff with the
 review. Inspect the filled-board DRC reports and the live unconnected counts;
 zero errors/warnings/parity differences with remaining airwires is a development
-checkpoint only. `make firmware` additionally requires the exact ESP-IDF setup
+checkpoint only. The development gate checks both the exact total and exact
+per-net counts in `hardware/drc-budget.json`; review every changed net before
+updating either field. GND and USB-data airwires are prohibited even if a budget
+lists them. Unknown endpoint/net descriptions fail closed; use KiCad's English
+JSON format so the gate can identify each endpoint's net. `make firmware` additionally requires the exact ESP-IDF setup
 in [bring-up instructions](72-firmware-bringup.md). Compilation and synthetic
 tests are source evidence, never device evidence.
 
