@@ -25,7 +25,8 @@ and zero GND/USB-data airwires. All 15 local pipeline stages pass with
 
 - [ ] **P0 — Finish routing:** close every connection in the table below on both boards. Review the U4.4 disable escape and local supply/USB-control corridors first; then supply trunks and MCU/fixture branches. Preserve all clearances, paste exclusions, thermal/RF areas and USB reference copper.
 - [ ] **P0 — Validate the final layouts:** independently review actual filled copper and current source, require zero opens/errors/warnings/parity, regenerate byte-identically, run the complete pipeline and pinned toolchain checks, refresh previews, commit and push.
-- [ ] **P1 — Finish journal integration:** review the isolated 500-record flash implementation, fix all confirmed recovery defects, exercise read/write/erase interruption and overflow/ACK cases, build with pinned ESP-IDF and verify capture compatibility. Its successful candidate build and host tests do not yet close F-03 or physical power-loss qualification.
+- [x] **P1 — Integrate the bring-up journal:** reviewed 500-record core, real ESP flash backend, partition, capture checks, read/write/erase fault cases and overflow/ACK tests; pinned ESP-IDF and address/undefined-behavior sanitizer builds pass.
+- [ ] **P1 — Qualify journal recovery on devices:** exercise physical flash power cuts and endurance, including the documented fail-closed partial-erase/header-corruption case. Source integration does not close F-03, network acknowledgement or availability qualification.
 - [ ] **P1 — Complete the exact prototype-order records:** electrical, assembly, procurement, mechanical and named order reviews. Obtain accepted pack/harness/NTC drawings, purchasing BOM, stackup/impedance, DFM/CPL, under-EP via/paste/inspection process and fixture registration.
 - [ ] **P1 — Produce the controlled 5 A + 5 B lot:** only from checksum-verified prototype archives after the preceding gates. The researched 3+3 option does not change the locked experiment sample plan.
 - [ ] **P1 — Inspect and bring up real samples:** incoming polarity/orientation, current-limited staged power, flashing/capture, wake/sleep, case/pack fit and source-policy tests, with serial-linked raw records. Keep charging and USB500 disabled until their separate gates pass.
@@ -61,8 +62,9 @@ column does not qualify that net's analog or physical behavior.
 
 The accepted source is on `master`; experiments remain in isolated worktrees
 until root integration checks pass. No quote, supplier sign-off, physical board
-or measurement is implied by a source PASS. Current journal work remains an
-uncommitted candidate outside the accepted checkout.
+or measurement is implied by a source PASS. The bring-up journal source is integrated after independent recovery review.
+Its partial-erase fail-closed availability limit and physical qualification
+remain open; no queued measurements were collected from real hardware.
 
 The last planning allowance for remaining routing/source closure is **2–5
 focused working days, low confidence**; it is not a committed delivery date.

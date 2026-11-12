@@ -13,6 +13,7 @@ def record():
     return dict(schema=1, kind="sensorly-bringup", chip_id="001122334455",
                 firmware_sha256="a" * 64, reset_reason=1, wake_reason=0, uptime_us=15000,
                 acquired_at_utc=None, clock_valid=False, factory_mode=True,
+                journal_open_status=0, journal_write_status=0, journal_id="1",
                 radio_started=False, charge_enabled=False, input_mode="STANDBY",
                 usb_present=True, charging=False, sensor_status="ESP_OK", adc_status="ESP_OK",
                 temperature_c=21.5, humidity_rh=48.2, battery_mv=3800,
@@ -63,6 +64,16 @@ class CaptureTests(unittest.TestCase):
         row.update(sensor_status="ESP_ERR_INVALID_CRC", temperature_c=None, humidity_rh=None)
         self.assertTrue(assess(parse_log(self.wire(row))))
         row["temperature_c"] = 0  # masking sensor failure with zero is rejected
+        with self.assertRaises(ValueError): parse_log(self.wire(row))
+
+    def test_journal_failure_cannot_pass(self):
+        for key, status in (("journal_open_status", 2), ("journal_write_status", 2)):
+            row = record(); row[key] = status; row["journal_id"] = None
+            if key=="journal_open_status": row["journal_write_status"] = 2
+            self.assertTrue(assess(parse_log(self.wire(row))))
+        row = record(); row["journal_write_status"] = 2
+        with self.assertRaises(ValueError): parse_log(self.wire(row))
+        row = record(); row["journal_id"] = "18446744073709551616"
         with self.assertRaises(ValueError): parse_log(self.wire(row))
 
     def test_unsafe_states_cannot_pass(self):

@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Engineering bring-up only. No charging, USB500, provisioning, OTA or radio.
 #include <inttypes.h>
+#include <limits.h>
+#include <math.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "cJSON.h"
@@ -12,6 +15,7 @@
 #include "esp_adc/adc_cali_scheme.h"
 #include "esp_app_desc.h"
 #include "esp_mac.h"
+#include "esp_random.h"
 #include "esp_sleep.h"
 #include "esp_system.h"
 #include "esp_task_wdt.h"
@@ -19,9 +23,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "sample.h"
+#include "journal_esp.h"
 
 #if !CONFIG_IDF_TARGET_ESP32C6 || !CONFIG_ESP_TASK_WDT_INIT || !CONFIG_ESP_TASK_WDT_PANIC
 #error "Bring-up requires ESP32-C6 and a resetting task watchdog"
+#endif
+#if !CONFIG_PARTITION_TABLE_CUSTOM
+#error "Bring-up requires the custom partition table with a journal partition"
 #endif
 _Static_assert(CONFIG_ESP_TASK_WDT_TIMEOUT_S == 5, "Review watchdog policy before changing timeout");
 
@@ -106,9 +114,24 @@ static esp_err_t battery_mv(int *millivolts) {
     return err;
 }
 
+static uint8_t hex_nibble(char c) {
+    if (c >= '0' && c <= '9') return (uint8_t)(c - '0');
+    if (c >= 'a' && c <= 'f') return (uint8_t)(c - 'a' + 10);
+    if (c >= 'A' && c <= 'F') return (uint8_t)(c - 'A' + 10);
+    return 0;
+}
+static void parse_hash(const char text[65], uint8_t bytes[32]) {
+    for (unsigned n = 0; n < 32; ++n)
+        bytes[n] = (uint8_t)((hex_nibble(text[2*n]) << 4) | hex_nibble(text[2*n+1]));
+}
+static int16_t journal_status(esp_err_t status) {
+    return status >= INT16_MIN && status <= INT16_MAX ? (int16_t)status : INT16_MAX;
+}
+
 void app_main(void) {
     safe_outputs();
     ESP_ERROR_CHECK(esp_task_wdt_add(NULL));
+    uint64_t boot_id = ((uint64_t)esp_random() << 32) | esp_random();
     // Open-drain charger outputs already have R9/R10 external pull-ups.
     gpio_config_t charger_inputs = {
         .pin_bit_mask = (1ULL << PG_N) | (1ULL << CHG_N),
@@ -143,9 +166,41 @@ void app_main(void) {
     snprintf(chip_id, sizeof(chip_id), "%02x%02x%02x%02x%02x%02x",
              mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     esp_app_get_elf_sha256(image_hash, sizeof(image_hash));
+    journal_t journal;
+    journal_result_t journal_open_status = journal_esp_open(&journal);
+    journal_result_t journal_write_status = JOURNAL_IO_ERROR;
+    uint64_t journal_id = 0;
+    if (journal_open_status == JOURNAL_OK) {
+        journal_sample_t sample = {
+            .boot_id = boot_id, .uptime_us = (uint64_t)acquired_us,
+            .temperature_milli_c = sensor_err == ESP_OK ? (int32_t)lround(temperature * 1000) : INT32_MIN,
+            .humidity_milli_rh = sensor_err == ESP_OK ? (uint32_t)lround(humidity * 1000) : UINT32_MAX,
+            .battery_mv = adc_err == ESP_OK ? vbat_mv : INT32_MIN,
+            .sensor_status = journal_status(sensor_err), .adc_status = journal_status(adc_err),
+            .quality_flags = 1u | 2u | 4u | (usb_present ? 8u : 0u) | (charging ? 16u : 0u),
+            .reset_reason = (uint8_t)esp_reset_reason(),
+            .wake_reason = (uint8_t)esp_sleep_get_wakeup_cause(),
+            .usb_present = usb_present, .charging = charging,
+        };
+        memcpy(sample.mac, mac, sizeof(mac));
+        parse_hash(image_hash, sample.firmware_sha256);
+        journal_write_status = journal_append(&journal, &sample, &journal_id);
+    }
+
     cJSON *record = cJSON_CreateObject();
     if (record) {
         cJSON_AddNumberToObject(record, "schema", 1);
+        cJSON_AddNumberToObject(record, "journal_open_status", journal_open_status);
+        cJSON_AddNumberToObject(record, "journal_write_status", journal_write_status);
+        if (journal_write_status == JOURNAL_OK) {
+            char id_text[21]; snprintf(id_text, sizeof(id_text), "%" PRIu64, journal_id);
+            cJSON_AddStringToObject(record, "journal_id", id_text);
+        } else cJSON_AddNullToObject(record, "journal_id");
+        if (journal_open_status == JOURNAL_OK) {
+            cJSON_AddNumberToObject(record, "journal_live", journal.live);
+            char overflow_text[21]; snprintf(overflow_text, sizeof(overflow_text), "%" PRIu64, journal.overflow);
+            cJSON_AddStringToObject(record, "journal_overflow", overflow_text);
+        }
         cJSON_AddStringToObject(record, "kind", "sensorly-bringup");
         cJSON_AddStringToObject(record, "chip_id", chip_id);
         cJSON_AddStringToObject(record, "firmware_sha256", image_hash);

@@ -1,6 +1,6 @@
 # 71 — Firmware implementation and acceptance contract
 
-**Partially implemented.** A compiled, radio-disabled engineering application is
+**Partially implemented.** A radio-disabled engineering application is
 described in [bring-up instructions](72-firmware-bringup.md). The hardware build
 must not report F-03…F-12 as passing. This contract defines
 the work needed to turn the boards into instruments; a contract is not firmware.
@@ -24,7 +24,8 @@ never overwrite acquisition time. The consumer can show last-seen age and
 quality without inventing accuracy from a numeric payload.
 
 Persist at least 500 measurements in a bounded journal with CRC and recovery
-from power loss during writes. Delete only after acknowledgement under the
+from power loss during writes. The engineering journal implementation and its
+remaining qualification limits are described in [72](72-firmware-bringup.md). Delete only after acknowledgement under the
 defined MQTT delivery contract. Duplicate delivery is allowed and deduplicated
 by serial/boot/sequence. Declare and count overflow; never silently overwrite
 unacknowledged samples. Bound outage radio activity with exponential backoff and

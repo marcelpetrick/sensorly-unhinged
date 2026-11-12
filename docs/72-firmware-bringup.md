@@ -12,9 +12,14 @@ then run `make firmware`. The wrapper rejects another SDK commit or tracked SDK
 modifications. SDK-managed compiler versions come from that checkout's
 `tools/tools.json`. SDK binaries and dependencies are not vendored here and keep
 Espressif/upstream licences. The application is GPL-3.0-or-later.
+If `_build/firmware/sdkconfig` predates the custom partition setting, remove
+that generated file before rebuilding; the firmware compile guard rejects a
+cached configuration without the custom table.
 
-`make firmware-test` runs the same wire decoder on the host with a known
+`make firmware-test` runs the wire decoder on the host with a known
 manufacturer CRC vector, endpoint conversions, and all 48 one-bit frame faults.
+It also exercises the flash journal with NOR-style writes, partial ACKs, bank
+compaction, repeated overflow, reboot recovery and torn/ambiguous writes.
 `make firmware` puts binaries, ELF, map, sdkconfig and flash arguments under
 `_build/firmware/`. Never treat successful compilation or these host tests as
 board measurements. ESP-IDF reproducible-build mode excludes build timestamps;
@@ -51,9 +56,14 @@ sampled. Never populate R21 as a zero-ohm link; EDS-15 requires a protected inte
 
 Emit one JSON line with chip MAC identity, image hash, reset cause, acquisition
 uptime, values/status and quality flags. UTC is null and clock validity false.
-A chip MAC is **not** a production serial. This image has no persistent journal,
-provisioning, network credentials, TLS, MQTT, OTA or user button actions; those
-acceptance cases remain open. The USB/cooldown/ADC qualification flags are explicit.
+A chip MAC is **not** a production serial. The image now appends the measurement
+to a dedicated flash journal before emitting JSON. `journal_id` and
+`journal_overflow` are decimal strings to avoid loss above the exact-integer
+range of JSON numbers. `journal_write_status` reports accepted, overflow or
+flash error. This image has no provisioning, network credentials, TLS, MQTT,
+OTA or user button actions; acknowledgement is an API for later upload code,
+not an automatic deletion. Those acceptance cases remain open. The
+USB/cooldown/ADC qualification flags are explicit.
 
 Charger status inputs IO22/23 disable MCU pull-ups/pull-downs: R9/R10 are the
 sole pull-ups for these open-drain nets, keeping the declared loading intact.
@@ -68,6 +78,49 @@ TP7 low before EN release and at least 3 ms afterward (module Table 4-2),
 then verifies joint USB/UART download on the first boards. Button wake and EDS-14 still require bench
 evidence; no provisioning behavior is implemented. Console logs and the watchdog
 can affect consumption; measure the eventual release firmware separately.
+
+
+## Flash journal engineering format
+
+`firmware/partitions.csv` reserves `journal` at 0x200000–0x21ffff in the
+configured 4 MB flash. The factory image ends at 0x1fffff; this partition map
+must be reviewed again for OTA slots. Two 64 KiB banks are independently erased
+in 4 KiB units. Each starts with a CRC-protected, commit-last header holding a
+monotonic generation, maximum assigned ID and overflow baseline. The newer
+committed generation wins after reset. The other bank is erased and filled with
+all live records before its header is committed. An interrupted write before
+the destination header commit leaves the prior bank authoritative if its header
+remains valid. A partial erase of the destination's old committed header can
+leave a bad CRC and a programmed commit word. Recovery then returns `CORRUPT`
+without choosing a bank; actual flash power-cut behavior remains unqualified.
+At 100 bytes per slot and a 64 byte header, each
+bank has 654 slots; the live limit is 500. Once slots fill, compaction copies
+unacknowledged records. Full-queue arrivals write durable overflow events;
+compaction folds those into the next header's counter. Counter and ID exhaustion
+return explicit errors rather than wrapping. A fully programmed commit whose
+flash call reports failure is found by acquisition token on recovery, including
+across a reboot. A partially programmed ACK remains live and can be retried.
+
+Record v1 encodes a 6 byte chip MAC, 32 byte ELF SHA-256, 64 bit boot nonce,
+64 bit monotonic journal ID, 64 bit acquisition uptime in microseconds,
+temperature and RH in milli-units, battery millivolts, 16 bit sensor/ADC status,
+reset/wake reason, USB/charging bits and quality bits. Signed `INT32_MIN` marks
+an unavailable temperature or battery; `UINT32_MAX` marks unavailable RH. The
+quality bits are engineering-unqualified, battery-meter-pending,
+cooldown-unqualified, USB thermal bias and unexpected charging status, in that
+order. A CRC-32 covers the 88 byte payload; separate programmed words mark
+commit and acknowledgement. A committed CRC mismatch stops recovery with an
+error so corrupted data cannot silently disappear. This bring-up record does
+not claim production serial, hardware revision, calibrated UTC, network delivery
+or physical power-loss qualification. Before the MQTT contract can close,
+firmware must map inventory serial/variant/revision, establish a trusted clock,
+exercise power cuts on actual flash, and ACK only confirmed broker deliveries.
+
+The first flash use initializes an erased journal partition. Reflashing only
+the application preserves the partition; a whole-flash erase destroys queued
+measurements. Do not ACK through the API until a delivery implementation defines
+its acknowledgement and duplicate handling. Firmware uses the same partition
+and format on A and B.
 
 ## First-board procedure
 
@@ -84,9 +137,14 @@ Inspect R21 DNP and capture those circuits independently.
    This writes only the image/bootloader/partition files selected by ESP-IDF;
    no eFuse, secure-boot key burning or whole-flash erase is requested.
 4. Pull TEST_MODE low, reset, and capture exactly one boot's USB console into a log.
-5. Run `make production-capture CAPTURE_ARGS='--input capture.log --serial ENV-0001
-   --variant a --chip-id <inventory-MAC> --firmware-sha256 <ELF-SHA256>
-   --operator <name> --output-dir measurements/bringup'` on one shell line.
+5. Compute the built ELF hash with `sha256sum _build/firmware/sensorly_bringup.elf`.
+   Run `make production-capture` using the command below, replacing the example
+   MAC, hash, serial, variant, operator and log path with the fixture inventory
+   and actual capture. The example values are not device evidence.
+
+   ```sh
+   make production-capture CAPTURE_ARGS='--input capture.log --serial ENV-0001 --variant a --chip-id aabbccddeeff --firmware-sha256 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef --operator bench --output-dir measurements/bringup'
+   ```
 6. Preserve the result and independent meter/scope traces. `BRINGUP_PASS` checks
    only the emitted record and identity; it does not pass rails, current, RF,
    charging, thermal accuracy, sleep energy or product release.

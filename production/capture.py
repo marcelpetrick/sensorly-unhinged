@@ -79,12 +79,24 @@ def parse_log(raw: bytes) -> dict:
         raise ValueError("Incomplete quality flags")
     if row.get("input_mode") != "STANDBY":
         raise ValueError("Unexpected input-current policy")
+    for name in ("journal_open_status", "journal_write_status"):
+        if type(row.get(name)) is not int or not 0 <= row[name] <= 6:
+            raise ValueError(f"Missing/invalid {name}")
+    if row["journal_write_status"] == 0:
+        if not isinstance(row.get("journal_id"), str) or not re.fullmatch(r"[1-9][0-9]*", row["journal_id"]):
+            raise ValueError("Missing/invalid journal ID")
+        if len(row["journal_id"]) > 20 or (len(row["journal_id"]) == 20 and row["journal_id"] > "18446744073709551615"):
+            raise ValueError("Journal ID exceeds uint64")
+    elif row.get("journal_id", "missing") is not None:
+        raise ValueError("Failed journal append must report null ID")
     return row
 
 
 def assess(row: dict) -> list[str]:
     """Only observable firmware assertions, never electrical qualification."""
     faults = []
+    if row["journal_open_status"] != 0 or row["journal_write_status"] != 0:
+        faults.append("measurement was not persisted in flash journal")
     for name in ("sensor_status", "adc_status"):
         if row[name] != "ESP_OK":
             faults.append(f"{name}: {row[name]}")

@@ -238,6 +238,9 @@ firmware-test:
 	@mkdir -p $(BUILD)/firmware-host
 	$(CC) -std=c11 -Wall -Wextra -Werror -pedantic -Ifirmware/main \
 	  firmware/main/sample.c firmware/tests/test_sample.c -lm -o $(BUILD)/firmware-host/test-sample
+	$(CC) -std=c11 -Wall -Wextra -Werror -pedantic -Ifirmware/main \
+	  firmware/main/journal.c firmware/tests/test_journal.c -o $(BUILD)/firmware-host/test-journal
+	$(BUILD)/firmware-host/test-journal
 	$(BUILD)/firmware-host/test-sample
 
 .PHONY: firmware-flash production-capture

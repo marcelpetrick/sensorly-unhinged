@@ -699,3 +699,33 @@ has host fault-injection tests and a successful pinned ESP-IDF v5.5.4 build,
 but is not yet accepted source or physical power-loss qualification. Review
 corrected stale-bank fallback on read failure/committed-header corruption and
 committed-record corruption during compaction; final integration is pending.
+
+
+### Bring-up journal source integration — 2026-11-12
+
+The shared A/B bring-up image now persists acquired samples after sensor/ADC
+acquisition in a 128 KiB flash partition. The reviewed two-bank format retains
+500 live records with CRC/commit/ACK markers, stable 64-bit IDs, compaction and
+a durable counted overflow policy. It does not enable radio, charging or USB500.
+Fixture capture rejects missing/failed journal persistence and out-of-range IDs.
+
+Independent review found and fixed data-loss paths involving failed newer-header
+reads, corrupt committed headers and corrupted records re-read during compaction.
+Host tests cover partial ACK/refill to 500, overflow compaction, stable IDs,
+torn/ambiguous programming, ACK, initial header and bank-copy phases, I/O errors
+and corruption. Test controls initialize booleans/counters independently from
+erased flash. Address and undefined-behavior sanitizer tests pass. The real
+ESP-IDF v5.5.4 backend builds in the exact pinned CI image; image size is
+`0x2f2d0` bytes in the configured `0x1f0000` factory partition. Root logs:
+`/tmp/sensorly-journal-sanitizers-20261112.log`,
+`/tmp/sensorly-root-journal-idf-20261112.log`,
+`/tmp/sensorly-journal-root-host-20261112.log`, and
+`/tmp/sensorly-journal-root-capture-20261112.log`.
+
+**Qualification limit:** interruption while erasing an inactive bank can leave
+its old committed header damaged. Recovery deliberately reports CORRUPT instead
+of choosing a potentially stale bank; the intact active data are not overwritten,
+but service may be needed. That behavior is tested and documented in doc 72.
+Automatic recovery from every erase interruption, device endurance/power-cut
+qualification, production serial/UTC mapping and MQTT ACK delivery remain open.
+No F-03 product qualification or actual device measurement is claimed.
