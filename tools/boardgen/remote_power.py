@@ -46,3 +46,34 @@ def route_remote_power(v, placed, tracks, vias):
     additions.append(Via('VBAT',*end))
     G.validate_via_paste(placed, additions)
     return out, additions
+
+
+def route_system_power(v, placed, tracks, vias):
+    """Join the shared C10/U4 output and C7/U3 input without altering In1."""
+    parts = {p.ref: p for p in placed}
+    for ref, pad, expected in (('C10','1',(28.2,11.45)), ('C7','1',(1.25,6.925))):
+        if (ref,pad) not in NETS['VSYS']:
+            raise ValueError(f'{ref}.{pad} no longer belongs to VSYS')
+        part = parts[ref]
+        point = G.xform(*G.get(part.footprint).pads[pad][0], part.x, part.y, part.rot)
+        if math.dist(point,expected)>1e-7:
+            raise ValueError(f'{ref}.{pad} system-power placement changed')
+    for point in ((28.2,10.75),(2.0,6.9)):
+        if not any(t.net=='VSYS' and t.layer=='F.Cu' and t.width>=.4 and
+                   any(G.distance_to_segment(point,a,b)<=t.width/2
+                       for a,b in zip(t.pts,t.pts[1:])) for t in tracks):
+            raise ValueError('VSYS landing no longer sits on its reviewed trunk')
+    additions=[Via('VSYS',29.2,10.5)]
+    existing=[q for q in vias if math.dist((q.x,q.y),(2.0,6.9))<1e-7]
+    if existing:
+        if len(existing)!=1 or existing[0].net!='VSYS' or abs(existing[0].size-.6)>1e-7 or abs(existing[0].drill-.3)>1e-7:
+            raise ValueError('VSYS input via changed')
+    else:
+        additions.append(Via('VSYS',2.0,6.9))
+    # Shared geometry bends around the real through-via field, outside RF and
+    # the guarded USB reference. It does not change any electrical value.
+    path = [(29.2, 10.5), (25.7, 10.5), (25.7, 9.6), (25.6, 9.6), (25.6, 9.5), (25.5, 9.5), (25.5, 9.4), (25.4, 9.4), (25.4, 9.3), (25.3, 9.3), (25.3, 9.2), (23.3, 9.2), (23.3, 9.1), (23.2, 9.1), (23.2, 8.9), (23.1, 8.9), (23.1, 8.7), (22.9, 8.7), (22.9, 8.6), (22.7, 8.6), (22.7, 8.5), (19.6, 8.5), (19.6, 8.3), (19.5, 8.3), (19.5, 8.1), (19.3, 8.1), (19.3, 8.0), (19.1, 8.0), (19.1, 7.9), (6.2, 7.9), (6.2, 7.8), (6.1, 7.8), (6.1, 7.7), (5.8, 7.7), (5.8, 7.6), (2.0, 7.6), (2.0, 6.9)]
+    routes=[Track('VSYS',.4,'F.Cu',[(28.2,10.75),(29.2,10.75),(29.2,10.5)]),
+            Track('VSYS',.4,'In2.Cu',path)]
+    G.validate_via_paste(placed,additions)
+    return routes, additions

@@ -44,3 +44,30 @@ class RemotePowerConnectivity(unittest.TestCase):
                         shutil.copy2(source.with_suffix('.'+extension),broken.with_suffix('.'+extension))
                     with self.subTest(variant=key,via=point):
                         self.assertEqual(len(opens(broken,str(number))),1)
+
+    def test_system_output_feed_depends_on_its_off_paste_via(self):
+        with tempfile.TemporaryDirectory(prefix='sensorly-vsys-bridge-') as directory:
+            root=Path(directory)
+            for key in ('a','b'):
+                source=ROOT/f'_build/{key}/env-sensor-{key}.kicad_pcb'
+                text=source.read_text()
+                def opens(board,name):
+                    output=root/f'{key}-{name}.json'
+                    subprocess.run([os.environ.get('KICAD_CLI','kicad-cli'),'pcb','drc',
+                                    '--refill-zones','--format','json','-o',str(output),str(board)],
+                                   check=True,capture_output=True,timeout=120)
+                    return [c for c in json.loads(output.read_text())['unconnected_items']
+                            if any('[VSYS]' in i['description'] for i in c['items'])]
+                before = len(opens(source,'good'))
+                target=[]
+                for via in G._blocks(text,'via'):
+                    at=re.search(r'\(at ([-\d.]+) ([-\d.]+)\)',via)
+                    if at and math.dist(tuple(map(float,at.groups())),(129.2,70.5))<1e-7 and re.search(r'\(net(?: \d+)? "VSYS"\)',via):
+                        target.append(via)
+                self.assertEqual(len(target),1)
+                broken=root/f'broken-{key}.kicad_pcb'
+                broken.write_text(text.replace(target[0],'',1))
+                for extension in ('kicad_pro','kicad_dru'):
+                    shutil.copy2(source.with_suffix('.'+extension),broken.with_suffix('.'+extension))
+                with self.subTest(variant=key):
+                    self.assertEqual(len(opens(broken,'broken')),before+1)

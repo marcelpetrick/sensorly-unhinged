@@ -350,3 +350,22 @@ either new landing via restoring a VBAT airwire. Evidence:
 `/tmp/sensorly-routing-root-vbat2-{a,b}-20261112.json` and
 `/tmp/sensorly-routing-root-vbat-tests-20261112.log`. This source proof does not
 qualify rail transients, current/thermal behavior or supplier stackup/process.
+
+### Shared system-supply inner bridge — 2026-11-12
+
+A guarded 0.4 mm In2.Cu path joins the existing C10/U4 VSYS output trunk to the
+C7/U3 input trunk. Its shared upper-body waypoints avoid the through-via field,
+antenna exclusion and guarded USB reference. C10 uses an off-paste via at
+(29.2,10.5) with a full-width F.Cu stub; the C7 landing at (2.0,6.9) reuses B's
+existing via and adds the same 0.6/0.3 mm via on A. Guards retain the actual
+terminal positions/nets, physical trunk landings and any existing input via.
+In1.Cu GND, outer routes, stackup and electrical values remain unchanged.
+
+Fresh combined root reports improve A22/B16 to A21/B15: VSYS3→2 on A and
+1→0 on B, every other per-net count unchanged. Zero ERC/DRC errors/warnings,
+parity differences and GND/USB opens remain. Six focused host/actual KiCad
+controls pass; removing the C10 landing via restores exactly one VSYS open
+on each board. Input/rail current and transient qualification remains open.
+Evidence: `/tmp/sensorly-routing-root-vsys-{a,b}-20261112.json`,
+`/tmp/sensorly-routing-root-vsys-tests-20261112.log` and
+`/tmp/sensorly-routing-root-vsys-output-control-20261112.log`.

@@ -792,6 +792,10 @@ def route_rest(v: Variant, placed: list[Placement],
     power_tracks, power_vias = route_remote_power(v, placed, island_tracks + tracks, island_vias + vias)
     tracks += power_tracks
     vias += power_vias
+    from .remote_power import route_system_power
+    system_tracks, system_vias = route_system_power(v, placed, island_tracks + tracks, island_vias + vias)
+    tracks += system_tracks
+    vias += system_vias
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 
