@@ -13,7 +13,7 @@ Accepted routing source: `54541eb`, generated layouts: `025cb1e`.
 Bring-up journal integration: `f37d203`, initialization hardened in `0163925`.
 The full local pipeline passed on the reviewed `0163925` source on 2026-11-12
 (Python 3.14.7 / KiCad 10.0.6); previews refreshed in `386f657`.
-Both layouts retain one electrical platform. Fresh filled checks have **A25/B19
+Both layouts retain one electrical platform. Fresh filled checks have **A24/B18
 open connections**, zero ERC/DRC errors, warnings and parity differences,
 and zero GND/USB-data airwires. All 15 local pipeline stages pass with
 **154 host tests and 35 actual KiCad controls**. This does not authorize fabrication.
@@ -47,6 +47,13 @@ Review findings and corrective evidence: [current-state audit](docs/99-current-s
 - [ ] **P2 — Run the A/B experiment:** retain calibrated references, uncertainty, charging/cooldown restrictions and the predeclared decision gate; an inconclusive result stays inconclusive.
 - [ ] **P2 — Revise and qualify the controlled 20-unit series:** close measured findings and sourcing risks, repeat affected tests, retain 20 device records and pass the product release/package gates.
 
+Latest routing progress: `d9441f9` adds occupancy-aware EN fixture completion.
+Fresh root checks verify A24/B18: EN2→1 on each, every other net unchanged;
+zero ERC/DRC violations/parity and GND/USB opens. Three focused guard and
+actual KiCad via-deletion tests pass. The full-pipeline figures above describe
+the preceding verified source; repeat the complete gate before pushing this
+routing batch.
+
 ## Active routing closure — starting at `7d631c6`
 
 - [ ] Join A's remaining +3V0 pull-up/fixture supply pads through guarded off-paste plane feeds; verify both variants.
@@ -73,7 +80,7 @@ column does not qualify that net's analog or physical behavior.
 | `CHARGE_ENABLE` | 1 | 1 |
 | `CHARGE_EN_N` | 1 | 2 |
 | `CHG_N` | 1 | 0 |
-| `EN` | 2 | 2 |
+| `EN` | 1 | 1 |
 | `PACK_TS` | 1 | 0 |
 | `PACK_TS_SENSE` | 1 | 1 |
 | `SDA` | 0 | 1 |

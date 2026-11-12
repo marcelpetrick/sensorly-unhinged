@@ -773,3 +773,16 @@ and ten topics were updated and read back using the githubAbout skill; the
 review retains exact wording, previous metadata and claim provenance. No
 manufacturing order, bench result, thermal advantage or professional hardware
 approval is implied. Continue the root plan's routing and supplier work order.
+
+
+### Additive reset fixture closure — 2026-11-12
+
+Source `d9441f9` recognizes actual retained EN copper components and searches
+against all foreign outer copper after pruning. Fresh root generated/filled
+reports improve A25/B19 to A24/B18: EN2→1 on each and every other per-net count
+unchanged. ERC/DRC errors/warnings/parity and GND/USB opens remain zero. Root
+endpoint and actual via-deletion tests: three pass. Logs/reports:
+`/tmp/sensorly-routing-root-en-{gen,fill,tests}-20261112.log` and
+`/tmp/sensorly-routing-root-en-{a,b}-20261112.json`. One EN branch still needs
+routing on each board. Full pipeline and combined routing validation remain
+required before pushing the batch; supplier/physical gates remain open.
