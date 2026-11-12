@@ -785,6 +785,9 @@ def route_rest(v: Variant, placed: list[Placement],
         island_tracks + fixed_tracks, island_vias + fixed_vias)
     tracks = fixed_tracks + maze_tracks
     vias = fixed_vias + maze_vias
+    from .fixture_branches import route_fixture_branches
+    ft,fv=route_fixture_branches(v,placed,island_tracks+tracks,island_vias+vias)
+    tracks+=ft;vias+=fv
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 

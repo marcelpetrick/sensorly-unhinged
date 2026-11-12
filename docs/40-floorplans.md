@@ -310,3 +310,24 @@ open, including the formerly disconnected R21.1 raw-TS pad. R21 remains DNP;
 this does not connect raw TS to the MCU or authorize charging. Its incomplete UART connection moves from TX to RX; both debug directions
 still require complete routing before fabrication. The exact counts and pad
 endpoints remain in the filled reports; no existing release is requalified.
+
+
+### Additive reset fixture branch candidate — 2026-11-12
+
+An isolated candidate based on `7d631c6` closes one EN connection on each
+board after generic routing/pruning, without moving any part or removing
+retained copper. The occupancy-aware search starts on physically connected
+copper components and respects the existing track/pad/via masks; it does not
+blindly append a fixed path through occupied copper. All four EN endpoints
+have explicit net/placement guards, and emitted vias are checked against paste.
+
+Fresh filled candidate reports have A24/B18 unconnected items, zero
+violations/warnings/parity and zero GND/USB-data airwires. EN alone falls from
+two opens to one on each board; every other net count is unchanged. On A the
+new branch joins the existing reset network to TP6, while C4 remains open. On
+B it joins C4 to TP6, while the remote MCU/pull-up branch remains open. The
+long A path is an unfinished-layout consequence, not measured reset immunity.
+An actual KiCad deletion control removes a required EN via on each variant
+and restores its second EN airwire. Root integration must recheck this search
+against any concurrent supply/charger changes; this candidate does not close
+manufacturing or bench qualification.
