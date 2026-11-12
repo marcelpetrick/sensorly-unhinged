@@ -1,8 +1,8 @@
 {
   "_comment": "Development-only routing checkpoint; exact total and per-net counts require fresh filled KiCad reports on both variants. GND and USB-data opens are prohibited. Zero ERC/DRC errors, warnings and schematic parity differences; no ignored checks or warning allowances. Manufacturing gates require zero unconnected items.",
   "a": {
-    "unconnected": 24,
-    "note": "R22 supply-plane access, reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R14-R15-C13 sense branches, Q1.3-to-R18.1 CHARGE_EN_N branch, Q1.1-to-R7.1 CHARGE_ENABLE branch, and R10.2-to-U4.9 CHG_N branch are present. U4.4 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval. Additive retained-copper completion closes one EN fixture connection; one EN connection remains open.",
+    "unconnected": 22,
+    "note": "R22 supply-plane access, reviewed local U3/U4 power and programming paths, plane-connected body returns, guarded native USB topology, R14-R15-C13 sense branches, Q1.3-to-R18.1 CHARGE_EN_N branch, Q1.1-to-R7.1 CHARGE_ENABLE branch, and R10.2-to-U4.9 CHG_N branch are present. U4.4 and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval. Additive retained-copper completion closes one EN fixture connection; one EN connection remains open. Guarded In2 bridges complete VBAT; all other per-net counts retained.",
     "warnings": [],
     "unconnected_by_net": {
       "+3V0": 3,
@@ -16,14 +16,13 @@
       "PACK_TS_SENSE": 1,
       "UART_RX": 1,
       "UART_TX": 1,
-      "VBAT": 2,
       "VBUS": 6,
       "VSYS": 3
     }
   },
   "b": {
-    "unconnected": 18,
-    "note": "R22 supply-plane access, reviewed local U3/U4 power and programming paths, guarded connector-side GND plane return, guarded native USB topology, R14-R15-C13 sense branches, guarded U4.1-to-J2.2 PACK_TS branch, and TP14.1-to-R10.2 CHG_N branch are present. Component-aware routing closes PACK_TS including R21.1 and the B charger-status network; UART_RX and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval. Additive retained-copper completion closes one EN fixture connection; one EN connection remains open.",
+    "unconnected": 16,
+    "note": "R22 supply-plane access, reviewed local U3/U4 power and programming paths, guarded connector-side GND plane return, guarded native USB topology, R14-R15-C13 sense branches, guarded U4.1-to-J2.2 PACK_TS branch, and TP14.1-to-R10.2 CHG_N branch are present. Component-aware routing closes PACK_TS including R21.1 and the B charger-status network; UART_RX and other remaining control/test-pad branches still need routing. This exact development count is not fabrication approval. Additive retained-copper completion closes one EN fixture connection; one EN connection remains open. Guarded In2 bridges complete VBAT; all other per-net counts retained.",
     "warnings": [],
     "unconnected_by_net": {
       "BOOT_MODE_H": 1,
@@ -33,7 +32,6 @@
       "PACK_TS_SENSE": 1,
       "SDA": 1,
       "UART_RX": 1,
-      "VBAT": 2,
       "VBAT_SENSE": 1,
       "VBUS": 6,
       "VSYS": 1

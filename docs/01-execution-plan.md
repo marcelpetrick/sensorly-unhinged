@@ -786,3 +786,18 @@ endpoint and actual via-deletion tests: three pass. Logs/reports:
 `/tmp/sensorly-routing-root-en-{a,b}-20261112.json`. One EN branch still needs
 routing on each board. Full pipeline and combined routing validation remain
 required before pushing the batch; supplier/physical gates remain open.
+
+
+### Battery branch closure on the combined root — 2026-11-12
+
+Guarded In2 VBAT bridges close both remaining battery connections per board:
+A24/B18→A22/B16, only VBAT2→0 each. The first combined route crossed EN vias;
+the accepted detour passes left of them. Fresh generated/filled root reports
+have zero ERC/DRC violations/warnings/parity and GND/USB opens, with unchanged
++3V0 connectivity. Three host/actual KiCad tests pass, including removal of
+either new landing via. Source guards retain exact terminal, physical trunk
+and fixture-via dimensions. Reports/logs:
+`/tmp/sensorly-routing-root-vbat2-{a,b}-20261112.json`,
+`/tmp/sensorly-routing-root-vbat2-{gen,fill}-20261112.log`,
+`/tmp/sensorly-routing-root-vbat-tests-20261112.log`. Further routing and the
+full batch gate remain pending; supplier and physical evidence stays open.
