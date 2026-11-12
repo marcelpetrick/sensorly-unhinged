@@ -788,6 +788,10 @@ def route_rest(v: Variant, placed: list[Placement],
     from .fixture_branches import route_fixture_branches
     ft,fv=route_fixture_branches(v,placed,island_tracks+tracks,island_vias+vias)
     tracks+=ft;vias+=fv
+    from .remote_power import route_remote_power
+    power_tracks, power_vias = route_remote_power(v, placed, island_tracks + tracks, island_vias + vias)
+    tracks += power_tracks
+    vias += power_vias
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 

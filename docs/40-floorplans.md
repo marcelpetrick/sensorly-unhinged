@@ -331,3 +331,22 @@ An actual KiCad deletion control removes a required EN via on each variant
 and restores its second EN airwire. Root integration must recheck this search
 against any concurrent supply/charger changes; this candidate does not close
 manufacturing or bench qualification.
+
+### Guarded VBAT inner-layer bridges — 2026-11-12
+
+Main-board 0.4 mm In2.Cu bridges join the reviewed U4/C11 F.Cu trunk to the
+existing VBAT fixture via and R14 divider input on both variants. In1.Cu GND
+and all existing outer routes remain intact. New off-paste 0.6/0.3 mm vias land
+at (22.2,13.2) and A(21.5,30.4)/B(19.0,28.8); the existing fixture via at
+(19.2,20.0) is reused. Source/endpoint/net guards reject changed trunk or via
+geometry. No stackup, component, electrical net or clearance rule changes.
+
+The root-combined path detours left through (21.8,15.8) to avoid the newly
+routed EN vias. Fresh generated/filled checks give A22/B16: VBAT2→0 on each,
+all other per-net counts unchanged from the A24/B18 EN checkpoint. ERC/DRC
+errors/warnings/parity and GND/USB opens remain zero; the +3V0 plane retains its
+prior connectivity. Three host/actual-KiCad tests pass, including deletion of
+either new landing via restoring a VBAT airwire. Evidence:
+`/tmp/sensorly-routing-root-vbat2-{a,b}-20261112.json` and
+`/tmp/sensorly-routing-root-vbat-tests-20261112.log`. This source proof does not
+qualify rail transients, current/thermal behavior or supplier stackup/process.
