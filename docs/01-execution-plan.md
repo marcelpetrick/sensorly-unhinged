@@ -814,3 +814,23 @@ Reports and logs: `/tmp/sensorly-routing-root-vsys-{a,b}-20261112.json`,
 `/tmp/sensorly-routing-root-vsys-{gen,fill,tests}-20261112.log`. Two A VSYS
 remote branches, other routing, full batch validation and physical/supplier
 qualification remain open.
+
+
+### Compact system supply complete — 2026-11-13
+
+Source `5404aaf`, generated `62a3252`: root A21/B15→A19/B15 changes only
+A VSYS2→0. Both VBAT and VSYS now have zero opens on each board. Fresh root
+reports have zero ERC/DRC errors/warnings/parity and GND/USB opens. Five source
+guards and three actual KiCad controls pass, including deletion of each new
+landing via. B is byte-identical; component values, nets, stackup and rules
+remain shared. New TP3 drill lies outside its pogo copper target. Initial
+BTN_PROV/SCL collision trials were rejected before source acceptance.
+Reports: `/tmp/sensorly-routing-root-vsys-complete-{a,b}-20261113.json`;
+logs: `/tmp/sensorly-vsys-complete-{guards,kicad}-20261113.log`.
+
+The prior published `03cd47d` hardware and firmware workflows passed:
+[hardware](https://github.com/marcelpetrick/sensorly-unhinged/actions/runs/43277824261),
+[firmware](https://github.com/marcelpetrick/sensorly-unhinged/actions/runs/43277824041).
+Its full hardware gate ran 160 host tests and 38 actual KiCad controls with
+Python 3.13.5 / KiCad 10.0.5. The current routing batch still needs its full
+pipeline before pushing; remaining routing, supplier and physical gates stay open.

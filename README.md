@@ -73,15 +73,15 @@ compact design wins. B has to earn its extra space.
 > Source checks pass; complete routing, supplier reviews and real-hardware
 > qualification are still required.
 
-The verified 2026-11-12 checkpoint is recorded in [the current plan](plan.md):
+The current routing checkpoint (2026-11-13) is recorded in [the plan](plan.md):
 
 | Check | Current evidence |
 |---|---|
 | Shared electrical design | One schematic, BOM and firmware for A and B |
 | ERC / DRC / schematic parity | **0 violations, 0 errors, 0 warnings, 0 parity differences** |
-| Routing | **A: 25 / B: 19 open connections**; zero GND/USB-data airwires |
+| Routing | **A: 19 / B: 15 open connections**; zero GND/USB-data airwires |
 | Reproducibility | Generated sources regenerate byte-identically |
-| Local verification | **15 pipeline stages**, 154 host tests and 35 actual KiCad controls pass |
+| Local verification | Last full checkpoint `03cd47d`: **15 stages**, 160 host tests and 38 actual KiCad controls pass; current routing batch awaits its complete gate |
 | Bring-up firmware | Pinned ESP-IDF build; radio disabled; acquired samples written to a reviewed flash journal |
 | Physical qualification | Still open; no measured A/B advantage or qualified charging claim |
 
