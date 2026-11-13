@@ -66,3 +66,10 @@ class SystemPowerGuards(unittest.TestCase):
                     remote_power.route_system_power(v,placed,tracks,[Via('GND',2.0,6.9)])
                 with self.assertRaisesRegex(ValueError,'input via changed'):
                     remote_power.route_system_power(v,placed,tracks,[Via('VSYS',2.0,6.9,.8,.3)])
+
+    def test_compact_system_fixture_drift_is_rejected(self):
+        for reference in ('R5','TP3'):
+            args=self.inputs('a')
+            next(p for p in args[1] if p.ref==reference).x += .1
+            with self.subTest(reference=reference), self.assertRaisesRegex(ValueError,'system-fixture placement changed'):
+                remote_power.route_system_power(*args)

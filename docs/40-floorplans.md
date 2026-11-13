@@ -369,3 +369,23 @@ on each board. Input/rail current and transient qualification remains open.
 Evidence: `/tmp/sensorly-routing-root-vsys-{a,b}-20261112.json`,
 `/tmp/sensorly-routing-root-vsys-tests-20261112.log` and
 `/tmp/sensorly-routing-root-vsys-output-control-20261112.log`.
+
+### Compact system-supply completion — 2026-11-13
+
+A now joins its R5 input-bias terminal and TP3 fixture target to the common
+VSYS network with guarded 0.4 mm inner trunks. R5 uses a short F.Cu stub to
+(6.5,10.0); TP3 uses a B.Cu stub to (14.5,20.5), whose through drill lies
+outside the 1.5 mm pogo target copper. Both use standard off-paste 0.6/0.3 mm
+vias. The paths preserve the USB In2 reference and In1 GND. B already joins
+these branches, so its generated board is unchanged.
+
+Fresh root generation and both filled reports show A19/B15, only VSYS2→0 on
+A versus the preceding checkpoint. VBAT/VSYS are now complete on both boards;
+every other per-net count is unchanged. Errors, warnings, parity differences
+and GND/USB opens remain zero. Five source guards and three actual KiCad
+controls pass, including individual via deletion restoring one VSYS open.
+Evidence: `/tmp/sensorly-routing-root-vsys-complete-{a,b}-20261113.json`,
+`/tmp/sensorly-vsys-complete-{guards,kicad}-20261113.log`. Initial trial landings
+crossed BTN_PROV or approached SCL too closely and were rejected; the accepted
+landing/path is checked against retained copper. Rail and fixture qualification
+remain open.
