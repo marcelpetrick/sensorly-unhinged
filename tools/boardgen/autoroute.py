@@ -604,6 +604,8 @@ def route_rest(v: Variant, placed: list[Placement],
     plane_tracks, plane_vias = route_plane_access(v, placed)
     tracks += plane_tracks
     vias += plane_vias
+    from .inner_signals import route_mcu_supply_bridge
+    tracks += route_mcu_supply_bridge(v, placed)
     fixed_tracks = list(tracks)
     fixed_vias = list(vias)
     terms['VBUS'] = [t for t in terms['VBUS'] if t.ref not in {'U5', 'C14'}]
@@ -796,6 +798,10 @@ def route_rest(v: Variant, placed: list[Placement],
     system_tracks, system_vias = route_system_power(v, placed, island_tracks + tracks, island_vias + vias)
     tracks += system_tracks
     vias += system_vias
+    from .inner_signals import route_inner_signals
+    inner_tracks, inner_vias = route_inner_signals(v, placed, island_tracks + tracks, island_vias + vias)
+    tracks += inner_tracks
+    vias += inner_vias
     stats = dict(tracks=len(tracks), vias=len(vias), failed=failed)
     return tracks, vias, stats
 

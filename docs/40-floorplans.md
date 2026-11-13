@@ -389,3 +389,27 @@ Evidence: `/tmp/sensorly-routing-root-vsys-complete-{a,b}-20261113.json`,
 crossed BTN_PROV or approached SCL too closely and were rejected; the accepted
 landing/path is checked against retained copper. Rail and fixture qualification
 remain open.
+
+### Occupancy-aware inner signal completion — 2026-11-13
+
+A post-pruning search joins real retained copper components on In2.Cu while
+preserving all outer routing and the In1 GND reference. It blocks every foreign
+through-hole/NPTH land, actual via diameter, existing inner track, thermal/RF
+area and the USB reference rectangle. Ordinary SMT pads are not phantom inner
+obstacles. New transitions retain standard off-paste 0.6/0.3 mm vias.
+
+The A MCU supply jumper is reserved before generic routing, with guarded
+U1.3/C1.1 placement/net and actual through-via anchors at (7.4,9.1) and
+(6.7,6.4). Its 0.4 mm B.Cu path preserves supply continuity across the completed
+inner routes. An earlier candidate cut that plane feed; it was rejected rather
+than hidden by a lower total open count.
+
+Fresh root reports improve A19/B15 to A18/B12: A CHG_N1→0; B SDA,
+PACK_TS_SENSE and VBAT_SENSE1→0. All other per-net counts, including +3V0,
+GND and USB data, are unchanged. ERC/DRC errors/warnings/parity are zero.
+Seven source/actual KiCad controls pass: deleting each new inner net bridge
+restores an open, cutting the A supply jumper restores its supply open, and
+unknown hole geometry fails closed. Evidence:
+`/tmp/sensorly-routing-root-inner-reserved-{a,b}-20261113.json`,
+`/tmp/sensorly-inner-reserved-tests-20261113.log`. Firmware clock/accuracy,
+supplier impedance/fixture and physical qualification remain open.
