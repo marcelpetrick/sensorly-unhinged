@@ -9,11 +9,11 @@ and the prototype/product manifests remain the approval authorities.
 
 ## Verified checkpoint
 
-Latest accepted routing source: `5404aaf`, generated compact layout: `62a3252`.
-Fresh generated/filled root checks verify **A19/B15 open connections**, zero
+Latest accepted routing source: `74c71c2`, generated layouts: `9b66979`.
+Fresh generated/filled root checks verify **A18/B12 open connections**, zero
 ERC/DRC errors, warnings, parity differences and GND/USB-data airwires. VBAT
-and VSYS are complete on both boards; B is unchanged by the latest A-only work.
-Five source guards and three actual KiCad controls pass for system supplies.
+and VSYS are complete on both boards; The latest inner routing closes four signal connections without per-net regressions.
+Seven focused source/actual KiCad controls pass for the latest inner routing.
 
 The latest complete hosted pipeline checkpoint is `03cd47d`: **160 host tests,
 38 actual KiCad controls and all 15 stages pass**, plus the pinned firmware
@@ -75,15 +75,15 @@ column does not qualify that net's analog or physical behavior.
 | `BTN_PROV` | 1 | 0 |
 | `CHARGE_ENABLE` | 1 | 1 |
 | `CHARGE_EN_N` | 1 | 2 |
-| `CHG_N` | 1 | 0 |
+| `CHG_N` | 0 | 0 |
 | `EN` | 1 | 1 |
 | `PACK_TS` | 1 | 0 |
-| `PACK_TS_SENSE` | 1 | 1 |
-| `SDA` | 0 | 1 |
+| `PACK_TS_SENSE` | 1 | 0 |
+| `SDA` | 0 | 0 |
 | `UART_RX` | 1 | 1 |
 | `UART_TX` | 1 | 0 |
 | `VBAT` | 0 | 0 |
-| `VBAT_SENSE` | 0 | 1 |
+| `VBAT_SENSE` | 0 | 0 |
 | `VBUS` | 6 | 6 |
 | `VSYS` | 0 | 0 |
 

@@ -83,7 +83,7 @@ the actual comparison. The experiment must remain capable of choosing A.
 ## Routing status — stated plainly
 
 Both boards are **partially routed**: the accepted 2026-11-13 checkpoint has
-**19** unconnected items on A and **15** on B, checked with KiCad 10.0.6. The
+**18** unconnected items on A and **12** on B, checked with KiCad 10.0.6. The
 [current plan](../plan.md) records the per-net backlog, and the development
 budget enforces both the exact total and per-net counts. GND and USB-data
 connections are complete at this checkpoint; fabrication requires zero opens

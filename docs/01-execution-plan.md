@@ -834,3 +834,17 @@ The prior published `03cd47d` hardware and firmware workflows passed:
 Its full hardware gate ran 160 host tests and 38 actual KiCad controls with
 Python 3.13.5 / KiCad 10.0.5. The current routing batch still needs its full
 pipeline before pushing; remaining routing, supplier and physical gates stay open.
+
+
+### Inner signal routing accepted — 2026-11-13
+
+Source `74c71c2`, generated `9b66979`: fresh root A19/B15→A18/B12 changes
+only A CHG_N1→0 and B SDA/TS-sense/battery-sense1→0. All prior power and other
+net counts remain intact, including +3V0; zero ERC/DRC errors/warnings/parity
+and GND/USB opens. The A MCU supply jumper is reserved before generic routing
+and its real pad/via anchors are guarded. Earlier plane-splitting and dangling
+UART candidates were rejected; they are not completion evidence. Seven focused
+source and actual KiCad cut-copper controls pass. Reports/logs:
+`/tmp/sensorly-routing-root-inner-reserved-{a,b}-20261113.json`,
+`/tmp/sensorly-inner-reserved-tests-20261113.log`. Full batch validation,
+remaining connections and supplier/physical qualification remain open.
