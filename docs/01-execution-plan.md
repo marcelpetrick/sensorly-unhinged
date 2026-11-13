@@ -848,3 +848,13 @@ source and actual KiCad cut-copper controls pass. Reports/logs:
 `/tmp/sensorly-routing-root-inner-reserved-{a,b}-20261113.json`,
 `/tmp/sensorly-inner-reserved-tests-20261113.log`. Full batch validation,
 remaining connections and supplier/physical qualification remain open.
+
+### Complete routing checkpoint gate — 2026-11-13
+
+The complete `./localPipeline.sh` passes at `9d3ba3a`: all 15 stages, 166 host
+tests and 41 actual KiCad controls, Python 3.14.7 / KiCad 10.0.6. Reproduction,
+ERC, both filled DRC/parity reports, enclosure and draft fab outputs pass.
+Exact unfinished counts remain A18/B12; errors, warnings, parity differences
+and GND/USB-data opens are zero. Log:
+`/tmp/sensorly-routing-checkpoint-pipeline-20261113.log`. This is a development
+checkpoint; routing and supplier/physical gates remain open.

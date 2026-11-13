@@ -12,13 +12,15 @@ and the prototype/product manifests remain the approval authorities.
 Latest accepted routing source: `74c71c2`, generated layouts: `9b66979`.
 Fresh generated/filled root checks verify **A18/B12 open connections**, zero
 ERC/DRC errors, warnings, parity differences and GND/USB-data airwires. VBAT
-and VSYS are complete on both boards; The latest inner routing closes four signal connections without per-net regressions.
+and VSYS are complete on both boards; the latest inner routing closes four signal connections without per-net regressions.
 Seven focused source/actual KiCad controls pass for the latest inner routing.
 
-The latest complete hosted pipeline checkpoint is `03cd47d`: **160 host tests,
-38 actual KiCad controls and all 15 stages pass**, plus the pinned firmware
-workflow. Those full-run figures precede the current routing batch, whose full
-gate must run before pushing. No source PASS authorizes fabrication.
+The full local pipeline passes at routing/preview checkpoint `9d3ba3a`: **166
+host tests, 41 actual KiCad controls and all 15 stages**, using Python 3.14.7 /
+KiCad 10.0.6. Both filled reports retain exactly A18/B12 opens with zero
+errors/warnings/parity and no GND/USB-data opens. The last hosted hardware and
+pinned firmware checkpoint is `03cd47d`; the new hosted run is pending push.
+No source PASS authorizes fabrication.
 
 - [x] Audit all 47 BOM references and 17 fixture targets; retain unqualified alternates and supplier gaps explicitly.
 - [x] Integrate reviewed USB, local power, charger/status, sense-divider and GPIO8 pull-up plane paths.

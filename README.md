@@ -81,7 +81,7 @@ The current routing checkpoint (2026-11-13) is recorded in [the plan](plan.md):
 | ERC / DRC / schematic parity | **0 violations, 0 errors, 0 warnings, 0 parity differences** |
 | Routing | **A: 18 / B: 12 open connections**; zero GND/USB-data airwires |
 | Reproducibility | Generated sources regenerate byte-identically |
-| Local verification | Last full checkpoint `03cd47d`: **15 stages**, 160 host tests and 38 actual KiCad controls pass; current routing batch awaits its complete gate |
+| Local verification | Local checkpoint `9d3ba3a`: **15 stages**, 166 host tests and 41 actual KiCad controls pass; A18/B12 opens remain |
 | Bring-up firmware | Pinned ESP-IDF build; radio disabled; acquired samples written to a reviewed flash journal |
 | Physical qualification | Still open; no measured A/B advantage or qualified charging claim |
 
